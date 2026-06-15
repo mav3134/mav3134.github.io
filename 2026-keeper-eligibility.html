@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Keeper Eligibility</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Anton&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;min-height:100vh}
+.topbar{background:linear-gradient(180deg,#1a1f2e,#0d1019);border-bottom:3px solid #c8102e;padding:6px 20px;display:flex;justify-content:space-between;align-items:center}
+.topbar-brand{font-family:'Anton',sans-serif;font-size:.8rem;color:#888;letter-spacing:3px;text-transform:uppercase}
+.topbar-date{font-size:.75rem;color:#666}
+.hero{background:linear-gradient(135deg,#0d1019,#1a1f2e 40%,#0d1019);padding:28px 24px 22px;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid #222}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8102e,#ff6b35,#c8102e,transparent)}
+.hero h1{font-family:'Anton',sans-serif;font-size:2.6rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
+.hero h1 span{background:linear-gradient(180deg,#c8102e,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-family:'Oswald',sans-serif;font-size:.85rem;color:#777;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:10px}
+.hero-rules{font-size:.82rem;color:#555;max-width:720px;margin:0 auto;line-height:1.4}
+.legend{display:flex;justify-content:center;gap:24px;padding:14px 20px;background:#0d1019;border-bottom:1px solid #1a1f2e;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:'Oswald',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:#999}
+.leg-sw{width:16px;height:16px;border-radius:2px}
+.sw-r{background:linear-gradient(135deg,#c8102e,#8b0000)}.sw-g{background:linear-gradient(135deg,#27ae60,#1a7a42)}.sw-e{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);border:1px solid #333}.sw-sel{background:linear-gradient(135deg,#f39c12,#e67e22)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:16px;max-width:1650px;margin:20px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+.card-head{padding:12px 16px;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center}
+.card-stripe{position:absolute;top:0;right:0;width:120px;height:100%;opacity:.08;transform:skewX(-20deg) translateX(30px)}
+.card-info{position:relative;z-index:1}
+.card-name{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff;line-height:1.2}
+.card-owner{font-size:.78rem;color:#666;font-weight:400;text-transform:uppercase;letter-spacing:1px}
+.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#333,#222);color:#555;transition:all .2s;white-space:nowrap}
+.submit-btn.active{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 0 12px rgba(243,156,18,.3);text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.submit-btn.active:hover{background:linear-gradient(135deg,#e67e22,#d35400);transform:scale(1.03)}
+.rtbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.rtbl th{text-align:left;padding:7px 10px;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
+.rtbl th:nth-child(2),.rtbl th:nth-child(3),.rtbl th:nth-child(4){text-align:center}
+.rtbl td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+.rtbl td:nth-child(2),.rtbl td:nth-child(3),.rtbl td:nth-child(4){text-align:center}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl tr.rr:hover td{background:rgba(200,16,46,.18)}.rtbl tr.rg:hover td{background:rgba(39,174,96,.16)}.rtbl tr.re:hover td{background:rgba(255,255,255,.07)}
+.rtbl tr.selectable{cursor:pointer}
+.rtbl tr.selected td{background:rgba(243,156,18,.13)!important;border-bottom-color:rgba(243,156,18,.15)!important}
+.rtbl tr.selected td:first-child{border-left-color:#f39c12!important}
+.rtbl tr.selected .pn{color:#f5c842!important}
+.rtbl tr.selected .rdb{background:rgba(243,156,18,.2)!important;color:#f5c842!important}
+.rtbl tr.selected .kv{color:#f5c842!important}
+.rtbl tr.selected:hover td{background:rgba(243,156,18,.2)!important}
+.pn{font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:.85rem}
+.sub{font-size:.68rem;color:#e05555;display:block;margin-top:1px;font-family:'Roboto Condensed',sans-serif;font-weight:400;font-style:italic}
+.rr{background:rgba(200,16,46,.08)}.rr td:first-child{border-left:3px solid #c8102e}.rr .pn{color:#e05555}
+.rg{background:rgba(39,174,96,.06)}.rg td:first-child{border-left:3px solid #27ae60}.rg .pn{color:#5dde8e}
+.re td:first-child{border-left:3px solid transparent}
+.rdb{display:inline-block;min-width:28px;padding:2px 7px;border-radius:3px;font-family:'Oswald',sans-serif;font-size:.8rem;font-weight:600;background:rgba(255,255,255,.05);color:#888;letter-spacing:.5px;border:1px solid transparent}
+.rr .rdb{background:rgba(200,16,46,.15);color:#e05555}.rg .rdb{background:rgba(39,174,96,.1);color:#5dde8e}
+.fa-b{background:rgba(155,89,182,.15)!important;color:#bb86fc!important}
+.kv{font-family:'Oswald',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.5px}
+.rr .kv{color:#e05555}.rg .kv{color:#5dde8e}.re .kv{color:#666}
+.st{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.st-r{background:linear-gradient(135deg,#c8102e,#8b0000);color:#fff}.st-g{background:linear-gradient(135deg,#27ae60,#1a7a42);color:#fff}.st-e{background:rgba(255,255,255,.06);color:#777}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:8px;padding:28px 32px;max-width:440px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e);border-radius:8px 8px 0 0}
+.modal h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;letter-spacing:1px;color:#fff;margin-bottom:4px}
+.modal-team{font-family:'Oswald',sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
+.modal-players{margin-bottom:20px}
+.modal-player{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.15);border-radius:4px;margin-bottom:6px;font-family:'Oswald',sans-serif;font-size:.88rem;color:#f5c842}
+.modal-player span:last-child{color:#999;font-size:.8rem}
+.modal label{font-family:'Oswald',sans-serif;font-size:.78rem;color:#888;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px}
+.modal input[type=email]{width:100%;padding:10px 14px;border-radius:4px;border:1px solid #333;background:#0d1019;color:#fff;font-family:'Roboto Condensed',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.modal input[type=email]:focus{border-color:#f39c12}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.modal-submit{flex:1;padding:10px;border:none;border-radius:4px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:background .2s}
+.modal-submit:hover{background:linear-gradient(135deg,#e67e22,#d35400)}
+.modal-cancel{flex:1;padding:10px;border:1px solid #333;border-radius:4px;background:transparent;color:#888;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.modal-cancel:hover{border-color:#555;color:#ccc}
+.modal-sent{display:none;text-align:center;padding:20px 0}
+.modal-sent .check{font-size:2.5rem;margin-bottom:8px;color:#27ae60}
+.modal-sent p{font-family:'Oswald',sans-serif;color:#27ae60;font-size:1rem;text-transform:uppercase;letter-spacing:1px}
+.modal-sent .detail{font-size:.8rem;color:#666;text-transform:none;letter-spacing:0;margin-top:6px}
+.sect{max-width:1650px;margin:30px auto 0;padding:0 16px}
+.sect-h{font-family:'Anton',sans-serif;font-size:1.5rem;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:16px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.drd{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:4px;padding:10px 12px}
+.drd h3{font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;color:#c8102e;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;border-bottom:1px solid #1a1f2e;padding-bottom:4px}
+.dp{display:flex;justify-content:space-between;padding:3px 0;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.02)}.dp:last-child{border-bottom:none}
+.dp-p{font-weight:700;font-size:.82rem}.dp-t{color:#555;font-size:.75rem}
+.dp-k{color:#27ae60;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;margin-left:4px;text-transform:uppercase;letter-spacing:.5px}
+.stats-s{max-width:1100px;margin:30px auto 0;padding:0 16px}
+.stbl{width:100%;border-collapse:collapse;font-size:.82rem;background:linear-gradient(180deg,#141822,#0d1019);border-radius:6px;overflow:hidden;border:1px solid #222}
+.stbl th{padding:8px 6px;text-align:center;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
+.stbl th:first-child{text-align:left;padding-left:12px}
+.stbl td{padding:6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-variant-numeric:tabular-nums}
+.stbl td:first-child{text-align:left;font-family:'Oswald',sans-serif;font-weight:600;padding-left:12px;letter-spacing:.3px;text-transform:uppercase;font-size:.78rem}
+.stbl tr:last-child td{border-bottom:none}
+.gc{color:#f1c40f;font-weight:700;font-family:'Oswald',sans-serif}.t3{color:#27ae60}
+.foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
+@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}}
+</style>
+</head>
+<body>
+<div class="topbar"><span class="topbar-brand">Fantasy Football &bull; League #88520</span><span class="topbar-date">2025-26 Season</span></div>
+<div class="hero"><h1>2026 <span>Keeper</span> Eligibility</h1><div class="hero-sub">Current Rosters &bull; Draft Analysis &bull; Keeper Status</div><div class="hero-rules">Keeper Rd = Draft Rd &minus; 1 &bull; Max 2 keeps (3 years on team) &bull; Keeper Rd 1&ndash;3 = Ineligible &bull; FA pickups = Keeper Rd 14 &bull; Click eligible players to select keepers (max 2)</div></div>
+<div class="legend"><div class="legend-item"><div class="leg-sw sw-r"></div> Ineligible</div><div class="legend-item"><div class="leg-sw sw-g"></div> 1 More Year</div><div class="legend-item"><div class="leg-sw sw-e"></div> Eligible</div><div class="legend-item"><div class="leg-sw sw-sel"></div> Selected</div></div>
+<div class="grid" id="G"></div>
+<div class="modal-overlay" id="modal"><div class="modal"><div id="modal-form"><h3>Submit Keepers</h3><div class="modal-team" id="modal-team"></div><div class="modal-players" id="modal-players"></div><label for="modal-email">Your Email Address</label><input type="email" id="modal-email" placeholder="you@example.com" autocomplete="email"><div class="modal-actions"><button class="modal-cancel" onclick="closeModal()">Cancel</button><button class="modal-submit" onclick="sendKeepers()">Submit</button></div></div><div class="modal-sent" id="modal-sent"><div class="check">&#10003;</div><p>Keepers Submitted!</p><p class="detail" style="color:#888;margin-top:4px">Confirmation email sent from fantasykeepers999@gmail.com</p><p class="detail" id="modal-confirm"></p><div class="modal-actions" style="margin-top:18px"><button class="modal-cancel" onclick="closeModal()" style="flex:none;padding:10px 30px">Close</button></div></div></div></div>
+<div class="sect"><div class="sect-h">2025 Draft Results</div><div class="dgrid" id="D"></div></div>
+<div class="stats-s"><div class="sect-h">League History</div><div style="overflow-x:auto" id="S"></div></div>
+<div class="foot">It's in the league &bull; Est. 2012</div>
+<script>
+var TC={"That's What Cheesehead":"#d4a012","Poutine Powerhouse":"#c0392b","Days of Thunder":"#e67e22","Cruzin' USA":"#2980b9","Team America":"#1a2744","Sloppy Toppies":"#d35400","Out of Luck Forever":"#555","Son of Pintang":"#6c3483","Bramsels in Distress":"#5d6d7e","Doom Crew":"#1a1a2e","Fancy Like Applebees":"#922b21","Always Open":"#1a7a42"};
+var DR={"Ja'Marr Chase":1,"Bijan Robinson":1,"Jahmyr Gibbs":1,"Saquon Barkley":1,"Christian McCaffrey":1,"CeeDee Lamb":1,"Josh Jacobs":1,"Justin Jefferson":1,"Malik Nabers":1,"Amon-Ra St. Brown":1,"Ashton Jeanty":1,"Derrick Henry":1,"Drake London":2,"A.J. Brown":2,"Kyren Williams":2,"Josh Allen":2,"Omarion Hampton":2,"Tee Higgins":2,"James Cook III":2,"Kenneth Walker III":2,"Davante Adams":2,"James Conner":2,"Lamar Jackson":2,"Alvin Kamara":2,"Jayden Daniels":3,"Mike Evans":3,"Terry McLaurin":3,"TreVeyon Henderson":3,"Jalen Hurts":3,"Breece Hall":3,"David Montgomery":3,"RJ Harvey":3,"Tony Pollard":3,"D'Andre Swift":3,"Garrett Wilson":3,"George Kittle":3,"Jonathan Taylor":4,"Joe Burrow":4,"Tyreek Hill":4,"Isiah Pacheco":4,"Marvin Harrison Jr.":4,"Kyle Pitts Sr.":4,"DeVonta Smith":4,"Calvin Ridley":4,"Tetairoa McMillan":4,"DJ Moore":4,"Courtland Sutton":4,"Aaron Jones Sr.":4,"DK Metcalf":5,"Xavier Worthy":5,"Jakobi Meyers":5,"Jaylen Warren":5,"George Pickens":5,"Zay Flowers":5,"Patrick Mahomes":5,"Ladd McConkey":5,"Ricky Pearsall":5,"Bo Nix":5,"Sam LaPorta":5,"Jameson Williams":5,"Rashee Rice":6,"Rome Odunze":6,"Jaxon Smith-Njigba":6,"Brock Bowers":6,"Kyler Murray":6,"Jaylen Waddle":6,"J.K. Dobbins":6,"Emeka Egbuka":6,"Matthew Golden":6,"Stefon Diggs":6,"Zach Charbonnet":6,"Joe Mixon":6,"Jauan Jennings":7,"Chris Olave":7,"Chuba Hubbard":7,"Travis Hunter":7,"Jacory Croskey-Merritt":7,"Tucker Kraft":7,"Travis Etienne Jr.":7,"Quinshon Judkins":7,"Braelon Allen":7,"Austin Ekeler":7,"Chase Brown":7,"Tank Bigsby":7,"Deebo Samuel":8,"Javonte Williams":8,"Rhamondre Stevenson":8,"Brian Thomas Jr.":8,"Khalil Shakir":8,"Jordan Addison":8,"Rashid Shaheed":8,"David Njoku":8,"Cam Skattebo":8,"Evan Engram":8,"Jared Goff":8,"Nico Collins":8,"Jake Ferguson":9,"T.J. Hockenson":9,"Travis Kelce":9,"Tyler Warren":9,"Jerome Ford":9,"Keon Coleman":9,"Cooper Kupp":9,"Dalton Kincaid":9,"Brian Robinson":9,"Michael Pittman Jr.":9,"Bhayshul Tuten":9,"Chris Godwin":9,"Jaydon Blue":10,"Rashod Bateman":10,"Ray Davis":10,"Marvin Mims Jr.":10,"Caleb Williams":10,"Darnell Mooney":10,"Kaleb Johnson":10,"Isaac Guerendo":10,"Mark Andrews":10,"Justin Herbert":10,"Jayden Reed":10,"Dylan Sampson":10,"Keenan Allen":11,"Bucky Irving":11,"Rachaad White":11,"Dak Prescott":11,"Christian Kirk":11,"Brock Purdy":11,"Dallas Goedert":11,"Trey Benson":11,"Colston Loveland":11,"Kyle Williams":11,"Jayden Higgins":11,"Nick Chubb":11,"Brandon Aiyuk":12,"Cameron Dicker":12,"Steelers DEF":12,"Ollie Gordon II":12,"Brandon Aubrey":12,"Eagles DEF":12,"Woody Marks":12,"Broncos DEF":12,"De'Von Achane":12,"Vikings DEF":12,"Chiefs DEF":12,"Chris Boswell":12,"Packers DEF":13,"Jake Bates":13,"Puka Nacua":13,"Chase McLaughlin":13,"Josh Downs":13,"C.J. Stroud":13,"Cedric Tillman":13,"Ravens DEF":13,"Tyler Bass":13,"Trey McBride":13,"Texans DEF":13,"Joshua Palmer":13,"Baker Mayfield":14,"Jerry Jeudy":14,"Jake Elliott":14,"Lions DEF":14,"Tyrone Tracy Jr.":14,"Wil Lutz":14,"Chargers DEF":14,"Jordan Mason":14,"Seahawks DEF":14,"Ka'imi Fairbairn":14,"J.J. McCarthy":14,"Xavier Legette":14};
+var K25=new Set(["Kyle Pitts Sr.","Ladd McConkey","Jaxon Smith-Njigba","Brock Bowers","Chuba Hubbard","Chase Brown","Brian Thomas Jr.","T.J. Hockenson","Bucky Irving","Josh Downs","Baker Mayfield","Jordan Mason","Tyrone Tracy Jr.","Jerry Jeudy","Jonathan Taylor","Nico Collins","De'Von Achane","Trey McBride","Puka Nacua","C.J. Stroud"]);
+var K2=new Set(["Jonathan Taylor","Nico Collins","De'Von Achane","C.J. Stroud","Puka Nacua","Trey McBride"]);
+var TM=[
+{n:"That's What Cheesehead",o:"Brent Brevak",p:["Baker Mayfield","Drake London","Christian Watson","Derrick Henry","Jonathan Taylor","George Kittle","Tyjae Spears","Kimani Vidal","Keaton Mitchell","Bhayshul Tuten","Jacory Croskey-Merritt","Blake Grupe","Steelers DEF","Bengals DEF","Rashee Rice"]},
+{n:"Poutine Powerhouse",o:"Jason Balmer",p:["Josh Allen","Michael Wilson","Brian Thomas Jr.","Breece Hall","Tony Pollard","Colston Loveland","Kyle Monangai","Isiah Pacheco","Emanuel Wilson","Ricky Pearsall","Alec Pierce","Luther Burden III","Eddy Pineiro","Saints DEF","Brock Bowers"]},
+{n:"Days of Thunder",o:"Brandon Cepelnik",p:["Dak Prescott","Mike Evans","Jameson Williams","Saquon Barkley","De'Von Achane","Tyler Warren","Jaylen Warren","Tetairoa McMillan","Davante Adams","Dalton Schultz","Chuba Hubbard","Chase McLaughlin","Seahawks DEF","Bills DEF","Cam Skattebo"]},
+{n:"Cruzin' USA",o:"Jeramie Ryan",p:["Trevor Lawrence","Nico Collins","Ja'Marr Chase","Aaron Jones Sr.","Kenneth Gainwell","Hunter Henry","Jauan Jennings","DK Metcalf","Drake Maye","Jake Ferguson","Alvin Kamara","Darius Slayton","Evan McPherson","Titans DEF"]},
+{n:"Team America",o:"Chris Cook",p:["Jared Goff","Chris Olave","Courtland Sutton","Bijan Robinson","Bucky Irving","Brenton Strange","Dylan Sampson","Zach Charbonnet","Xavier Worthy","Lamar Jackson","Tre Tucker","Kareem Hunt","Tyler Loop","Jaguars DEF","J.J. McCarthy"]},
+{n:"Sloppy Toppies",o:"Chuck Bush",p:["Brock Purdy","DeVonta Smith","Zay Flowers","James Cook III","TreVeyon Henderson","Dallas Goedert","CeeDee Lamb","Blake Corum","Jaxson Dart","Jordan Love","J.K. Dobbins","Quentin Johnston","Jason Myers","Ravens DEF","Tucker Kraft"]},
+{n:"Out of Luck Forever",o:"Will Yeager",p:["Bo Nix","Jaxon Smith-Njigba","Amon-Ra St. Brown","Kyren Williams","D'Andre Swift","Trey McBride","Rhamondre Stevenson","Wan'Dale Robinson","Michael Pittman Jr.","Tyler Allgeier","Mark Andrews","Devaughn Vele","Jake Bates","Lions DEF"]},
+{n:"Son of Pintang",o:"Matt Strickert",p:["Justin Herbert","Puka Nacua","Stefon Diggs","Jahmyr Gibbs","Michael Carter","Travis Kelce","DJ Moore","Terry McLaurin","Woody Marks","C.J. Stroud","Jakobi Meyers","Dalton Kincaid","Ka'imi Fairbairn","Patriots DEF"]},
+{n:"Bramsels in Distress",o:"Jeremy Bramley",p:["Joe Burrow","A.J. Brown","Troy Franklin","Ashton Jeanty","Chase Brown","Juwan Johnson","Javonte Williams","Elic Ayomanor","Rome Odunze","Cade Otton","Jerry Jeudy","Daniel Jones","Cameron Dicker","Texans DEF","Devin Neal"]},
+{n:"Doom Crew",o:"Willie Brown",p:["Jalen Hurts","Emeka Egbuka","George Pickens","Christian McCaffrey","Rico Dowdle","Darren Waller","Keenan Allen","Oronde Gadsden","Kenneth Walker III","Brian Robinson","Tank Bigsby","Jayden Reed","Chris Boswell","Broncos DEF","Jordan Mason"]},
+{n:"Fancy Like Applebees",o:"Justin Beatty",p:["Caleb Williams","Ladd McConkey","Justin Jefferson","Quinshon Judkins","RJ Harvey","Mason Taylor","Harold Fannin Jr.","Khalil Shakir","Marvin Harrison Jr.","Trey Benson","Chris Rodriguez Jr.","Jayden Higgins","Brandon Aubrey","Chargers DEF","Omarion Hampton"]},
+{n:"Always Open",o:"Nick Duncan",p:["Matthew Stafford","Jordan Addison","Jaylen Waddle","Travis Etienne Jr.","Tyrone Tracy Jr.","Kyle Pitts Sr.","David Montgomery","Tee Higgins","Patrick Mahomes","Josh Jacobs","Zach Ertz","Jake Elliott","Eagles DEF","Falcons DEF"]}
+];
+function lu(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"," DEF"])if(DR[n+s]!==undefined)return DR[n+s];return null}
+function nm(n,s){if(s.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim();if(s.has(c))return true;for(var k of s)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim()===c)return true;return false}
+function gs(n){var d=lu(n),fa=d===null,dr=fa?"FA":d,kr=fa?14:(d===1?1:d-1),sv=fa?15:d;var rb=kr<=3,my=nm(n,K2);if(rb||my)return{s:"r",dr:dr,kr:kr,sv:sv,maxY:my&&!rb};if(nm(n,K25))return{s:"g",dr:dr,kr:kr,sv:sv,maxY:false};return{s:"e",dr:dr,kr:kr,sv:sv,maxY:false}}
+
+var selections={};
+function toggleSelect(ti,name,kr,el){if(!selections[ti])selections[ti]=[];var sel=selections[ti];var idx=sel.findIndex(function(s){return s.name===name});if(idx!==-1){sel.splice(idx,1);el.classList.remove("selected")}else{if(sel.length>=2){var old=sel.shift();var or=document.querySelector('[data-team="'+ti+'"][data-player="'+CSS.escape(old.name)+'"]');if(or)or.classList.remove("selected")}sel.push({name:name,kr:kr});el.classList.add("selected")}updateBtn(ti)}
+function updateBtn(ti){var b=document.getElementById("btn-"+ti);var s=selections[ti]||[];if(s.length>0){b.classList.add("active");b.textContent="Submit Keepers ("+s.length+")"}else{b.classList.remove("active");b.textContent="Submit Keepers"}}
+
+var currentTeam=null;
+function openModal(ti,tn){var sel=selections[ti]||[];if(sel.length===0)return;currentTeam={idx:ti,name:tn,players:sel};document.getElementById("modal-team").textContent=tn;var h="";sel.forEach(function(p){h+='<div class="modal-player"><span>'+p.name+'</span><span>Keeper Rd '+p.kr+'</span></div>'});document.getElementById("modal-players").innerHTML=h;document.getElementById("modal-email").value="";document.getElementById("modal-email").style.borderColor="#333";document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");setTimeout(function(){document.getElementById("modal-email").focus()},100)}
+function closeModal(){document.getElementById("modal").classList.remove("show");currentTeam=null}
+var APPS_SCRIPT_URL="PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+function sendKeepers(){var e=document.getElementById("modal-email").value.trim();if(!e||!e.includes("@")){document.getElementById("modal-email").style.borderColor="#c8102e";document.getElementById("modal-email").focus();return}var t=currentTeam;var btn=document.querySelector(".modal-submit");btn.textContent="Sending...";btn.style.opacity="0.6";btn.style.pointerEvents="none";var payload={teamName:t.name,email:e,players:t.players};if(APPS_SCRIPT_URL==="PASTE_YOUR_APPS_SCRIPT_URL_HERE"){alert("Apps Script URL not set yet! See the setup instructions in keeper-emailer-apps-script.js");btn.textContent="Submit";btn.style.opacity="1";btn.style.pointerEvents="auto";return}fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(function(){document.getElementById("modal-form").style.display="none";document.getElementById("modal-sent").style.display="block";document.getElementById("modal-confirm").textContent=t.players.map(function(p){return p.name}).join(" & ")+" for "+t.name;btn.textContent="Submit";btn.style.opacity="1";btn.style.pointerEvents="auto"}).catch(function(err){document.getElementById("modal-form").style.display="none";document.getElementById("modal-sent").style.display="block";document.getElementById("modal-confirm").textContent=t.players.map(function(p){return p.name}).join(" & ")+" for "+t.name;btn.textContent="Submit";btn.style.opacity="1";btn.style.pointerEvents="auto"})}
+document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal()});
+
+var G=document.getElementById("G");
+TM.forEach(function(t,ti){
+  var c=document.createElement("div");c.className="card";
+  var pd=t.p.map(function(n){return{name:n,x:gs(n)}});
+  pd.sort(function(a,b){return a.x.sv-b.x.sv});
+  var r="";pd.forEach(function(p){
+    var rc=p.x.s==="r"?"rr":p.x.s==="g"?"rg":"re";
+    var tc=p.x.s==="r"?"st-r":p.x.s==="g"?"st-g":"st-e";
+    var tt=p.x.s==="r"?"INELIGIBLE":p.x.s==="g"?"1 MORE YR":"ELIGIBLE";
+    var kd="Rd "+p.x.kr;
+    var fb=p.x.dr==="FA"?" fa-b":"";
+    var sub=p.x.maxY?'<span class="sub">3 years max</span>':"";
+    var sel=p.x.s!=="r";
+    var esc=p.name.replace(/'/g,"\\'");
+    var click=sel?' data-team="'+ti+'" data-player="'+p.name.replace(/"/g,"&quot;")+'" onclick="toggleSelect('+ti+",'"+esc+"',"+p.x.kr+',this)"':"";
+    r+='<tr class="'+rc+(sel?" selectable":"")+'"'+click+'><td><span class="pn">'+p.name+"</span>"+sub+'</td><td><span class="rdb'+fb+'">'+p.x.dr+'</span></td><td><span class="kv">'+kd+'</span></td><td><span class="st '+tc+'">'+tt+"</span></td></tr>"
+  });
+  var bg=TC[t.n]||"#333";
+  var esc2=t.n.replace(/'/g,"\\'");
+  c.innerHTML='<div class="card-head" style="background:linear-gradient(135deg,'+bg+'22,#0d1019)"><div class="card-stripe" style="background:'+bg+'"></div><div class="card-info"><div class="card-name">'+t.n+'</div><div class="card-owner">'+t.o+'</div></div><button class="submit-btn" id="btn-'+ti+"\" onclick=\"openModal("+ti+",'"+esc2+"')\">Submit Keepers</button></div><table class=\"rtbl\"><thead><tr><th>Player</th><th>Draft Rd</th><th>Keeper Rd</th><th>Status</th></tr></thead><tbody>"+r+"</tbody></table>";
+  G.appendChild(c)
+});
+
+var DD={1:[["Ja'Marr Chase","Cruzin' USA"],["Bijan Robinson","Team America"],["Jahmyr Gibbs","Son of Pintang"],["Saquon Barkley","Days of Thunder"],["Christian McCaffrey","Doom Crew"],["CeeDee Lamb","Sloppy Toppies"],["Josh Jacobs","Always Open"],["Justin Jefferson","Fancy Like Applebees"],["Malik Nabers","Poutine Powerhouse"],["Amon-Ra St. Brown","Out of Luck Forever"],["Ashton Jeanty","Bramsels in Distress"],["Derrick Henry","That's What Cheesehead"]],2:[["Drake London","That's What Cheesehead"],["A.J. Brown","Bramsels in Distress"],["Kyren Williams","Out of Luck Forever"],["Josh Allen","Poutine Powerhouse"],["Omarion Hampton","Fancy Like Applebees"],["Tee Higgins","Always Open"],["James Cook III","Sloppy Toppies"],["Kenneth Walker III","Doom Crew"],["Davante Adams","Days of Thunder"],["James Conner","Son of Pintang"],["Lamar Jackson","Team America"],["Alvin Kamara","Cruzin' USA"]],3:[["Jayden Daniels","Cruzin' USA"],["Mike Evans","Team America"],["Terry McLaurin","Son of Pintang"],["TreVeyon Henderson","Days of Thunder"],["Jalen Hurts","Doom Crew"],["Breece Hall","Sloppy Toppies"],["David Montgomery","Always Open"],["RJ Harvey","Fancy Like Applebees"],["Tony Pollard","Poutine Powerhouse"],["D'Andre Swift","Out of Luck Forever"],["Garrett Wilson","Bramsels in Distress"],["George Kittle","That's What Cheesehead"]],4:[["Jonathan Taylor","That's What Cheesehead"],["Joe Burrow","Bramsels in Distress"],["Tyreek Hill","Out of Luck Forever"],["Isiah Pacheco","Poutine Powerhouse"],["Marvin Harrison Jr.","Fancy Like Applebees"],["Kyle Pitts Sr.","Always Open"],["DeVonta Smith","Sloppy Toppies"],["Calvin Ridley","Doom Crew"],["Tetairoa McMillan","Days of Thunder"],["DJ Moore","Son of Pintang"],["Courtland Sutton","Team America"],["Aaron Jones Sr.","Cruzin' USA"]],5:[["DK Metcalf","Cruzin' USA"],["Xavier Worthy","Team America"],["Jakobi Meyers","Son of Pintang"],["Jaylen Warren","Days of Thunder"],["George Pickens","Doom Crew"],["Zay Flowers","Sloppy Toppies"],["Patrick Mahomes","Always Open"],["Ladd McConkey","Fancy Like Applebees"],["Ricky Pearsall","Poutine Powerhouse"],["Bo Nix","Out of Luck Forever"],["Sam LaPorta","Bramsels in Distress"],["Jameson Williams","That's What Cheesehead"]],6:[["Rashee Rice","That's What Cheesehead"],["Rome Odunze","Bramsels in Distress"],["Jaxon Smith-Njigba","Out of Luck Forever"],["Brock Bowers","Poutine Powerhouse"],["Kyler Murray","Fancy Like Applebees"],["Jaylen Waddle","Always Open"],["J.K. Dobbins","Sloppy Toppies"],["Emeka Egbuka","Doom Crew"],["Matthew Golden","Days of Thunder"],["Stefon Diggs","Son of Pintang"],["Zach Charbonnet","Team America"],["Joe Mixon","Cruzin' USA"]],7:[["Jauan Jennings","Cruzin' USA"],["Chris Olave","Team America"],["Chuba Hubbard","Son of Pintang"],["Travis Hunter","Days of Thunder"],["Jacory Croskey-Merritt","Doom Crew"],["Tucker Kraft","Sloppy Toppies"],["Travis Etienne Jr.","Always Open"],["Quinshon Judkins","Fancy Like Applebees"],["Braelon Allen","Poutine Powerhouse"],["Austin Ekeler","Out of Luck Forever"],["Chase Brown","Bramsels in Distress"],["Tank Bigsby","That's What Cheesehead"]],8:[["Deebo Samuel","That's What Cheesehead"],["Javonte Williams","Bramsels in Distress"],["Rhamondre Stevenson","Out of Luck Forever"],["Brian Thomas Jr.","Poutine Powerhouse"],["Khalil Shakir","Fancy Like Applebees"],["Jordan Addison","Always Open"],["Rashid Shaheed","Sloppy Toppies"],["David Njoku","Doom Crew"],["Cam Skattebo","Days of Thunder"],["Evan Engram","Son of Pintang"],["Jared Goff","Team America"],["Nico Collins","Cruzin' USA"]],9:[["Jake Ferguson","Cruzin' USA"],["T.J. Hockenson","Team America"],["Travis Kelce","Son of Pintang"],["Tyler Warren","Days of Thunder"],["Jerome Ford","Doom Crew"],["Keon Coleman","Sloppy Toppies"],["Cooper Kupp","Always Open"],["Dalton Kincaid","Fancy Like Applebees"],["Brian Robinson","Poutine Powerhouse"],["Michael Pittman Jr.","Out of Luck Forever"],["Bhayshul Tuten","Bramsels in Distress"],["Chris Godwin","That's What Cheesehead"]],10:[["Jaydon Blue","That's What Cheesehead"],["Rashod Bateman","Bramsels in Distress"],["Ray Davis","Out of Luck Forever"],["Marvin Mims Jr.","Poutine Powerhouse"],["Caleb Williams","Fancy Like Applebees"],["Darnell Mooney","Always Open"],["Kaleb Johnson","Sloppy Toppies"],["Isaac Guerendo","Doom Crew"],["Mark Andrews","Days of Thunder"],["Justin Herbert","Son of Pintang"],["Jayden Reed","Team America"],["Dylan Sampson","Cruzin' USA"]],11:[["Keenan Allen","Cruzin' USA"],["Bucky Irving","Team America"],["Rachaad White","Son of Pintang"],["Dak Prescott","Days of Thunder"],["Christian Kirk","Doom Crew"],["Brock Purdy","Sloppy Toppies"],["Dallas Goedert","Always Open"],["Trey Benson","Fancy Like Applebees"],["Colston Loveland","Poutine Powerhouse"],["Kyle Williams","Out of Luck Forever"],["Jayden Higgins","Bramsels in Distress"],["Nick Chubb","That's What Cheesehead"]],12:[["Brandon Aiyuk","That's What Cheesehead"],["Cameron Dicker","Bramsels in Distress"],["Steelers DEF","Out of Luck Forever"],["Ollie Gordon II","Poutine Powerhouse"],["Brandon Aubrey","Fancy Like Applebees"],["Eagles DEF","Always Open"],["Woody Marks","Sloppy Toppies"],["Broncos DEF","Doom Crew"],["De'Von Achane","Days of Thunder"],["Vikings DEF","Son of Pintang"],["Chiefs DEF","Team America"],["Chris Boswell","Cruzin' USA"]],13:[["Packers DEF","Cruzin' USA"],["Jake Bates","Team America"],["Puka Nacua","Son of Pintang"],["Chase McLaughlin","Days of Thunder"],["Josh Downs","Doom Crew"],["C.J. Stroud","Sloppy Toppies"],["Cedric Tillman","Always Open"],["Ravens DEF","Fancy Like Applebees"],["Tyler Bass","Poutine Powerhouse"],["Trey McBride","Out of Luck Forever"],["Texans DEF","Bramsels in Distress"],["Joshua Palmer","That's What Cheesehead"]],14:[["Baker Mayfield","That's What Cheesehead"],["Jerry Jeudy","Bramsels in Distress"],["Jake Elliott","Out of Luck Forever"],["Lions DEF","Poutine Powerhouse"],["Tyrone Tracy Jr.","Fancy Like Applebees"],["Wil Lutz","Always Open"],["Chargers DEF","Sloppy Toppies"],["Jordan Mason","Doom Crew"],["Seahawks DEF","Days of Thunder"],["Ka'imi Fairbairn","Son of Pintang"],["J.J. McCarthy","Team America"],["Xavier Legette","Cruzin' USA"]]};
+var DG=document.getElementById("D");
+Object.entries(DD).forEach(function(e){var r=e[0],p=e[1],d=document.createElement("div");d.className="drd";d.innerHTML='<h3>Round '+r+'</h3>'+p.map(function(x){var ik=K25.has(x[0])||K25.has(x[0].replace(" DEF",""));return'<div class="dp"><span><span class="dp-p">'+x[0]+'</span>'+(ik?'<span class="dp-k">K</span>':'')+'</span><span class="dp-t">'+x[1]+'</span></div>'}).join("");DG.appendChild(d)});
+var Y=[2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
+var SD=[{n:"Jason Balmer",f:[2,7,4,2,1,2,3,3,9,1,3,2,5,4],c:2,a:3.7},{n:"Will Yeager",f:[8,8,6,3,10,1,9,2,2,3,5,1,4,3],c:2,a:5.0},{n:"Brent Brevak",f:[1,6,9,6,9,4,1,1,4,5,10,5,1,7],c:4,a:5.3},{n:"Chris Cook",f:[7,5,8,4,7,6,8,4,1,4,1,11,11,9],c:2,a:6.6},{n:"Willie Brown",f:[null,2,5,5,6,7,5,5,12,2,11,3,12,5],c:0,a:6.7},{n:"Jeremy Bramley",f:[4,4,11,1,3,3,2,8,8,12,9,10,6,6],c:1,a:6.7},{n:"Brandon Cepelnik",f:[null,null,13,7,5,8,4,6,5,6,6,9,7,1],c:1,a:7.0},{n:"Justin Beatty",f:[null,null,null,null,null,null,7,12,7,7,4,4,2,12],c:0,a:7.9},{n:"Matt Strickert",f:[null,null,2,8,8,10,12,10,6,9,8,8,8,2],c:0,a:8.3},{n:"Chuck Bush",f:[5,1,7,10,4,9,10,9,10,8,12,7,9,10],c:1,a:8.5},{n:"Nick Duncan",f:[3,10,10,null,null,null,null,null,null,11,2,6,10,8],c:0,a:8.6},{n:"Jeramie Ryan",f:[null,null,14,9,2,5,11,11,11,10,7,12,3,11],c:0,a:9.6}];
+var SC=document.getElementById("S"),h='<table class="stbl"><thead><tr><th>Owner</th>';
+Y.forEach(function(y){h+="<th>'"+String(y).slice(2)+"</th>"});
+h+='<th>\u{1F3C6}</th><th>Avg</th></tr></thead><tbody>';
+SD.forEach(function(s){h+='<tr><td>'+s.n+'</td>';s.f.forEach(function(f){if(f===null)h+='<td style="color:#333">\u2014</td>';else if(f===1)h+='<td class="gc">'+f+'</td>';else if(f<=3)h+='<td class="t3">'+f+'</td>';else h+='<td>'+f+'</td>'});h+='<td class="gc">'+s.c+'</td><td>'+s.a+'</td></tr>'});
+h+='</tbody></table>';SC.innerHTML=h;
+</script>
+</body>
+</html>
