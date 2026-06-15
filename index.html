@@ -16,7 +16,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .hero h1{font-family:'Anton',sans-serif;font-size:2.6rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
 .hero h1 span{background:linear-gradient(180deg,#c8102e,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .hero-sub{font-family:'Oswald',sans-serif;font-size:.85rem;color:#777;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:10px}
-.hero-rules{font-size:.82rem;color:#555;max-width:720px;margin:0 auto;line-height:1.4}
+.hero-rules{font-size:.85rem;color:#999;max-width:720px;margin:0 auto;line-height:1.4}
+.hero-action{font-family:'Oswald',sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1.5px;margin-top:10px;text-align:center}
 .legend{display:flex;justify-content:center;gap:24px;padding:14px 20px;background:#0d1019;border-bottom:1px solid #1a1f2e;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-family:'Oswald',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:#999}
 .leg-sw{width:16px;height:16px;border-radius:2px}
@@ -29,7 +30,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .card-info{position:relative;z-index:1}
 .card-name{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff;line-height:1.2}
 .card-owner{font-size:.78rem;color:#666;font-weight:400;text-transform:uppercase;letter-spacing:1px}
-.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#333,#222);color:#555;transition:all .2s;white-space:nowrap}
+.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#333,#222);color:#555;transition:all .2s;white-space:nowrap;display:none}
 .submit-btn.active{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 0 12px rgba(243,156,18,.3);text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .submit-btn.active:hover{background:linear-gradient(135deg,#e67e22,#d35400);transform:scale(1.03)}
 .rtbl{width:100%;border-collapse:collapse;font-size:.82rem}
@@ -109,7 +110,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 </head>
 <body>
 <div class="topbar"><span class="topbar-brand">Fantasy Football &bull; League #88520</span><span class="topbar-date">2025-26 Season</span></div>
-<div class="hero"><h1>2026 <span>Keeper</span> Eligibility</h1><div class="hero-sub">Current Rosters &bull; Draft Analysis &bull; Keeper Status</div><div class="hero-rules">Keeper Rd = Draft Rd &minus; 1 &bull; Max 2 keeps (3 years on team) &bull; Keeper Rd 1&ndash;3 = Ineligible &bull; FA pickups = Keeper Rd 14 &bull; Click eligible players to select keepers (max 2)</div></div>
+<div class="hero"><h1>2026 <span>Keeper</span> Eligibility</h1><div class="hero-sub">Current Rosters &bull; Draft Analysis &bull; Keeper Status</div><div class="hero-rules">Keeper Rd = Draft Rd &minus; 1 &bull; Max 2 keeps (3 years on team) &bull; Keeper Rd 1&ndash;3 = Ineligible &bull; FA pickups = Keeper Rd 14</div><div class="hero-action">Click eligible players to select keepers (max 2)</div></div>
 <div class="legend"><div class="legend-item"><div class="leg-sw sw-r"></div> Ineligible</div><div class="legend-item"><div class="leg-sw sw-g"></div> 1 More Year</div><div class="legend-item"><div class="leg-sw sw-e"></div> Eligible</div><div class="legend-item"><div class="leg-sw sw-sel"></div> Selected</div></div>
 <div class="grid" id="G"></div>
 <div class="pick-overlay" id="picker"><div class="pick-modal"><h2>Who Are You?</h2><div class="pick-sub">Select your team</div><div class="pick-grid" id="pick-grid"></div></div></div>
@@ -189,7 +190,8 @@ function pickTeam(name){
   var grid=document.getElementById("G");
   var cards=Array.from(grid.children);
   var mine=cards.find(function(c){return c.getAttribute("data-team")===name});
-  if(mine){grid.insertBefore(mine,grid.firstChild);mine.style.border="2px solid #f39c12";mine.style.boxShadow="0 0 20px rgba(243,156,18,.15)";setTimeout(function(){mine.scrollIntoView({behavior:"smooth",block:"start"})},100)}
+  if(mine){grid.insertBefore(mine,grid.firstChild);mine.style.border="2px solid #f39c12";mine.style.boxShadow="0 0 20px rgba(243,156,18,.15)";var btn=mine.querySelector(".submit-btn");if(btn)btn.style.display="inline-block";setTimeout(function(){mine.scrollIntoView({behavior:"smooth",block:"start"})},100)}
+  cards.forEach(function(c){if(c.getAttribute("data-team")!==name){var rows=c.querySelectorAll("tr.selectable");rows.forEach(function(r){r.classList.remove("selectable");r.removeAttribute("onclick");r.style.cursor="default"})}});
   document.getElementById("picker").classList.add("hide");
 }
 
