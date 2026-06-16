@@ -3,249 +3,513 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 Keeper Eligibility</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Anton&display=swap" rel="stylesheet">
+<title>Fantasy Football League – 2026 Rosters</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;min-height:100vh}
-.topbar{background:linear-gradient(180deg,#1a1f2e,#0d1019);border-bottom:3px solid #c8102e;padding:6px 20px;display:flex;justify-content:space-between;align-items:center}
-.topbar-brand{font-family:'Anton',sans-serif;font-size:.8rem;color:#888;letter-spacing:3px;text-transform:uppercase}
-.topbar-date{font-size:.75rem;color:#666}
-.hero{background:linear-gradient(135deg,#0d1019,#1a1f2e 40%,#0d1019);padding:28px 24px 22px;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid #222}
-.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8102e,#ff6b35,#c8102e,transparent)}
-.hero h1{font-family:'Anton',sans-serif;font-size:2.6rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
-.hero h1 span{background:linear-gradient(180deg,#c8102e,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-sub{font-family:'Oswald',sans-serif;font-size:.85rem;color:#777;text-transform:uppercase;letter-spacing:2px;font-weight:400;margin-bottom:10px}
-.hero-rules{font-size:.85rem;color:#999;max-width:720px;margin:0 auto;line-height:1.4}
-.hero-action{font-family:'Oswald',sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1.5px;margin-top:10px;text-align:center}
-.legend{display:flex;justify-content:center;gap:24px;padding:14px 20px;background:#0d1019;border-bottom:1px solid #1a1f2e;flex-wrap:wrap}
-.legend-item{display:flex;align-items:center;gap:7px;font-family:'Oswald',sans-serif;font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:#999}
-.leg-sw{width:16px;height:16px;border-radius:2px}
-.sw-r{background:linear-gradient(135deg,#c8102e,#8b0000)}.sw-g{background:linear-gradient(135deg,#27ae60,#1a7a42)}.sw-e{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);border:1px solid #333}.sw-sel{background:linear-gradient(135deg,#f39c12,#e67e22)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:16px;max-width:1650px;margin:20px auto;padding:0 16px}
-.card{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;position:relative}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
-.card-head{padding:12px 16px;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:center}
-.card-stripe{position:absolute;top:0;right:0;width:120px;height:100%;opacity:.08;transform:skewX(-20deg) translateX(30px)}
-.card-info{position:relative;z-index:1}
-.card-name{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff;line-height:1.2}
-.card-owner{font-size:.78rem;color:#666;font-weight:400;text-transform:uppercase;letter-spacing:1px}
-.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#333,#222);color:#555;transition:all .2s;white-space:nowrap;display:none}
-.submit-btn.active{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 0 12px rgba(243,156,18,.3);text-shadow:0 1px 2px rgba(0,0,0,.3)}
-.submit-btn.active:hover{background:linear-gradient(135deg,#e67e22,#d35400);transform:scale(1.03)}
-.rtbl{width:100%;border-collapse:collapse;font-size:.82rem}
-.rtbl th{text-align:left;padding:7px 10px;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
-.rtbl th:nth-child(2),.rtbl th:nth-child(3),.rtbl th:nth-child(4){text-align:center}
-.rtbl td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
-.rtbl td:nth-child(2),.rtbl td:nth-child(3),.rtbl td:nth-child(4){text-align:center}
-.rtbl tr:last-child td{border-bottom:none}
-.rtbl tr.rr:hover td{background:rgba(200,16,46,.18)}.rtbl tr.rg:hover td{background:rgba(39,174,96,.16)}.rtbl tr.re:hover td{background:rgba(255,255,255,.07)}
-.rtbl tr.selectable{cursor:pointer}
-.rtbl tr.selected td{background:rgba(243,156,18,.13)!important;border-bottom-color:rgba(243,156,18,.15)!important}
-.rtbl tr.selected td:first-child{border-left-color:#f39c12!important}
-.rtbl tr.selected .pn{color:#f5c842!important}
-.rtbl tr.selected .rdb{background:rgba(243,156,18,.2)!important;color:#f5c842!important}
-.rtbl tr.selected .kv{color:#f5c842!important}
-.rtbl tr.selected:hover td{background:rgba(243,156,18,.2)!important}
-.pn{font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:.85rem}
-.sub{font-size:.68rem;color:#e05555;display:block;margin-top:1px;font-family:'Roboto Condensed',sans-serif;font-weight:400;font-style:italic}
-.rr{background:rgba(200,16,46,.08)}.rr td:first-child{border-left:3px solid #c8102e}.rr .pn{color:#e05555}
-.rg{background:rgba(39,174,96,.06)}.rg td:first-child{border-left:3px solid #27ae60}.rg .pn{color:#5dde8e}
-.re td:first-child{border-left:3px solid transparent}
-.re .pn{color:#fff}
-.rdb{display:inline-block;min-width:28px;padding:2px 7px;border-radius:3px;font-family:'Oswald',sans-serif;font-size:.8rem;font-weight:600;background:rgba(255,255,255,.05);color:#888;letter-spacing:.5px;border:1px solid transparent}
-.rr .rdb{background:rgba(200,16,46,.15);color:#e05555}.rg .rdb{background:rgba(39,174,96,.1);color:#5dde8e}
-.fa-b{background:rgba(155,89,182,.15)!important;color:#bb86fc!important}
-.kv{font-family:'Oswald',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.5px}
-.rr .kv{color:#e05555}.rg .kv{color:#5dde8e}.re .kv{color:#666}
-.st{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:2px;white-space:nowrap}
-.st-r{background:linear-gradient(135deg,#c8102e,#8b0000);color:#fff}.st-g{background:linear-gradient(135deg,#27ae60,#1a7a42);color:#fff}.st-e{background:rgba(255,255,255,.06);color:#777}
-.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
-.modal-overlay.show{display:flex}
-.pick-overlay{display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(4,6,10,.92);z-index:2000;justify-content:center;align-items:center;backdrop-filter:blur(6px)}
-.pick-overlay.hide{display:none}
-.pick-modal{background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:10px;padding:32px;max-width:600px;width:92%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.pick-modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e);border-radius:10px 10px 0 0}
-.pick-modal h2{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:2px;color:#fff;text-align:center;margin-bottom:6px}
-.pick-modal .pick-sub{font-family:'Oswald',sans-serif;font-size:.85rem;color:#666;text-align:center;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:24px}
-.pick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.pick-btn{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:14px 6px;border-radius:6px;border:2px solid #333;background:linear-gradient(180deg,#1e2333,#141822);color:#ccc;cursor:pointer;transition:all .15s;text-align:center;line-height:1.3}
-.pick-btn:hover{border-color:#f39c12;color:#f5c842;background:linear-gradient(180deg,#2a2520,#1a1510);transform:scale(1.03)}
-@media(max-width:600px){.pick-grid{grid-template-columns:repeat(3,1fr)}.pick-modal{padding:24px 16px}}
-.modal{background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:8px;padding:28px 32px;max-width:440px;width:90%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
-.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e);border-radius:8px 8px 0 0}
-.modal h3{font-family:'Anton',sans-serif;font-size:1.3rem;text-transform:uppercase;letter-spacing:1px;color:#fff;margin-bottom:4px;text-align:center}
-.modal-team{font-family:'Oswald',sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;text-align:center}
-.modal-players{margin-bottom:20px}
-.modal-player{display:flex;justify-content:space-between;padding:8px 12px;background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.15);border-radius:4px;margin-bottom:6px;font-family:'Oswald',sans-serif;font-size:.88rem;color:#f5c842}
-.modal-player span:last-child{color:#999;font-size:.8rem}
-.modal-msg{font-family:'Roboto Condensed',sans-serif;font-size:.95rem;color:#ccc;margin:16px 0 4px;line-height:1.4;text-align:center}
-.modal-actions{display:flex;gap:10px;margin-top:18px}
-.modal-submit{flex:1;padding:10px;border:none;border-radius:4px;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:background .2s}
-.modal-submit:hover{background:linear-gradient(135deg,#e67e22,#d35400)}
-.modal-cancel{flex:1;padding:10px;border:1px solid #333;border-radius:4px;background:transparent;color:#888;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s}
-.modal-cancel:hover{border-color:#555;color:#ccc}
-.modal-sent{display:none;text-align:center;padding:20px 0}
-.modal-sent .check{font-size:3rem;margin-bottom:8px;color:#27ae60}
-.modal-sent p{font-family:'Oswald',sans-serif;color:#27ae60;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
-.modal-sent .detail{font-size:.8rem;color:#666;text-transform:none;letter-spacing:0;margin-top:6px}
-.sect{max-width:1650px;margin:30px auto 0;padding:0 16px}
-.sect-h{font-family:'Anton',sans-serif;font-size:1.5rem;text-transform:uppercase;letter-spacing:2px;text-align:center;margin-bottom:16px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.drd{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:4px;padding:10px 12px}
-.drd h3{font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;color:#c8102e;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px;border-bottom:1px solid #1a1f2e;padding-bottom:4px}
-.dp{display:flex;justify-content:space-between;padding:3px 0;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.02)}.dp:last-child{border-bottom:none}
-.dp-p{font-weight:700;font-size:.82rem}.dp-t{color:#555;font-size:.75rem}
-.dp-k{color:#27ae60;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;margin-left:4px;text-transform:uppercase;letter-spacing:.5px}
-.stats-s{max-width:1100px;margin:30px auto 0;padding:0 16px}
-.stbl{width:100%;border-collapse:collapse;font-size:.82rem;background:linear-gradient(180deg,#141822,#0d1019);border-radius:6px;overflow:hidden;border:1px solid #222}
-.stbl th{padding:8px 6px;text-align:center;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
-.stbl th:first-child{text-align:left;padding-left:12px}
-.stbl td{padding:6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-variant-numeric:tabular-nums}
-.stbl td:first-child{text-align:left;font-family:'Oswald',sans-serif;font-weight:600;padding-left:12px;letter-spacing:.3px;text-transform:uppercase;font-size:.78rem}
-.stbl tr:last-child td{border-bottom:none}
-.gc{color:#f1c40f;font-weight:700;font-family:'Oswald',sans-serif}.t3{color:#27ae60}
-.foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
-@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}}
+:root {
+  --bg: #0f1117;
+  --card-bg: #1a1d27;
+  --card-border: #2a2d3a;
+  --text: #e4e4e7;
+  --text-muted: #8b8d97;
+  --accent: #6366f1;
+  --green: #22c55e;
+  --green-bg: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --yellow: #eab308;
+  --popup-bg: #22252f;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  padding:24px;
+}
+header { text-align:center; margin-bottom:32px; padding-bottom:24px; border-bottom:1px solid var(--card-border); }
+header h1 { font-size:1.75rem; font-weight:800; letter-spacing:-0.03em; margin-bottom:8px; }
+header p { color:var(--text-muted); font-size:0.85rem; max-width:700px; margin:0 auto; }
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(340px,1fr));
+  gap:20px;
+  max-width:1400px;
+  margin:0 auto;
+}
+.team-card {
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:12px;
+  overflow:hidden;
+}
+.team-header {
+  padding:14px 16px;
+  background:rgba(255,255,255,0.03);
+  border-bottom:1px solid var(--card-border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.team-name { font-weight:700; font-size:0.95rem; }
+.team-owner { color:var(--text-muted); font-size:0.78rem; }
+.roster-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.roster-table th {
+  padding:8px 10px;
+  text-align:left;
+  font-size:0.68rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.04em;
+  color:var(--text-muted);
+  background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--card-border);
+}
+.roster-table td {
+  padding:6px 10px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.roster-table tr:last-child td { border-bottom:none; }
+.player-name {
+  font-weight:500;
+  cursor:pointer;
+  position:relative;
+  border-bottom:1px dotted rgba(255,255,255,0.2);
+  transition:color 0.15s;
+}
+.player-name:hover { color:var(--accent); }
+.pos-badge {
+  display:inline-block;
+  padding:1px 6px;
+  border-radius:4px;
+  font-size:0.68rem;
+  font-weight:600;
+  text-transform:uppercase;
+}
+.pos-qb { background:rgba(239,68,68,0.2); color:#f87171; }
+.pos-rb { background:rgba(34,197,94,0.15); color:#4ade80; }
+.pos-wr { background:rgba(59,130,246,0.2); color:#60a5fa; }
+.pos-te { background:rgba(234,179,8,0.2); color:#facc15; }
+.pos-k { background:rgba(168,85,247,0.2); color:#c084fc; }
+.pos-def { background:rgba(255,255,255,0.08); color:#a1a1aa; }
+
+/* ═══════════════════════════════════ */
+/* POPUP                               */
+/* ═══════════════════════════════════ */
+.popup-overlay {
+  display:none;
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.6);
+  z-index:999;
+  backdrop-filter:blur(3px);
+}
+.popup-overlay.active { display:flex; align-items:center; justify-content:center; }
+.popup {
+  background:var(--popup-bg);
+  border:1px solid var(--card-border);
+  border-radius:16px;
+  padding:28px;
+  max-width:440px;
+  width:90%;
+  position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:popIn 0.2s ease-out;
+}
+@keyframes popIn {
+  from { transform:scale(0.92); opacity:0; }
+  to { transform:scale(1); opacity:1; }
+}
+.popup-close {
+  position:absolute;
+  top:12px; right:14px;
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  font-size:1.2rem;
+  cursor:pointer;
+}
+.popup-close:hover { color:var(--text); }
+.popup-header {
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin-bottom:16px;
+}
+.popup-headshot {
+  width:80px; height:80px;
+  border-radius:50%;
+  object-fit:cover;
+  background:rgba(255,255,255,0.05);
+  border:2px solid var(--card-border);
+  flex-shrink:0;
+}
+.popup-headshot.placeholder {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2rem;
+}
+.popup-player-name {
+  font-weight:800;
+  font-size:1.15rem;
+  letter-spacing:-0.02em;
+}
+.popup-team-pos {
+  color:var(--text-muted);
+  font-size:0.78rem;
+  margin-top:2px;
+}
+.popup-blurb {
+  font-size:0.88rem;
+  line-height:1.7;
+  color:#c8c8cd;
+}
+
+@media (max-width:600px) {
+  body { padding:12px; }
+  .grid { grid-template-columns:1fr; }
+  header h1 { font-size:1.3rem; }
+  .popup { padding:20px; max-width:95%; }
+}
 </style>
 </head>
 <body>
-<div class="topbar"><span class="topbar-brand">Fantasy Football &bull; League #88520</span><span class="topbar-date">2025-26 Season</span></div>
-<div class="hero"><h1>2026 <span>Keeper</span> Eligibility</h1><div class="hero-sub">Current Rosters &bull; Draft Analysis &bull; Keeper Status</div><div class="hero-rules">Keeper Rd = Draft Rd &minus; 1 &bull; Max 2 keeps (3 years on team) &bull; Keeper Rd 1&ndash;3 = Ineligible &bull; FA pickups = Keeper Rd 14</div><div class="hero-action">Click eligible players to select keepers (max 2)</div></div>
-<div class="legend"><div class="legend-item"><div class="leg-sw sw-r"></div> Ineligible</div><div class="legend-item"><div class="leg-sw sw-g"></div> 1 More Year</div><div class="legend-item"><div class="leg-sw sw-e"></div> Eligible</div><div class="legend-item"><div class="leg-sw sw-sel"></div> Selected</div></div>
-<div class="grid" id="G"></div>
-<div class="pick-overlay" id="picker"><div class="pick-modal"><h2>Who Are You?</h2><div class="pick-sub">Select your team</div><div class="pick-grid" id="pick-grid"></div></div></div>
-<div class="modal-overlay" id="modal"><div class="modal"><div id="modal-form"><h3>Submit Keepers</h3><div class="modal-team" id="modal-team"></div><div class="modal-players" id="modal-players"></div><p class="modal-msg">You are submitting your own picks and not being a dick and doing someone else's right?</p><div class="modal-actions"><button class="modal-cancel" onclick="closeModal()">I'm sorry, I'll go back and do mine</button><button class="modal-submit" onclick="sendKeepers()">Yes, submit now</button></div></div><div class="modal-sent" id="modal-sent"><div class="check">&#10003;</div><p>Keepers Submitted!</p><p class="detail" style="color:#888;margin-top:4px">Sent to the commish</p><div id="modal-confirm-players" style="margin:16px 0"></div><div id="modal-quip" style="font-family:'Roboto Condensed',sans-serif;font-size:1rem;color:#e05555;text-align:center;margin:16px 0;padding:12px 16px;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.15);border-radius:6px;font-style:italic;line-height:1.4"></div><div style="text-align:center;margin-top:18px"><button class="modal-cancel" onclick="closeModal()" style="padding:10px 40px;display:inline-block">Close</button></div></div></div></div>
-<div class="sect"><div class="sect-h">2025 Draft Results</div><div class="dgrid" id="D"></div></div>
-<div class="stats-s"><div class="sect-h">League History</div><div style="overflow-x:auto" id="S"></div></div>
-<div class="foot">It's in the league &bull; Est. 2012</div>
+
+<header>
+  <h1>2026 Fantasy Football Rosters</h1>
+  <p>Tap any player name for the scouting report. God-tier praise meets brutal honesty.</p>
+</header>
+
+<div class="grid" id="roster-grid"></div>
+
+<div class="popup-overlay" id="popup-overlay">
+  <div class="popup" id="popup">
+    <button class="popup-close" id="popup-close">&times;</button>
+    <div class="popup-header">
+      <img class="popup-headshot" id="popup-img" src="" alt="">
+      <div>
+        <div class="popup-player-name" id="popup-name"></div>
+        <div class="popup-team-pos" id="popup-team"></div>
+      </div>
+    </div>
+    <div class="popup-blurb" id="popup-blurb"></div>
+  </div>
+</div>
+
 <script>
-var TC={"That's What Cheesehead":"#d4a012","Poutine Powerhouse":"#c0392b","Days of Thunder":"#e67e22","Cruzin' USA":"#2980b9","Team America":"#1a2744","Sloppy Toppies":"#d35400","Out of Luck Forever":"#555","Son of Pintang":"#6c3483","Bramsels in Distress":"#5d6d7e","Doom Crew":"#1a1a2e","Fancy Like Applebees":"#922b21","Always Open":"#1a7a42"};
-var DR={"Ja'Marr Chase":1,"Bijan Robinson":1,"Jahmyr Gibbs":1,"Saquon Barkley":1,"Christian McCaffrey":1,"CeeDee Lamb":1,"Josh Jacobs":1,"Justin Jefferson":1,"Malik Nabers":1,"Amon-Ra St. Brown":1,"Ashton Jeanty":1,"Derrick Henry":1,"Drake London":2,"A.J. Brown":2,"Kyren Williams":2,"Josh Allen":2,"Omarion Hampton":2,"Tee Higgins":2,"James Cook III":2,"Kenneth Walker III":2,"Davante Adams":2,"James Conner":2,"Lamar Jackson":2,"Alvin Kamara":2,"Jayden Daniels":3,"Mike Evans":3,"Terry McLaurin":3,"TreVeyon Henderson":3,"Jalen Hurts":3,"Breece Hall":3,"David Montgomery":3,"RJ Harvey":3,"Tony Pollard":3,"D'Andre Swift":3,"Garrett Wilson":3,"George Kittle":3,"Jonathan Taylor":4,"Joe Burrow":4,"Tyreek Hill":4,"Isiah Pacheco":4,"Marvin Harrison Jr.":4,"Kyle Pitts Sr.":4,"DeVonta Smith":4,"Calvin Ridley":4,"Tetairoa McMillan":4,"DJ Moore":4,"Courtland Sutton":4,"Aaron Jones Sr.":4,"DK Metcalf":5,"Xavier Worthy":5,"Jakobi Meyers":5,"Jaylen Warren":5,"George Pickens":5,"Zay Flowers":5,"Patrick Mahomes":5,"Ladd McConkey":5,"Ricky Pearsall":5,"Bo Nix":5,"Sam LaPorta":5,"Jameson Williams":5,"Rashee Rice":6,"Rome Odunze":6,"Jaxon Smith-Njigba":6,"Brock Bowers":6,"Kyler Murray":6,"Jaylen Waddle":6,"J.K. Dobbins":6,"Emeka Egbuka":6,"Matthew Golden":6,"Stefon Diggs":6,"Zach Charbonnet":6,"Joe Mixon":6,"Jauan Jennings":7,"Chris Olave":7,"Chuba Hubbard":7,"Travis Hunter":7,"Jacory Croskey-Merritt":7,"Tucker Kraft":7,"Travis Etienne Jr.":7,"Quinshon Judkins":7,"Braelon Allen":7,"Austin Ekeler":7,"Chase Brown":7,"Tank Bigsby":7,"Deebo Samuel":8,"Javonte Williams":8,"Rhamondre Stevenson":8,"Brian Thomas Jr.":8,"Khalil Shakir":8,"Jordan Addison":8,"Rashid Shaheed":8,"David Njoku":8,"Cam Skattebo":8,"Evan Engram":8,"Jared Goff":8,"Nico Collins":8,"Jake Ferguson":9,"T.J. Hockenson":9,"Travis Kelce":9,"Tyler Warren":9,"Jerome Ford":9,"Keon Coleman":9,"Cooper Kupp":9,"Dalton Kincaid":9,"Brian Robinson":9,"Michael Pittman Jr.":9,"Bhayshul Tuten":9,"Chris Godwin":9,"Jaydon Blue":10,"Rashod Bateman":10,"Ray Davis":10,"Marvin Mims Jr.":10,"Caleb Williams":10,"Darnell Mooney":10,"Kaleb Johnson":10,"Isaac Guerendo":10,"Mark Andrews":10,"Justin Herbert":10,"Jayden Reed":10,"Dylan Sampson":10,"Keenan Allen":11,"Bucky Irving":11,"Rachaad White":11,"Dak Prescott":11,"Christian Kirk":11,"Brock Purdy":11,"Dallas Goedert":11,"Trey Benson":11,"Colston Loveland":11,"Kyle Williams":11,"Jayden Higgins":11,"Nick Chubb":11,"Brandon Aiyuk":12,"Cameron Dicker":12,"Steelers DEF":12,"Ollie Gordon II":12,"Brandon Aubrey":12,"Eagles DEF":12,"Woody Marks":12,"Broncos DEF":12,"De'Von Achane":12,"Vikings DEF":12,"Chiefs DEF":12,"Chris Boswell":12,"Packers DEF":13,"Jake Bates":13,"Puka Nacua":13,"Chase McLaughlin":13,"Josh Downs":13,"C.J. Stroud":13,"Cedric Tillman":13,"Ravens DEF":13,"Tyler Bass":13,"Trey McBride":13,"Texans DEF":13,"Joshua Palmer":13,"Baker Mayfield":14,"Jerry Jeudy":14,"Jake Elliott":14,"Lions DEF":14,"Tyrone Tracy Jr.":14,"Wil Lutz":14,"Chargers DEF":14,"Jordan Mason":14,"Seahawks DEF":14,"Ka'imi Fairbairn":14,"J.J. McCarthy":14,"Xavier Legette":14};
-var K25=new Set(["Kyle Pitts Sr.","Ladd McConkey","Jaxon Smith-Njigba","Brock Bowers","Chuba Hubbard","Chase Brown","Brian Thomas Jr.","T.J. Hockenson","Bucky Irving","Josh Downs","Baker Mayfield","Jordan Mason","Tyrone Tracy Jr.","Jerry Jeudy","Jonathan Taylor","Nico Collins","De'Von Achane","Trey McBride","Puka Nacua","C.J. Stroud"]);
-var K2=new Set(["Jonathan Taylor","Nico Collins","De'Von Achane","C.J. Stroud","Puka Nacua","Trey McBride"]);
-var TM=[
-{n:"That's What Cheesehead",o:"Brent Brevak",p:["Baker Mayfield","Drake London","Christian Watson","Derrick Henry","Jonathan Taylor","George Kittle","Tyjae Spears","Kimani Vidal","Keaton Mitchell","Bhayshul Tuten","Jacory Croskey-Merritt","Blake Grupe","Steelers DEF","Bengals DEF","Rashee Rice"]},
-{n:"Poutine Powerhouse",o:"Jason Balmer",p:["Josh Allen","Michael Wilson","Brian Thomas Jr.","Breece Hall","Tony Pollard","Colston Loveland","Kyle Monangai","Isiah Pacheco","Emanuel Wilson","Ricky Pearsall","Alec Pierce","Luther Burden III","Eddy Pineiro","Saints DEF","Brock Bowers"]},
-{n:"Days of Thunder",o:"Brandon Cepelnik",p:["Dak Prescott","Mike Evans","Jameson Williams","Saquon Barkley","De'Von Achane","Tyler Warren","Jaylen Warren","Tetairoa McMillan","Davante Adams","Dalton Schultz","Chuba Hubbard","Chase McLaughlin","Seahawks DEF","Bills DEF","Cam Skattebo"]},
-{n:"Cruzin' USA",o:"Jeramie Ryan",p:["Trevor Lawrence","Nico Collins","Ja'Marr Chase","Aaron Jones Sr.","Kenneth Gainwell","Hunter Henry","Jauan Jennings","DK Metcalf","Drake Maye","Jake Ferguson","Alvin Kamara","Darius Slayton","Evan McPherson","Titans DEF"]},
-{n:"Team America",o:"Chris Cook",p:["Jared Goff","Chris Olave","Courtland Sutton","Bijan Robinson","Bucky Irving","Brenton Strange","Dylan Sampson","Zach Charbonnet","Xavier Worthy","Lamar Jackson","Tre Tucker","Kareem Hunt","Tyler Loop","Jaguars DEF","J.J. McCarthy"]},
-{n:"Sloppy Toppies",o:"Chuck Bush",p:["Brock Purdy","DeVonta Smith","Zay Flowers","James Cook III","TreVeyon Henderson","Dallas Goedert","CeeDee Lamb","Blake Corum","Jaxson Dart","Jordan Love","J.K. Dobbins","Quentin Johnston","Jason Myers","Ravens DEF","Tucker Kraft"]},
-{n:"Out of Luck Forever",o:"Will Yeager",p:["Bo Nix","Jaxon Smith-Njigba","Amon-Ra St. Brown","Kyren Williams","D'Andre Swift","Trey McBride","Rhamondre Stevenson","Wan'Dale Robinson","Michael Pittman Jr.","Tyler Allgeier","Mark Andrews","Devaughn Vele","Jake Bates","Lions DEF"]},
-{n:"Son of Pintang",o:"Matt Strickert",p:["Justin Herbert","Puka Nacua","Stefon Diggs","Jahmyr Gibbs","Michael Carter","Travis Kelce","DJ Moore","Terry McLaurin","Woody Marks","C.J. Stroud","Jakobi Meyers","Dalton Kincaid","Ka'imi Fairbairn","Patriots DEF"]},
-{n:"Bramsels in Distress",o:"Jeremy Bramley",p:["Joe Burrow","A.J. Brown","Troy Franklin","Ashton Jeanty","Chase Brown","Juwan Johnson","Javonte Williams","Elic Ayomanor","Rome Odunze","Cade Otton","Jerry Jeudy","Daniel Jones","Cameron Dicker","Texans DEF","Devin Neal"]},
-{n:"Doom Crew",o:"Willie Brown",p:["Jalen Hurts","Emeka Egbuka","George Pickens","Christian McCaffrey","Rico Dowdle","Darren Waller","Keenan Allen","Oronde Gadsden","Kenneth Walker III","Brian Robinson","Tank Bigsby","Jayden Reed","Chris Boswell","Broncos DEF","Jordan Mason"]},
-{n:"Fancy Like Applebees",o:"Justin Beatty",p:["Caleb Williams","Ladd McConkey","Justin Jefferson","Quinshon Judkins","RJ Harvey","Mason Taylor","Harold Fannin Jr.","Khalil Shakir","Marvin Harrison Jr.","Trey Benson","Chris Rodriguez Jr.","Jayden Higgins","Brandon Aubrey","Chargers DEF","Omarion Hampton"]},
-{n:"Always Open",o:"Nick Duncan",p:["Matthew Stafford","Jordan Addison","Jaylen Waddle","Travis Etienne Jr.","Tyrone Tracy Jr.","Kyle Pitts Sr.","David Montgomery","Tee Higgins","Patrick Mahomes","Josh Jacobs","Zach Ertz","Jake Elliott","Eagles DEF","Falcons DEF"]}
+// ═══════════════════════════════════════
+// PLAYER BLURBS
+// ═══════════════════════════════════════
+var blurbs = {
+// ── THAT'S WHAT CHEESEHEAD ──
+"Baker Mayfield":{pos:"QB",team:"Buccaneers",blurb:"The man went from being left for dead on a waiver wire to a top-10 QB who slings it like he's got absolutely nothing to lose — because at one point he literally didn't. His deep ball is pure sex when it connects. The problem is he still throws picks that make you want to gouge your eyes out with a rusty spoon, and his floor is basically 'benched in both real life and fantasy.'"},
+"Drake London":{pos:"WR",team:"Falcons",blurb:"Built like a 6'4\" brick shithouse who body-catches everything thrown within his zip code. When he's in the red zone he's basically a cheat code — defenders bounce off him like toddlers. But his route running can look like a refrigerator trying to do ballet, and his YAC ability is somewhere between 'elderly man' and 'parked car.'"},
+"Christian Watson":{pos:"WR",team:"Packers",blurb:"When healthy, this man is a guided missile — 4.36 speed with a 6'4\" frame is genuinely unfair and his big play ability borders on divine intervention. He'll rip off a 75-yard bomb that makes you feel like a genius. Then he'll disappear for three straight weeks and get hurt reaching for the TV remote. The 'when healthy' qualifier is doing Olympic-level heavy lifting."},
+"Derrick Henry":{pos:"RB",team:"Ravens",blurb:"Father Time has been trying to tackle this man for years and keeps getting stiff-armed into the shadow realm. He's a 250-pound wrecking ball who runs angry enough to make linebackers reconsider their career choices. In Baltimore's offense he's a damn cheat code with Lamar pulling defenders away. Still completely useless in the passing game — catching a screen pass is his Vietnam."},
+"Jonathan Taylor":{pos:"RB",team:"Colts",blurb:"A generational talent held hostage by the Colts' inability to field a competent football team around him. When he hits the hole clean, he looks like prime AP gliding through traffic with that effortless burst. But between the injuries and Indianapolis cycling through QBs like they're auditioning for The Bachelor, his ceiling keeps getting capped by organizational incompetence."},
+"George Kittle":{pos:"TE",team:"49ers",blurb:"The most entertaining tight end in football — blocks like a psychopath, catches like a receiver, and celebrates like he just shotgunned six beers in the parking lot. His run-after-catch ability is elite-tier nasty, and he genuinely loves pancaking defensive ends. Durability has been an issue, and some weeks he gets like two targets because Kyle Shanahan forgot he exists."},
+"Tyjae Spears":{pos:"RB",team:"Titans",blurb:"Quick, shifty, and explosive in the open field — the kind of back who makes the first guy miss and then hits the afterburners. His receiving chops are legit and he's a nightmare on wheel routes. Unfortunately he's stuck in a Tennessee offense that has all the creativity of a wet cardboard box, and Derrick Henry's ghost still haunts every RB who plays there."},
+"Kimani Vidal":{pos:"RB",team:"Chargers",blurb:"A bowling ball of a runner who absolutely refuses to go down on first contact — watching him bounce off linebackers is genuinely entertaining. He showed flashes of being a legit NFL back with surprising pass-catching ability. But he's buried on a depth chart and gets about as many touches as the team waterboy. Draft capital says 'handcuff at best.'"},
+"Keaton Mitchell":{pos:"RB",team:"Ravens",blurb:"This little dude ran a 4.27 forty and looked like a video game glitch the few times he touched the ball — pure electric with game-breaking speed. Then his knee exploded and he's been trying to get back to that level ever since. He's the ultimate 'stash and pray' guy on your bench, which is fantasy code for 'waste of a roster spot 90% of the time.'"},
+"Bhayshul Tuten":{pos:"RB",team:"Jaguars",blurb:"Runs with the kind of reckless violence that makes you wince and cheer at the same time. He's got legit power and enough wiggle to make defenders look foolish in short yardage. The problem is he's a depth piece fighting for scraps in a backfield that doesn't really need him, and his pass protection might actually be a war crime."},
+"Jacory Croskey-Merritt":{pos:"RB",team:"2026 Rookie",blurb:"Fresh meat from the draft with legs like tree trunks and a chip on his shoulder the size of Montana. The college tape is nasty — he runs through arm tackles like they're suggestions. But rookies in the NFL are basically lottery tickets, and his pass-catching ability is still more 'theoretical' than 'proven.' Could be a league winner, could be a roster clogger."},
+"Blake Grupe":{pos:"K",team:"Saints",blurb:"A kicker. He kicks the ball. Sometimes it goes through the uprights and you get points. Sometimes it doesn't and you scream at your phone. His leg is decent from inside 50 but anything beyond that and you're basically praying, which is appropriate for a guy who plays in the city of saints."},
+"Rashee Rice":{pos:"WR",team:"Chiefs",blurb:"When he's on the field he's a YAC monster who turns five-yard slants into 40-yard touchdowns with Mahomes feeding him like a golden retriever at Thanksgiving. His route running in the intermediate game is chef's kiss — crisp, efficient, deadly. But the off-field drama follows him like a bad smell, and one more incident and he'll be playing in the XFL."},
+
+// ── POUTINE POWERHOUSE ──
+"Josh Allen":{pos:"QB",team:"Bills",blurb:"A 6'5\" 240-pound missile launcher who also happens to be the best rushing QB in football — the man scored 14 rushing TDs like it was nothing and finished as the overall QB1. When he takes off and hurdles a safety, entire stadiums lose their minds. His arm talent is generational, but he still occasionally throws balls into triple coverage like he's playing backyard football with his cousins."},
+"Michael Wilson":{pos:"WR",team:"Cardinals",blurb:"A big-bodied receiver with contested catch ability that makes him look like a mini DeAndre Hopkins out there. When Kyler was feeding him, he showed real WR2 potential with smooth routes and strong hands. Now with Murray gone to Minnesota, his QB situation is a complete dumpster fire and he might be catching passes from some guy they found at a 7-Eleven."},
+"Brian Thomas Jr.":{pos:"WR",team:"Jaguars",blurb:"His rookie year was absolutely bonkers — looked like a future top-5 receiver with that speed and body control. Then his sophomore season hit and his production fell off a cliff, dropping from 16.7 to 9.9 fantasy PPG which is the kind of regression that makes you physically ill. The talent is still otherworldly, but Jacksonville's offense turned him into a ghost. Biggest blue-ball in fantasy."},
+"Breece Hall":{pos:"RB",team:"Jets",blurb:"Before the ACL tear this man was on pace to be a top-3 dynasty asset — explosive, versatile, and straight-up electric with the ball in his hands. He's shown flashes of that pre-injury form with legit three-down ability and soft hands out of the backfield. But the Jets are where fantasy dreams go to die, and their offensive line creates holes about as often as a solar eclipse."},
+"Tony Pollard":{pos:"RB",team:"Titans",blurb:"Went from Zeke's backup to a legitimate RB1 who proved he could handle a full workload and not spontaneously combust. His breakaway speed is elite — once he hits the second level, defensive backs are just chasing a dust cloud. The problem is he's in Tennessee where offense goes to die, and his touchdown upside is limited by a team that treats the end zone like it's haunted."},
+"Colston Loveland":{pos:"TE",team:"Bears",blurb:"This kid was a top tight end prospect for a reason — silky smooth routes, reliable hands, and the kind of athleticism that gives linebackers nightmares in coverage. Put up 193 receiving yards in the playoffs as a rookie like it was just another Tuesday. With Caleb Williams feeding him in Chicago's offense, the ceiling here is genuinely terrifying for the rest of the league."},
+"Kyle Monangai":{pos:"RB",team:"2026 Rookie",blurb:"A violent downhill runner who treats defensive backs like speed bumps and has the kind of low center of gravity that makes arm tackles completely useless. The college film is full of 'wow' runs where he just bulldozes through stacked boxes. NFL rookie backs are always a gamble though, and his landing spot will make or break whether he's relevant or riding the bench all year."},
+"Isiah Pacheco":{pos:"RB",team:"Chiefs",blurb:"Built like a fire hydrant who runs with controlled fury — when he's healthy, he's the perfect complement to Mahomes and the Chiefs' offense is basically unstoppable. His power running style wears down defenses by the fourth quarter like a human battering ram. But his body breaks down more than a 2003 Ford Focus, and when he's out, you're left staring at your bench wondering why you trusted him again."},
+"Emanuel Wilson":{pos:"RB",team:"Packers",blurb:"A bigger back who showed some juice when given opportunities and runs with enough power to move the pile consistently. He's a decent handcuff in Green Bay's run-heavy scheme. But let's be real — he's the third or fourth option in that backfield, and starting him in fantasy is basically admitting your season is already over."},
+"Ricky Pearsall":{pos:"WR",team:"49ers",blurb:"The fact that this man got literally shot before his rookie season and came back to ball out is the most gangster thing in recent NFL history. By the end of 2024 he was catching everything — 14 catches for 210 yards and 2 TDs in his last two games. With Mike Evans now in SF too, targets might be tight, but this dude has ice in his veins and legit WR2 upside."},
+"Alec Pierce":{pos:"WR",team:"Colts",blurb:"A deep threat specialist with 4.33 speed who can blow the top off a defense when his QB actually sees him downfield. The physical tools are absolutely ridiculous — he's a track star playing football. The problem is his route tree is about as diverse as a one-item menu, and when the deep ball isn't there, he becomes functionally invisible on the football field."},
+"Luther Burden III":{pos:"WR",team:"2026 Rookie",blurb:"One of the most explosive college receivers in recent memory — his ability to create separation and turn short catches into long touchdowns is genuinely elite. He was a freak at Missouri and the NFL draft pedigree backs it up. But NFL rookie receivers are hit or miss, and his landing spot will determine whether he's a league winner or just another name collecting dust on your bench."},
+"Eddy Pineiro":{pos:"K",team:"Panthers",blurb:"A kicker with a big leg who can absolutely crush it from 50+, which is great. The consistency part? That's more of a 'some days yes, some days absolutely not' situation. He's the kind of kicker you stream and then immediately regret when he shanks a 38-yarder that costs you your matchup by 0.4 points."},
+"Brock Bowers":{pos:"TE",team:"Raiders",blurb:"Finished as a top-4 tight end AS A ROOKIE, which is basically unheard of and absolutely disgusting in the best way possible. His route running is already elite — he moves like a wide receiver trapped in a tight end's body with hands softer than a cloud made of silk. The only thing holding him back is playing for the Raiders, who find creative new ways to be terrible every single season."},
+
+// ── DAYS OF THUNDER ──
+"Dak Prescott":{pos:"QB",team:"Cowboys",blurb:"When Dak is rolling, he looks like a top-5 QB — the arm talent is real, the pocket presence is elite, and he can absolutely shred a defense with surgical precision. He's got that killer 'I'm about to drop 350 yards and 4 TDs on you' ability any given Sunday. Then he'll follow it up with a three-interception stinker that makes you question every life decision that led you to drafting him."},
+"Mike Evans":{pos:"WR",team:"49ers",blurb:"Mr. Consistent just relocated to San Francisco and paired up with a Shanahan offense that should make him absolutely lethal in the red zone. The man has had 1,000+ yard seasons like most people have birthdays — it just happens automatically every year. At his age the speed isn't what it was, but his contested catch ability is still borderline illegal and he's still big enough to body any corner in the league."},
+"Jameson Williams":{pos:"WR",team:"Lions",blurb:"When he hits top speed he looks like a damn cheetah chasing a gazelle across the Serengeti — there might not be a faster player in the NFL, period. His deep threat ability single-handedly opens up Detroit's entire offense. But he's had more suspensions and setbacks than a soap opera character, and his hands are sometimes about as reliable as a weather forecast in Michigan."},
+"Saquon Barkley":{pos:"RB",team:"Eagles",blurb:"The move to Philly turned him into an absolute god — running behind that Eagles offensive line is basically playing on easy mode and he took full advantage like a man possessed. His combination of power, speed, and agility is genuinely unfair to other human beings who have to try to tackle him. When he hits the hole and does that little jump-cut, defensive coordinators everywhere start updating their resumes."},
+"De'Von Achane":{pos:"RB",team:"Dolphins",blurb:"The fastest running back in the NFL who hits holes like a bullet and turns routine screen passes into 70-yard house calls that make you jump off your couch screaming. When he's healthy and the Dolphins' offense is clicking, he's a top-5 RB who puts up video game numbers. The 'when healthy' part is doing heavy lifting because this man is built like a sports car — incredible performance but breaks down if you look at him wrong."},
+"Tyler Warren":{pos:"TE",team:"Patriots",blurb:"This big man was a revelation as a rookie — a do-it-all tight end who lined up everywhere and gave the Patriots an actual offensive weapon that wasn't Drake Maye running for his life. His playoff performance proved he's the real deal, not just a product of opportunity. He's got that old-school tight end versatility that coaches absolutely drool over — blocks, catches, and occasionally makes you forget he's a tight end."},
+"Jaylen Warren":{pos:"RB",team:"Steelers",blurb:"Dollar-store Alvin Kamara who runs with way more power than his size suggests and is genuinely dangerous as a pass-catcher out of the backfield. When Pittsburgh actually uses him correctly, he's a PPR cheat code who quietly drops 15+ points. The problem is he's perpetually stuck in a timeshare that limits his ceiling, and the Steelers' offensive playcalling is about as creative as a bowl of plain oatmeal."},
+"Tetairoa McMillan":{pos:"WR",team:"Cardinals",blurb:"6'5\" with hands the size of dinner plates and body control that makes you think he might actually be part cat — his contested catch ability as a rookie was genuinely jaw-dropping. He high-points the ball like he's got a magnet in his gloves and makes cornerbacks feel personally attacked on every 50/50 ball. With Kyler Murray leaving town though, his QB situation just went from 'meh' to 'oh god no.'"},
+"Davante Adams":{pos:"WR",team:"Rams",blurb:"The most technically perfect route runner on planet Earth who makes defensive backs look like they're stuck in quicksand while he's ice skating through his breaks. Teamed up with Stafford and helped the Rams make a deep playoff run, proving he's still elite even on the wrong side of 30. Age is starting to creep in and his hamstrings file complaints more often now, but his releases off the line are still pure filth."},
+"Dalton Schultz":{pos:"TE",team:"Texans",blurb:"The human equivalent of a Toyota Camry — reliable, boring, gets the job done without any flash whatsoever. He'll catch 5 balls for 45 yards every week like clockwork, which is great if you love being underwhelmed but consistent. Don't expect any fireworks, but he won't lose you your week either. He's the TE you draft when you forget about tight end until round 12."},
+"Chuba Hubbard":{pos:"RB",team:"Panthers",blurb:"Quietly put together a career year with 1,195 yards and 10 TDs that nobody talked about because he plays for the Panthers and nobody watches the Panthers. His vision improved dramatically and he actually learned how to be patient behind the line of scrimmage instead of just sprinting into the back of his lineman. Solid RB2 who could sneak into RB1 territory if Carolina's offense takes another step forward."},
+"Chase McLaughlin":{pos:"K",team:"Various",blurb:"A journeyman kicker who has played for more NFL teams than most people have had jobs. His leg is adequate — nothing more, nothing less. Streaming kickers is already depressing enough without having to rely on a guy whose Wikipedia page looks like a travel itinerary."},
+"Cam Skattebo":{pos:"RB",team:"2026 Rookie",blurb:"An absolute bowling ball from Arizona State who runs like he's personally offended by every defender on the field. His college tape is full of trucking linebackers into the shadow realm and refusing to go down like some kind of angry pinball machine. Whether that translates to the NFL is the million-dollar question, but you cannot teach that level of angry running."},
+
+// ── CRUZIN' USA ──
+"Trevor Lawrence":{pos:"QB",team:"Jaguars",blurb:"The golden boy who was supposed to save the Jaguars franchise, and to his credit he actually helped them win the AFC South and look competent. His arm talent is still absolutely gorgeous — tight spirals, beautiful deep balls, the whole package. But for every game where he looks like a future Hall of Famer, there's one where he looks like he's throwing with oven mitts on and you want to dropkick your TV."},
+"Nico Collins":{pos:"WR",team:"Texans",blurb:"A 6'4\" alpha receiver who runs routes like a much smaller man and absolutely terrorizes cornerbacks in contested situations with his size-speed combo. When he's healthy, he's a legit top-5 WR who makes difficult catches look routine. The injury history is concerning enough to keep you up at night though, and Houston's receiver room has gotten crowded enough that target share anxiety is real."},
+"Ja'Marr Chase":{pos:"WR",team:"Bengals",blurb:"The best receiver in football, full stop. His combination of route running, contested catches, body control, and pure swagger is absolutely disgusting — he makes elite corners look like they're playing a different sport. The connection with Burrow is basically telepathic at this point. The only negative is that Cincinnati's o-line occasionally lets him down by getting Burrow murdered before the ball comes out."},
+"Aaron Jones Sr.":{pos:"RB",team:"Vikings",blurb:"The ultimate 'still good but nobody cares anymore' running back who quietly produces every year while the fantasy community chases shiny new toys. His pass-catching ability keeps him relevant in PPR and he rarely flat-out kills you. He's getting older than dirt in RB years though, and his body has taken more hits than a piñata at a kid's birthday party."},
+"Kenneth Gainwell":{pos:"RB",team:"Eagles",blurb:"A nice little change-of-pace back who catches passes and does the dirty work that Saquon Barkley doesn't want to do. He's the human embodiment of 'fine, I guess' — useful but never exciting. Starting him in fantasy means something has gone horribly wrong with your roster and you're basically waving the white flag."},
+"Hunter Henry":{pos:"TE",team:"Patriots",blurb:"A solid, dependable tight end who gives you consistent production without ever making you feel excited about it. He's like missionary position — gets the job done but nobody's bragging about it. With Tyler Warren emerging in New England, Henry's target share is shrinking faster than a cheap t-shirt in hot water."},
+"Jauan Jennings":{pos:"WR",team:"49ers",blurb:"This absolute maniac played through FIVE broken ribs and multiple ankle sprains because he just loves football that much — he's the toughest SOB in the league and it's not even close. When healthy, he's a sneaky-good WR3 who makes plays in the clutch and has Purdy's trust in the red zone. The durability issues are terrifying though, and his body is held together with basically duct tape and willpower."},
+"DK Metcalf":{pos:"WR",team:"Steelers",blurb:"A physical freak of nature whose combination of 4.33 speed and 235 pounds of pure muscle should be illegal in all 50 states. When he gets behind a defense, the DB covering him might as well start writing his resignation letter mid-route. The trade to Pittsburgh gave him a fresh start, but his tendency to body-catch and his route tree that's about as complex as a children's coloring book remain concerns."},
+"Drake Maye":{pos:"QB",team:"Patriots",blurb:"Led the damn Patriots to the Super Bowl which is basically a modern miracle on par with turning water into wine. His arm talent is legit, his mobility is elite, and he showed serious moxie in the playoffs that had everyone doing double takes. He's got that dawg in him — the real question is whether the Pats will actually build around him properly or keep surrounding him with a supporting cast made of wet newspaper."},
+"Jake Ferguson":{pos:"TE",team:"Cowboys",blurb:"A reliable tight end who quietly became Dak's security blanket over the middle and has sneaky red zone upside that makes him a solid TE1 option. His hands are sure and his route running keeps improving every season. He's not flashy enough to get his own Nike commercial, but he'll get you 12 fantasy points while you're not paying attention."},
+"Alvin Kamara":{pos:"RB",team:"Saints",blurb:"Still one of the most versatile backs in football whose receiving ability out of the backfield is a thing of absolute beauty — he runs routes that would make some receivers jealous. The man is aging like fine wine in PPR formats and remains a cheat code on screen passes and checkdowns. But Father Time is undefeated, his carries are declining, and the Saints have been a dumpster fire for going on two years now."},
+"Darius Slayton":{pos:"WR",team:"Giants",blurb:"The ultimate survivor who keeps showing up on the Giants' roster year after year despite everyone assuming he'll get cut every offseason. His deep speed is real and he can stretch a defense when his QB actually gets time to throw. But his hands are made of stone about 30% of the time, and catching passes from whatever poor soul is playing QB in New York is like trying to catch a grenade."},
+"Evan McPherson":{pos:"K",team:"Bengals",blurb:"Money Mac earned that nickname by hitting clutch kicks in the biggest moments of his career — the dude's got ice water in his veins from 50+ yards out. He was an elite kicker his first couple seasons and has mostly maintained that level. One of the few kickers you can actually feel good about drafting instead of just streaming and praying."},
+
+// ── TEAM AMERICA ──
+"Jared Goff":{pos:"QB",team:"Lions",blurb:"Went from being the punchline of every 'Rams fleeced the Lions' joke to captaining one of the best offenses in football — the redemption arc is straight out of a movie. His accuracy in the short-to-intermediate game is borderline surgical, and Detroit's weapons make him look like an MVP candidate some weeks. He still can't throw into tight windows or handle pressure like an elite QB though — when the pocket collapses, he panics like a cat near a bathtub."},
+"Chris Olave":{pos:"WR",team:"Saints",blurb:"One of the purest route runners in the NFL — his releases off the line are so clean they should be studied in film school, and his ability to separate at every level of the field is absolutely gorgeous. The talent screams WR1. The Saints' QB situation has been a rotating carousel of mediocrity that has single-handedly torpedoed his fantasy value, which is a crime against humanity."},
+"Courtland Sutton":{pos:"WR",team:"Broncos",blurb:"A big-body contested-catch machine who can go up and rip the ball away from any cornerback in the league with his ridiculous catch radius. When Bo Nix is dealing, Sutton looks like a WR1 who can dominate on any given Sunday. His consistency is shakier than a Jenga tower in an earthquake though — he'll drop 25 one week and then give you 4 the next like some kind of sadistic fantasy torture device."},
+"Bijan Robinson":{pos:"RB",team:"Falcons",blurb:"The most talented running back in the NFL whose combination of vision, burst, agility, and power is straight out of a lab where they genetically engineer the perfect football player. Watching him run is like watching art — every cut, every juke is calculated perfection that makes defenders look like NPC characters. The only thing holding him back from absolute world domination is Atlanta's occasionally brain-dead playcalling."},
+"Bucky Irving":{pos:"RB",team:"Buccaneers",blurb:"Emerged as a legit starting back with great vision and the ability to make the first man miss consistently. His burst through the hole is impressive and he showed real three-down potential. The foot and shoulder issues in 2025 were concerning — he's built for speed, not necessarily for absorbing 250+ touches a season without something breaking."},
+"Brenton Strange":{pos:"TE",team:"Jaguars",blurb:"An athletic tight end who flashes enough to keep you interested but never quite delivers enough to make you feel good about starting him. He's the 'maybe next week' guy who stays on your bench forever while you wait for the breakout that may never come. His blocking is solid which keeps him on the field, but blocking doesn't score fantasy points last time I checked."},
+"Dylan Sampson":{pos:"RB",team:"2026 Rookie",blurb:"A compact, explosive runner from Tennessee who was absolutely electric in college and runs with a low center of gravity that makes him nearly impossible to tackle in the open field. His burst through the hole is legit, and he's got the kind of acceleration that turns a 2-yard gain into a 20-yard gain in a heartbeat. Rookie RBs are always risky though — landing spot is everything."},
+"Zach Charbonnet":{pos:"RB",team:"Seahawks",blurb:"A bruising backup who has shown he can absolutely carry the load when called upon — the man runs like he's angry at the ground. He looked like a legit starter filling in for Walker and proved he's more than just a handcuff. With Kenneth Walker gone to Kansas City, Charbonnet's workload just got a lot more interesting and he could be this year's sneaky RB2 value."},
+"Xavier Worthy":{pos:"WR",team:"Chiefs",blurb:"The fastest player in NFL Combine history (4.21 forty) who is basically a human blur on the football field — when he gets behind you, it's game over, go home, do not pass go. Having Mahomes throw him the ball is like giving a Ferrari to a NASCAR driver. He's still learning how to be a complete receiver though, and his slight frame means one good hit could fold him like a lawn chair."},
+"Lamar Jackson":{pos:"QB",team:"Ravens",blurb:"A former MVP whose rushing ability is legitimately unlike anything football has ever seen — he moves through defenses like he's playing a video game with cheat codes activated. When he's right, there's nobody more electric in the sport and he can win you your fantasy week single-handedly. His 2025 was derailed by hamstring and back injuries though, and his passing accuracy in big moments still has more question marks than a philosophy class."},
+"Tre Tucker":{pos:"WR",team:"Raiders",blurb:"Blazing speed and gadget-play ability make him fun to watch when the Raiders actually remember he's on the roster. He's a big play waiting to happen with his 4.28 speed. But his target share is depressingly low and starting him in fantasy is the equivalent of going to a casino and putting your rent money on red."},
+"Kareem Hunt":{pos:"RB",team:"Free Agent",blurb:"The ultimate cockroach of the NFL — you think he's done and then he keeps showing up on rosters and producing just enough to stay relevant. His goal-line work is still effective because he runs with the fury of a man with something to prove every single snap. He's 31 though, has more miles than a cross-country trucker, and his roster spot is never guaranteed."},
+"Tyler Loop":{pos:"K",team:"Various",blurb:"If you're rostering Tyler Loop, things have gone sideways in ways you couldn't have predicted. He's a kicker. That's about all there is to say. May God have mercy on your fantasy team."},
+"J.J. McCarthy":{pos:"QB",team:"Vikings",blurb:"The future of the Vikings franchise who showed glimpses of being the real deal before getting derailed by injury. His accuracy and poise in the pocket suggest he could be special, like really special. But he's still a massive unknown, and banking on him in fantasy right now is like putting a deposit on a house that hasn't been built yet — exciting but terrifying."},
+
+// ── SLOPPY TOPPIES ──
+"Brock Purdy":{pos:"QB",team:"49ers",blurb:"Mr. Irrelevant turned Mr. Incredible — the last pick of the draft who became a top-10 QB because he's surrounded by more weapons than a military base. His decision-making is elite and he throws with pinpoint accuracy in Shanahan's scheme. The knock is that literally any competent QB would look good with those receivers, which is the most annoying and partially true criticism in football."},
+"DeVonta Smith":{pos:"WR",team:"Eagles",blurb:"The Slim Reaper is 170 pounds of pure route-running wizardry who makes cornerbacks look absolutely foolish on double moves and releases. He's one of the most technically skilled receivers in the game and his hands are elite-tier reliable. The only problem is he weighs less than some linebackers' legs, and when he takes a big hit you hold your breath like you're watching a car accident in slow motion."},
+"Zay Flowers":{pos:"WR",team:"Ravens",blurb:"A shifty little slot demon who runs routes with the precision of a Swiss watch and has the kind of quickness that makes man coverage look like a suggestion. He's Lamar's favorite target in the passing game and his YAC ability is genuinely excellent. But his fumbling issues gave everyone heart attacks, and in a run-heavy Baltimore offense his target ceiling has a hard cap."},
+"James Cook III":{pos:"RB",team:"Bills",blurb:"Went from afterthought to Josh Allen's favorite backfield weapon with legit three-down ability and silky smooth receiving skills. His breakaway speed is real and he complements Allen's offense perfectly. The problem is Josh Allen vultures approximately 47 touchdowns a year with his legs, so Cook is perpetually getting cockblocked at the goal line by his own quarterback."},
+"TreVeyon Henderson":{pos:"RB",team:"Patriots",blurb:"Ohio State's former top recruit who brought his explosive running style to New England and actually started stealing carries from Rhamondre Stevenson. His speed and vision are NFL-caliber and he showed real promise as a pass-catcher too. The Patriots might actually have a good thing going here if they commit to him, but this is the Patriots we're talking about so they'll probably trade him for a fifth-round pick."},
+"Dallas Goedert":{pos:"TE",team:"Eagles",blurb:"One of the most underrated tight ends in football whose route running and hands are genuinely elite — he'd be a household name if he played for literally any other team. When he's featured in the offense, he can go toe-to-toe with any TE in the league. The issue is he plays second fiddle to the entire Eagles passing attack and injuries keep derailing his seasons like clockwork."},
+"CeeDee Lamb":{pos:"WR",team:"Cowboys",blurb:"An absolute magician with the ball in his hands who turns simple slant routes into highlight-reel plays that make SportsCenter producers weep with joy. His body control and ability to adjust to any throw is flat-out supernatural — he catches balls that have no business being caught. The only thing standing between him and 'best WR in football' status is playing for the Cowboys, who are professionally committed to wasting talent."},
+"Blake Corum":{pos:"RB",team:"Rams",blurb:"A tough, gritty back from Michigan who earned carries behind Kyren Williams and showed he belongs in the NFL with his downhill running style. He won't wow you with speed but he runs hard, finishes runs, and doesn't fumble. He's the ultimate 'your flex when three guys are on bye' player — not exciting enough to start confidently, too good to outright drop."},
+"Jaxson Dart":{pos:"QB",team:"2026 Rookie",blurb:"The Ole Miss gunslinger who threw it all over the yard in college and has the arm talent to make every throw in the NFL. His swagger and confidence are through the roof, which either makes him the next great QB or the next great bust. Rookie QBs in fantasy are generally about as useful as a screen door on a submarine, but this kid has upside worth dreaming on."},
+"Jordan Love":{pos:"QB",team:"Packers",blurb:"Went from 'Aaron Rodgers' mysterious successor' to a legitimate franchise QB who can sling it with the best of them. His arm talent is absolutely filthy — he throws ropes into tight windows that make you gasp. The consistency is still maddening though; he'll throw 4 TDs one week and then 3 picks the next, and the emotional rollercoaster will give you whiplash."},
+"J.K. Dobbins":{pos:"RB",team:"Broncos",blurb:"His talent is undeniable — when healthy he runs with a violent burst that defenders genuinely fear. His early 2024 start with the Chargers was electric enough to remind everyone what he could be. But this man's body falls apart more reliably than IKEA furniture, and betting on his health is like betting on it NOT raining in Seattle. Re-signed with Denver and we're all just waiting for the inevitable injury tweet."},
+"Quentin Johnston":{pos:"WR",team:"Chargers",blurb:"The 21st pick in the 2023 draft who has been a colossal disappointment — the kind of bust that makes GMs lose sleep and fantasy managers lose their minds. He's got the physical tools of a number-one receiver but plays like he's wearing mittens and running in sand. Every offseason we hear about how 'he's looked great in camp' and every season he looks like he's never seen a football before."},
+"Jason Myers":{pos:"K",team:"Seahawks",blurb:"A solid veteran kicker who won't blow your mind but won't blow your week either. He's reliable from inside 50 and occasionally shows range beyond that. The kicker equivalent of a warm beer — it works, but you're not exactly thrilled about it."},
+"Tucker Kraft":{pos:"TE",team:"Packers",blurb:"A freak athlete at tight end who looks like he was created in a lab with his combination of size, speed, and hands. In Jordan Love's offense, he's becoming a legitimate red-zone weapon who can stretch the seam like few tight ends can. He's still developing, but the trajectory is pointing straight up and the breakout could be coming any week now."},
+
+// ── OUT OF LUCK FOREVER ──
+"Bo Nix":{pos:"QB",team:"Broncos",blurb:"The most experienced college QB in history who played approximately 47 seasons at Auburn and Oregon before finally landing in Denver. His accuracy and decision-making are impressive, and he showed real poise as a rookie starter. The arm talent isn't elite though — he throws a wobbly ball that looks like a drunk duck sometimes — but he manages the game well enough to keep you in it."},
+"Jaxon Smith-Njigba":{pos:"WR",team:"Seahawks",blurb:"Finished as the WR2 in all of fantasy football with 1,793 yards and 10 TDs because apparently he decided to become the best slot receiver on earth overnight. His route running is so crisp it makes defensive coordinators cry into their playbooks. He went from 'was he a bust?' after year one to 'oh my God he's incredible' in year two, which is the most satisfying fantasy arc since sliced bread."},
+"Amon-Ra St. Brown":{pos:"WR",team:"Lions",blurb:"The Egyptian Sun God who catches everything thrown anywhere near him with the consistency of a robot designed specifically to haul in footballs. His slot work is elite, his contested catch ability defies his size, and Jared Goff feeds him targets like he's the only receiver on the roster. He's the ultimate PPR cheat code — boring to watch, beautiful to own."},
+"Kyren Williams":{pos:"RB",team:"Rams",blurb:"Went from undrafted afterthought to the Rams' bell cow who rushed for 183 yards in the playoffs like it was nothing. His vision and patience behind the line are legitimately impressive for a smaller back. The TD upside is massive in McVay's offense, but he gets banged up enough that you spend half the season checking the injury report like a nervous parent checking on a sleeping baby."},
+"D'Andre Swift":{pos:"RB",team:"Bears",blurb:"His talent has never been in question — when he's got daylight, he's one of the most explosive backs in the league with elite-level agility and burst. The problem is his durability is made of glass and wishful thinking. He'll give you three incredible weeks and then miss four, turning your fantasy season into an emotional support group meeting."},
+"Trey McBride":{pos:"TE",team:"Cardinals",blurb:"Emerged as a legit top-3 fantasy tight end by becoming the Cardinals' entire passing offense and catching approximately 900 targets per game. His volume is utterly insane and his catch rate is practically perfect. With Kyler Murray leaving Arizona, the offense might crater so badly that even McBride's absurd target share can't save him from touchdown regression."},
+"Rhamondre Stevenson":{pos:"RB",team:"Patriots",blurb:"A bruising, powerful back who led the entire NFL in playoff rushing yards and helped the Patriots go on their miracle Super Bowl run. When he's the guy, he's a bulldozer who grinds out tough yards and wears defenses down. He lost the lead-back role to TreVeyon Henderson during the regular season though, making him a frustrating timeshare player who might explode or might give you 6 points."},
+"Wan'Dale Robinson":{pos:"WR",team:"Giants",blurb:"A tiny slot receiver who is somehow the most productive pass-catcher on the Giants, which says more about the Giants than it does about him. His ability to get open in short areas is real and he's a YAC weapon in the open field despite being 5'8\" and 185 pounds soaking wet. He's a PPR floor play on a team with no ceiling, which is the most depressing sentence in fantasy football."},
+"Michael Pittman Jr.":{pos:"WR",team:"Steelers",blurb:"Got traded to Pittsburgh and landed a fat $59 million extension proving that somebody out there truly values a big-bodied possession receiver who consistently does his job without any drama. He's the definition of reliable — 70 catches, 900 yards, 5 TDs, set your watch to it. He'll never win you a week but he'll never lose you one either. He's the missionary position of fantasy receivers."},
+"Tyler Allgeier":{pos:"RB",team:"Falcons",blurb:"A no-nonsense grinder who runs hard between the tackles and refuses to go down easy. He's Bijan Robinson's backup which means he'll get 8 carries a game and occasionally vulture a goal-line TD that makes Bijan owners scream into the void. He's a handcuff at best, but if Robinson goes down, Allgeier becomes a very viable RB2. Until then, he's bench decoration."},
+"Mark Andrews":{pos:"TE",team:"Ravens",blurb:"Was once the undisputed TE1 in all of fantasy football — his connection with Lamar was absolutely lethal and his red-zone dominance was unmatched. He's been battling injuries and inconsistency lately, and watching him drop critical passes is like watching a surgeon accidentally cut the wrong thing. When he's on, he's still elite. When he's off, he makes you want to launch your phone into orbit."},
+"Devaughn Vele":{pos:"WR",team:"Broncos",blurb:"A big-bodied receiver who showed flashes as a late-round rookie in Denver with his ability to win contested catches. At 6'4\" he's got the frame to be a legitimate outside threat if given the opportunity. But he's still buried on the depth chart and relying on him in fantasy is a move born of either genius or complete desperation — probably the latter."},
+"Jake Bates":{pos:"K",team:"Lions",blurb:"The UFL legend who went from kicking in spring football leagues to kicking in the NFL, which is the most 'only in America' story you'll hear this year. His leg is genuinely massive — he's boomed 60-yarders like they were chip shots. Detroit's high-powered offense gives him plenty of extra point opportunities but not enough field goal attempts, which is a weird kicker problem to have."},
+
+// ── SON OF PINTANG ──
+"Justin Herbert":{pos:"QB",team:"Chargers",blurb:"Might have the strongest arm in the entire NFL — he throws lasers that could cut through steel and makes 60-yard bombs look casual. His physical talent is absolutely absurd, like God decided to make a perfect quarterback and then put him on the Chargers just to be cruel. The injuries and conservative Jim Harbaugh offense have been slowly sucking the life out of his fantasy value like a vampire."},
+"Puka Nacua":{pos:"WR",team:"Rams",blurb:"Finished as the WR1 in ALL of fantasy football with 375 points and was the most common player on championship rosters — the man is a certified league-winning cheat code. His 2025 was basically a masterclass in route running, YAC ability, and making Matthew Stafford look like a Hall of Famer. He caught 14 passes on deep balls and flashed vertical juice that he didn't even have as a rookie. Absolutely terrifying player."},
+"Stefon Diggs":{pos:"WR",team:"Patriots",blurb:"Came back from his torn ACL and landed in New England where he became Drake Maye's big-play threat with a three-game 100-yard streak that proved the doubters wrong. When his legs are right, his route running is still among the best in football and he plays with an edge that borders on psychotic. The mouth runs as much as the routes though, and one bad game turns him into the most dramatic person on the sideline."},
+"Jahmyr Gibbs":{pos:"RB",team:"Lions",blurb:"A silky-smooth runner whose combination of speed, elusiveness, and receiving ability makes him look like he's playing a different sport than everyone else on the field. He's the human joystick of the Lions' backfield and every touch is a potential house call. The only thing stopping him from being THE RB1 in fantasy is David Montgomery vulturing TDs like a goddamn thief in the night. Free Gibbs."},
+"Michael Carter":{pos:"RB",team:"Various",blurb:"A JAG (Just A Guy) running back who has bounced around the league collecting roster spots and giving fantasy managers absolutely nothing of value. He's fine as a depth piece but starting him in fantasy is admitting defeat. Think of him as the human equivalent of a participation trophy — he showed up, and that's about it."},
+"Travis Kelce":{pos:"TE",team:"Chiefs",blurb:"The greatest tight end in NFL history whose stats, rings, and cultural dominance make him a literal icon both on and off the field. Even in his declining years he's still a matchup nightmare who Mahomes trusts with his life in the biggest moments. He's getting older than some of the wines he drinks at his fancy dinners, but writing off Kelce has been a losing bet for a decade straight."},
+"DJ Moore":{pos:"WR",team:"Bills",blurb:"Got traded to Buffalo and paired with Josh Allen, which should be an absolute dream scenario for a receiver with his after-the-catch ability and deep speed. He's been underutilized his entire career and this might finally be the situation where he explodes into a true WR1. The concern is Buffalo already has plenty of mouths to feed, but Moore's talent is undeniable when he's actually featured."},
+"Terry McLaurin":{pos:"WR",team:"Commanders",blurb:"The most loyal receiver in football who has been balling out for Washington through approximately 47 different quarterbacks and never once complained about it. His speed, route running, and contested catch ability are all top-tier and he's been a WR1 in basically every situation. He deserves better than what this franchise has given him, but he just keeps showing up and producing like a true professional."},
+"Woody Marks":{pos:"RB",team:"2025 Rookie",blurb:"A well-rounded back from USC who does a little bit of everything — runs, catches, blocks — without being spectacular at any of it. He's the Swiss Army knife that coaches love and fantasy managers tolerate. His ceiling is low but his floor is surprisingly stable, which makes him the most boring useful player on your bench."},
+"C.J. Stroud":{pos:"QB",team:"Texans",blurb:"Burst onto the scene like a supernova in his rookie year and looked like the next great franchise quarterback with poise beyond his years. His accuracy and pocket presence are genuinely elite for someone so young. The concern is whether defenses have figured him out after a full season of film — the sophomore slump is real and Houston needs to keep building around him before he starts looking mortal."},
+"Jakobi Meyers":{pos:"WR",team:"Raiders",blurb:"The ultimate 'just a guy' receiver who somehow keeps producing despite playing in the worst offensive situations imaginable. His route running is technically sound and his hands are reliable. But he's on the Raiders, which means his QB might change three times a season and his fantasy ceiling is capped at 'fine, I guess.' The human equivalent of a shrug emoji."},
+"Dalton Kincaid":{pos:"TE",team:"Bills",blurb:"Has all the physical tools to be a top-5 fantasy tight end — his route running is elite for the position and Josh Allen clearly trusts him in the red zone. His athletic ability is genuinely special and he should be a focal point of Buffalo's passing attack. The breakout keeps getting teased but never fully materializes, making him the biggest cocktease at the tight end position."},
+"Ka'imi Fairbairn":{pos:"K",team:"Texans",blurb:"One of the most reliable kickers in the league who benefits from a Houston offense that's usually good enough to get into field goal range. His accuracy is top-tier and he rarely misses inside 50. He's a set-it-and-forget-it kicker, which is the highest compliment you can give someone who kicks a ball for a living."},
+
+// ── BRAMSELS IN DISTRESS ──
+"Joe Burrow":{pos:"QB",team:"Bengals",blurb:"When healthy, he's a top-3 quarterback who carves up defenses with surgical precision and an ice-cold demeanor that screams 'I'm better than you and we both know it.' His connection with Ja'Marr Chase is the best QB-WR duo in football and it's not particularly close. The wrist, the calf, the appendix — this man's body has more repair work than a New York City pothole. Elite talent, bubblewrap candidate."},
+"A.J. Brown":{pos:"WR",team:"Eagles",blurb:"A physical specimen who runs through tackles like they're made of tissue paper and has the kind of speed-power combo that makes defensive coordinators drink heavily. When Hurts targets him deep, it's basically a guaranteed highlight reel play that gets 10 million views on Twitter. He missed some time last year and has a diva streak that occasionally flares up, but when he's locked in he's a top-5 receiver on planet Earth."},
+"Troy Franklin":{pos:"WR",team:"Broncos",blurb:"A silky route runner from Oregon who has the tools to be a legit NFL starter with his smooth releases and ability to separate. He showed some promise as a rookie but was stuck behind a crowded receiver room in Denver. The talent is real but the production hasn't matched yet, making him the ultimate 'potential over production' stash on your bench."},
+"Ashton Jeanty":{pos:"RB",team:"2025 Draft",blurb:"Rushed for 2,601 yards and 30 TDs in college like he was playing against middle schoolers — the most dominant college running back performance in recent memory. His vision, balance, and contact balance are all elite and he hits the hole with instant acceleration that's almost impossible to defend. He's a surefire first-round pick and potential immediate fantasy star. If he lands in the right spot, he's your league winner."},
+"Chase Brown":{pos:"RB",team:"Bengals",blurb:"Emerged as a legit starting back in Cincinnati with explosive speed and the kind of breakaway ability that turns 5-yard runs into 50-yard touchdowns. His burst is genuinely elite and he makes the first defender miss more often than not. He's still proving he can handle a full workload without wearing down, and Zac Taylor's playcalling sometimes forgets he exists for entire halves."},
+"Juwan Johnson":{pos:"TE",team:"Saints",blurb:"A converted wide receiver playing tight end who has sneaky red-zone upside because he's basically a large receiver that linebackers can't cover. He'll go three weeks without doing anything and then randomly score two touchdowns on a Tuesday night and you'll have no idea what happened. He's the ultimate boom-or-bust TE streamer — emphasis heavily on the bust part."},
+"Javonte Williams":{pos:"RB",team:"Broncos",blurb:"Before the ACL tear he was on the fast track to superstardom — a violent, powerful runner who broke tackles like they owed him money. Since the knee injury he's been a shell of himself, and watching him try to recapture that explosiveness is genuinely sad. He's still got decent vision but the burst is gone and he's now a plodding backup who runs like he's wearing concrete shoes."},
+"Elic Ayomanor":{pos:"WR",team:"2026 Rookie",blurb:"A big-play Stanford receiver who made some of the most ridiculous catches in college football history — his body control and ability to adjust mid-air is absolutely insane. He's raw but the physical tools are tantalizing enough to make you dream on the upside. Whether he can develop into a consistent NFL contributor or remains a highlight reel without substance is the million-dollar question."},
+"Rome Odunze":{pos:"WR",team:"Bears",blurb:"A first-round pick who has the size and athleticism to be a true alpha receiver — at 6'3\" with fluid route running, the upside is enormous. Playing alongside DJ Moore and Keenan Allen limited his target share as a rookie, but with Moore shipped to Buffalo, the opportunity is wide open. He could absolutely explode in year two if Caleb Williams takes the next step. The ceiling is tantalizing."},
+"Cade Otton":{pos:"TE",team:"Buccaneers",blurb:"A solid, reliable tight end who does all the little things right and has become a trusted target in Tampa's offense. His hands are sure, his routes are clean, and he blocks well enough to stay on the field. He's never going to be a league winner but he's the kind of TE who gives you 8-12 points consistently, which is more than most tight ends can say."},
+"Jerry Jeudy":{pos:"WR",team:"Browns",blurb:"One of the most frustrating receivers in the NFL — his route running is genuinely elite, his ability to create separation is top-tier, and he STILL can't put it all together for a full season. He's got the talent of a WR1 trapped in the body of a WR3's production, and watching him drop easy catches or disappear for weeks is maddening. Playing in Cleveland certainly doesn't help, but at some point you have to blame the player."},
+"Daniel Jones":{pos:"QB",team:"Free Agent",blurb:"The living, breathing embodiment of 'sunk cost fallacy' — the Giants paid him $160 million and got the most expensive game manager in NFL history in return. His arm is average, his mobility disappeared after the ACL tear, and his decision-making ranges from 'fine' to 'what the actual hell was that.' He's somehow still in the league, which is either a testament to his resilience or the NFL's inability to evaluate quarterbacks."},
+"Cameron Dicker":{pos:"K",team:"Chargers",blurb:"An oddly reliable kicker who quietly became one of the better options at the position despite nobody knowing who he is. His leg is solid, his accuracy is good, and the Chargers' offense generates enough opportunities. He's the kicker you draft, forget about, and then are pleasantly surprised by at the end of the season."},
+"Devin Neal":{pos:"RB",team:"2026 Rookie",blurb:"A Kansas product who runs with impressive power and has surprising speed for his size. His college production was legit and he profiles as an early-down thumper at the next level. Whether he gets a real opportunity depends entirely on landing spot, but the tape shows a player who can absolutely punish defenders between the tackles."},
+
+// ── DOOM CREW ──
+"Jalen Hurts":{pos:"QB",team:"Eagles",blurb:"A dual-threat monster whose rushing ability at the QB position is basically a cheat code — he scores more rushing TDs than some starting running backs and his legs alone make him a QB1. The Eagles built an empire around his unique skills and he led them back to contention. His passing accuracy still has holes you could drive a truck through though, and his tendency to hold the ball too long makes his linemen want to commit crimes."},
+"Emeka Egbuka":{pos:"WR",team:"Buccaneers",blurb:"A polished route runner from Ohio State who was a first-round pick and has all the tools to be an immediate contributor. His football IQ is off the charts and his ability to find soft spots in zone coverage is already NFL-ready. He's stepping into a Tampa offense that just lost Mike Evans to free agency, which means targets should be plentiful from day one. Could be a sneaky WR2 as a rookie."},
+"George Pickens":{pos:"WR",team:"Steelers",blurb:"The most talented and most infuriating receiver in the NFL — his physical gifts are absolutely absurd, with body control and catch radius that belong on a highlight reel. When he decides to try, he looks like a top-10 receiver who can dominate any cornerback in the league. The key phrase is 'when he decides to try,' because his effort level fluctuates more than Bitcoin prices and his attitude has been a constant headache."},
+"Christian McCaffrey":{pos:"RB",team:"49ers",blurb:"The OVERALL number one fantasy scorer in 2025 with 404.9 points — nearly 40 points more than the next guy — proving once again that he is the single most valuable fantasy asset when healthy. He does everything: runs, catches, blocks, probably does your taxes during the bye week. He's basically a create-a-player with every stat maxed out. The man is a freak of nature and drafting him first overall is never wrong."},
+"Rico Dowdle":{pos:"RB",team:"Panthers",blurb:"Went from complete nobody to fantasy hero with back-to-back 30-plus point games that made anyone who picked him up off waivers feel like an absolute genius. His burst and vision were surprising, and he proved he can be a legitimate NFL starter when given the opportunity. The question is whether that production was real or just a hot streak, because the line between 'breakout' and 'flash in the pan' is paper thin."},
+"Darren Waller":{pos:"TE",team:"Retired",blurb:"One of the most physically gifted tight ends in NFL history who played the position like a 6'6\" wide receiver and terrorized defenses at his peak. His comeback story from personal struggles was genuinely inspiring and made you root for him as a human being. He's retired now, so if he's still on your roster you should probably check on that. Great player, but this roster spot is basically dead weight."},
+"Keenan Allen":{pos:"WR",team:"Bears",blurb:"The master of the intermediate route who has been silently torching defenses for over a decade with his technical precision and sure hands. He runs routes so clean you could eat off them, and his catch rate is consistently among the best in the league. He's older than most of his teammates' favorite childhood movies now, and his speed has declined to the point where he gets chased down by linebackers."},
+"Oronde Gadsden":{pos:"TE",team:"Chargers",blurb:"A massive athletic freak from Syracuse who was drafted to be the next great hybrid tight end — at 6'5\" with receiver-level route running ability, the tools are ridiculous. His rookie year was a learning curve but the flashes were real enough to keep you excited. He's the kind of prospect you stash and hope develops into a top-5 TE within two years, which is the fantasy equivalent of buying a stock early."},
+"Kenneth Walker III":{pos:"RB",team:"Chiefs",blurb:"Super Bowl MVP who signed with Kansas City to become the next in a long line of Chiefs running backs that Mahomes makes look better than they actually are — except Walker is actually really damn good on his own. His explosiveness and contact balance are elite, and pairing him with the best offense in football is genuinely scary. The injury history is real though, and the Chiefs have historically not given any single back a true workhorse role."},
+"Brian Robinson":{pos:"RB",team:"Commanders",blurb:"The man literally got shot twice before his rookie season and came back to be a productive NFL running back, which makes every other injury excuse in sports history sound pathetic. He's a hard-nosed, between-the-tackles grinder who won't make your jaw drop but will reliably grind out 70 yards and a TD. His lack of pass-catching ability caps his ceiling in PPR, and his speed would lose a race to most offensive linemen."},
+"Tank Bigsby":{pos:"RB",team:"Jaguars",blurb:"A powerful back who runs with bad intentions and has the kind of lower-body strength that makes arm tackles completely futile. He showed legit ability as a fill-in starter and proved he can handle NFL-level carries. The problem is he's stuck behind Travis Etienne in Jacksonville's pecking order, which means you're basically drafting him as a handcuff and hoping for the best."},
+"Jayden Reed":{pos:"WR",team:"Packers",blurb:"Was looking like a breakout candidate before injuries derailed his season and he landed on IR, which was a gut punch for anyone who drafted him. When healthy, his ability to create after the catch and his versatility as a gadget player make him a fun weapon in Green Bay's offense. The Packers' receiver room is insanely crowded though, and there are only so many targets to go around when you've got Watson, Doubs, and a first-round pick competing."},
+"Chris Boswell":{pos:"K",team:"Steelers",blurb:"The Boz is legitimately one of the best kickers in the NFL — accurate, clutch, and benefits from a Steelers defense that keeps games close and creates field goal opportunities. He's the kind of kicker you draft and actually feel good about, which is a rare and beautiful thing. In Pittsburgh's conservative offense, he might lead the team in scoring, which is either a compliment to him or an insult to the offense."},
+"Jordan Mason":{pos:"RB",team:"49ers",blurb:"Stepped up HUGE when McCaffrey was injured previously and ran like a man possessed, proving he's a legit NFL starter trapped behind the best running back in football. His running style is violent and decisive, and he hits the hole with authority. The problem is unless CMC goes down again, Mason is glued to the bench watching the best player in fantasy football take all his carries. Ultimate handcuff."},
+
+// ── FANCY LIKE APPLEBEES ──
+"Caleb Williams":{pos:"QB",team:"Bears",blurb:"Led the Bears to the damn playoffs as a sophomore QB and put up 618 passing yards in the postseason, proving that the number one overall pick was absolutely worth it. His ability to extend plays and throw on the move is genuinely special — he makes throws that shouldn't be physically possible. The hero-ball tendencies still pop up, and when he tries to do too much, things go sideways fast, but the upside is through the roof."},
+"Ladd McConkey":{pos:"WR",team:"Chargers",blurb:"Was absolutely electric down the stretch of his rookie year, averaging 17.6 PPR points from Weeks 8-18 and dropping 197 yards in the playoffs. Then his sophomore season hit and the crowded Chargers offense swallowed his target share whole. He took a massive step back that left fantasy managers feeling personally betrayed. The talent is still there but the volume needs to come back for him to matter."},
+"Justin Jefferson":{pos:"WR",team:"Vikings",blurb:"When he's right, he's the most dynamic receiver in football — his route running, his ability to create separation, and his absurd catch radius make him virtually uncoverable. He's a generational talent who can win you your fantasy week in a single quarter. But his 2025 was disappointing enough to land on bust lists, and at his draft price, anything less than WR1 production feels like getting robbed at knifepoint."},
+"Quinshon Judkins":{pos:"RB",team:"2025 Draft",blurb:"A powerful Ohio State runner who hits the hole with authority and has the kind of build that offensive coordinators dream about for short-yardage situations. His college production was obscene and he's got the complete skill set to be a three-down NFL back. The landing spot and opportunity will determine everything — in the right system, he's a league winner waiting to happen."},
+"RJ Harvey":{pos:"RB",team:"2026 Rookie",blurb:"An explosive UCF product who scored touchdowns at an absurd rate and showed elite-level vision and acceleration in college. His ability to hit the crease and explode through it is legitimately NFL-caliber. Rookie RBs are always a dice roll, but this kid has the kind of highlight reel that makes scouts drool and fantasy managers reach a round early."},
+"Mason Taylor":{pos:"TE",team:"2026 Rookie",blurb:"A smooth pass-catching tight end from LSU who has the bloodline (his dad is Jason Taylor) and the athletic ability to be a real factor in the NFL. His route running for a tight end is surprisingly polished and his hands are reliable. Rookie tight ends historically take a couple years to produce in fantasy though, so patience is the name of the game here."},
+"Harold Fannin Jr.":{pos:"TE",team:"2026 Rookie",blurb:"A bowling ball of a tight end who was one of the most productive pass-catchers in college football regardless of position. His combination of size and receiving ability is rare for the position and he profiles as an immediate contributor if given the opportunity. Could be the rookie TE who actually breaks the 'rookie TEs don't produce' curse — or could follow the same depressing pattern as every other rookie TE."},
+"Khalil Shakir":{pos:"WR",team:"Bills",blurb:"The most underrated receiver in the NFL who consistently produces despite never being the number-one option because he runs routes with technical precision and has some of the surest hands in the game. His chemistry with Josh Allen in the slot is real and he's a PPR machine. With DJ Moore now in Buffalo too, targets could get tight, but Shakir's reliability has earned him snaps regardless of who else is on the roster."},
+"Marvin Harrison Jr.":{pos:"WR",team:"Cardinals",blurb:"The most hyped receiver prospect since his literal father, and his rookie season was... fine. Just fine. Not the 1,400-yard explosion everyone expected from a guy with that bloodline and that draft capital. His route running is already polished and his hands are elite, but Arizona's offense couldn't consistently get him the ball in favorable positions. Year two breakout is the hope, but Kyler leaving adds a huge question mark."},
+"Trey Benson":{pos:"RB",team:"Cardinals",blurb:"A big, physical back from Florida State who looked promising in limited rookie action with his downhill running style and surprising burst for his size. He's the heir apparent in Arizona's backfield and could see a massive workload increase if everything breaks right. The passing game ability is still raw though, which limits his PPR upside and makes him more of a standard-league darling."},
+"Chris Rodriguez Jr.":{pos:"RB",team:"Various",blurb:"A power back from Kentucky who runs like a bowling ball with legs and refuses to go down without making you earn it. He's bounced around practice squads and roster fringes trying to carve out a role. If he ever gets consistent touches he could surprise people, but right now he's deep depth chart fodder and a fantasy afterthought."},
+"Jayden Higgins":{pos:"WR",team:"2026 Rookie",blurb:"A long, physical receiver from Iowa State who dominated college football with his size and ability to win at the catch point. His contested catch ability is his calling card and he profiles as a red-zone weapon at the next level. Like most rookie receivers, the production might take a minute, but the physical tools suggest a player who could be very relevant by year two."},
+"Brandon Aubrey":{pos:"K",team:"Cowboys",blurb:"Might be the most talented kicker in the NFL — he's got a leg that could kick a ball into orbit and has hit multiple 60-yarders like they were extra points. The fact that he came from professional soccer makes his story even cooler. He's a game-changing weapon at a position where most guys are interchangeable, and he'll genuinely win you fantasy weeks that no other kicker would."},
+"Omarion Hampton":{pos:"RB",team:"2025 Draft",blurb:"A powerful North Carolina runner with elite size and the ability to punish defenders between the tackles while also showing surprising breakaway speed. His college tape is full of runs where he simply refuses to be brought down by one man. If he lands in a feature-back role, the ceiling is a top-15 RB. If he's in a committee, prepare for weekly frustration."},
+
+// ── ALWAYS OPEN ──
+"Matthew Stafford":{pos:"QB",team:"Rams",blurb:"Led the NFL in playoff passing yards with 936 because apparently this man just turns into God during January football — his playoff resume is now genuinely Hall of Fame caliber. His arm is still a howitzer that can make every throw in the book, and with Nacua and Adams as his targets, he's basically playing with cheat codes. Regular season consistency is the issue — he'll look washed for two weeks and then drop 400 yards on you like it's nothing."},
+"Jordan Addison":{pos:"WR",team:"Vikings",blurb:"A smooth route runner with real deep threat ability who can stretch a defense vertically and make big plays when you need them most. His body control and ability to track the ball downfield are legitimately impressive for his size. The off-field concerns and inconsistent target share keep him from being a reliable fantasy starter, making him a boom-or-bust FLEX play who'll either save or ruin your week."},
+"Jaylen Waddle":{pos:"WR",team:"Dolphins",blurb:"A dynamic playmaker whose speed and agility make him one of the most dangerous players in the open field — when Tua was feeding him, he was putting up video game numbers. His ability to turn short catches into long gains is genuinely elite. With Tua gone to Atlanta and the Dolphins' QB situation in shambles with Malik Willis, Waddle's fantasy value just took a hit bigger than any tackle he's ever absorbed."},
+"Travis Etienne Jr.":{pos:"RB",team:"Jaguars",blurb:"A talented back who has the speed and receiving ability to be a true three-down stud, and showed that when Jacksonville won the AFC South. His burst through the hole and ability to catch passes out of the backfield make him a PPR asset. Consistency has been an issue though — he'll rip off a 60-yard run one drive and then look completely lost for the next three, which is the kind of rollercoaster that fantasy managers did not sign up for."},
+"Tyrone Tracy Jr.":{pos:"RB",team:"Giants",blurb:"A converted wide receiver who became a surprisingly effective running back as a rookie, showing vision and burst that nobody expected from a player changing positions. His receiving ability is a natural advantage at the RB position and he's a legitimate PPR contributor. Playing for the Giants is a massive handicap though, as their offense generates about as much excitement as a DMV waiting room."},
+"Kyle Pitts Sr.":{pos:"TE",team:"Falcons",blurb:"The fourth overall pick whose career has been the most disappointing tight end trajectory since the invention of the position. The physical tools are INSANE — 6'6\" with 4.44 speed and the athleticism of a gazelle — but he's been buried by bad QB play and offensive dysfunction his entire career. Every year we say 'this is the breakout year' and every year he gives you 500 yards and 2 TDs. The hope is eternal but the patience is wearing thin."},
+"David Montgomery":{pos:"RB",team:"Lions",blurb:"The ultimate touchdown vulture who exists solely to steal goal-line carries from Jahmyr Gibbs and make Gibbs owners contemplate arson. He's a bowling ball near the end zone — get him within 5 yards of the goal line and he's scoring. His between-the-20s running is pedestrian at best, but Detroit uses him exactly right and he keeps putting up RB2 numbers purely on TDs."},
+"Tee Higgins":{pos:"WR",team:"Bengals",blurb:"A legit number-one receiver talent who has been overshadowed by Ja'Marr Chase his entire career despite putting up stats that most teams' WR1s would kill for. His contested catch ability at 6'4\" is elite and he comes up big in the biggest moments. The franchise tag saga and injury history have made him a fantasy headache, but when he's on the field catching passes from Burrow, he's a top-15 receiver."},
+"Patrick Mahomes":{pos:"QB",team:"Chiefs",blurb:"The best quarterback on Earth whose no-look passes and sidearm slings have redefined what's possible at the position — he plays football like he's bored and just trying to entertain himself. Three Super Bowl rings before 30 is absolutely insane and he's on pace to be the GOAT when it's all said and done. His fantasy production has dipped slightly as the Chiefs have become more run-heavy and defensive, but he's still an elite QB1 you can never doubt."},
+"Josh Jacobs":{pos:"RB",team:"Packers",blurb:"Rejuvenated his career in Green Bay by running behind a solid offensive line and proving that he's still a legitimate starter when given an opportunity. His vision and power between the tackles are still excellent, and he showed he can handle a heavy workload without breaking down. The explosive big plays have disappeared though — he's more grinder than game-breaker at this point, which is fine for an RB2 but won't blow anyone's mind."},
+"Zach Ertz":{pos:"TE",team:"Various",blurb:"A future Hall of Famer who is hanging on by a thread at this point in his career but still catches everything thrown his way with those legendary reliable hands. He's been a security blanket for QBs for over a decade and his route running IQ is still among the best at the position. Father Time is winning this battle though — his separation has gone from 'decent' to 'nonexistent' and he's basically a red-zone-or-bust play."},
+"Jake Elliott":{pos:"K",team:"Eagles",blurb:"A Pro Bowl kicker with a leg strong enough to bomb 60-yarders and the accuracy to be trusted in clutch situations — the perfect kicker for a contending team. Playing for the Eagles means he gets plenty of opportunities and extra points. He's one of the top-5 kickers in fantasy every year, which is the most boring yet comforting thing you can say about a roster spot."}
+};
+
+// ═══════════════════════════════════════
+// TEAM DATA
+// ═══════════════════════════════════════
+var teams = [
+  {name:"That's What Cheesehead",owner:"Brent Brevak",players:["Baker Mayfield","Drake London","Christian Watson","Derrick Henry","Jonathan Taylor","George Kittle","Tyjae Spears","Kimani Vidal","Keaton Mitchell","Bhayshul Tuten","Jacory Croskey-Merritt","Blake Grupe","Steelers","Bengals","Rashee Rice"]},
+  {name:"Poutine Powerhouse",owner:"Jason Balmer",players:["Josh Allen","Michael Wilson","Brian Thomas Jr.","Breece Hall","Tony Pollard","Colston Loveland","Kyle Monangai","Isiah Pacheco","Emanuel Wilson","Ricky Pearsall","Alec Pierce","Luther Burden III","Eddy Pineiro","Saints","Brock Bowers"]},
+  {name:"Days of Thunder",owner:"Brandon Cepelnik",players:["Dak Prescott","Mike Evans","Jameson Williams","Saquon Barkley","De'Von Achane","Tyler Warren","Jaylen Warren","Tetairoa McMillan","Davante Adams","Dalton Schultz","Chuba Hubbard","Chase McLaughlin","Seahawks","Bills","Cam Skattebo"]},
+  {name:"Cruzin' USA",owner:"Jeramie Ryan",players:["Trevor Lawrence","Nico Collins","Ja'Marr Chase","Aaron Jones Sr.","Kenneth Gainwell","Hunter Henry","Jauan Jennings","DK Metcalf","Drake Maye","Jake Ferguson","Alvin Kamara","Darius Slayton","Evan McPherson","Titans"]},
+  {name:"Team America",owner:"Chris Cook",players:["Jared Goff","Chris Olave","Courtland Sutton","Bijan Robinson","Bucky Irving","Brenton Strange","Dylan Sampson","Zach Charbonnet","Xavier Worthy","Lamar Jackson","Tre Tucker","Kareem Hunt","Tyler Loop","Jaguars","J.J. McCarthy"]},
+  {name:"Sloppy Toppies",owner:"Chuck Bush",players:["Brock Purdy","DeVonta Smith","Zay Flowers","James Cook III","TreVeyon Henderson","Dallas Goedert","CeeDee Lamb","Blake Corum","Jaxson Dart","Jordan Love","J.K. Dobbins","Quentin Johnston","Jason Myers","Ravens","Tucker Kraft"]},
+  {name:"Out of Luck Forever",owner:"Will Yeager",players:["Bo Nix","Jaxon Smith-Njigba","Amon-Ra St. Brown","Kyren Williams","D'Andre Swift","Trey McBride","Rhamondre Stevenson","Wan'Dale Robinson","Michael Pittman Jr.","Tyler Allgeier","Mark Andrews","Devaughn Vele","Jake Bates","Lions"]},
+  {name:"Son of Pintang",owner:"Matt Strickert",players:["Justin Herbert","Puka Nacua","Stefon Diggs","Jahmyr Gibbs","Michael Carter","Travis Kelce","DJ Moore","Terry McLaurin","Woody Marks","C.J. Stroud","Jakobi Meyers","Dalton Kincaid","Ka'imi Fairbairn","Patriots"]},
+  {name:"Bramsels in Distress",owner:"Jeremy Bramley",players:["Joe Burrow","A.J. Brown","Troy Franklin","Ashton Jeanty","Chase Brown","Juwan Johnson","Javonte Williams","Elic Ayomanor","Rome Odunze","Cade Otton","Jerry Jeudy","Daniel Jones","Cameron Dicker","Texans","Devin Neal"]},
+  {name:"Doom Crew",owner:"Willie Brown",players:["Jalen Hurts","Emeka Egbuka","George Pickens","Christian McCaffrey","Rico Dowdle","Darren Waller","Keenan Allen","Oronde Gadsden","Kenneth Walker III","Brian Robinson","Tank Bigsby","Jayden Reed","Chris Boswell","Broncos","Jordan Mason"]},
+  {name:"Fancy Like Applebees",owner:"Justin Beatty",players:["Caleb Williams","Ladd McConkey","Justin Jefferson","Quinshon Judkins","RJ Harvey","Mason Taylor","Harold Fannin Jr.","Khalil Shakir","Marvin Harrison Jr.","Trey Benson","Chris Rodriguez Jr.","Jayden Higgins","Brandon Aubrey","Chargers","Omarion Hampton"]},
+  {name:"Always Open",owner:"Nick Duncan",players:["Matthew Stafford","Jordan Addison","Jaylen Waddle","Travis Etienne Jr.","Tyrone Tracy Jr.","Kyle Pitts Sr.","David Montgomery","Tee Higgins","Patrick Mahomes","Josh Jacobs","Zach Ertz","Jake Elliott","Eagles","Falcons"]}
 ];
-function lu(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"," DEF"])if(DR[n+s]!==undefined)return DR[n+s];return null}
-function nm(n,s){if(s.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim();if(s.has(c))return true;for(var k of s)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$| DEF$/g,"").trim()===c)return true;return false}
-function gs(n){var d=lu(n),fa=d===null,dr=fa?"FA":d,kr=fa?14:(d===1?1:d-1),sv=fa?15:d;var rb=kr<=3,my=nm(n,K2);if(rb||my)return{s:"r",dr:dr,kr:kr,sv:sv,maxY:my&&!rb};if(nm(n,K25))return{s:"g",dr:dr,kr:kr,sv:sv,maxY:false};return{s:"e",dr:dr,kr:kr,sv:sv,maxY:false}}
 
-var selections={};
-function toggleSelect(ti,name,kr,el){if(!selections[ti])selections[ti]=[];var sel=selections[ti];var idx=sel.findIndex(function(s){return s.name===name});if(idx!==-1){sel.splice(idx,1);el.classList.remove("selected")}else{if(sel.length>=2){var old=sel.shift();var or=document.querySelector('[data-team="'+ti+'"][data-player="'+CSS.escape(old.name)+'"]');if(or)or.classList.remove("selected")}sel.push({name:name,kr:kr});el.classList.add("selected")}updateBtn(ti)}
-function updateBtn(ti){var b=document.getElementById("btn-"+ti);var s=selections[ti]||[];if(s.length>0){b.classList.add("active");b.textContent="Submit Keepers ("+s.length+")"}else{b.classList.remove("active");b.textContent="Submit Keepers"}}
+// ═══════════════════════════════════════
+// DEF / TEAM NAMES (skip blurbs)
+// ═══════════════════════════════════════
+var defNames = new Set(["Steelers","Bengals","Saints","Seahawks","Bills","Titans","Jaguars","Ravens","Lions","Patriots","Texans","Broncos","Chargers","Eagles","Falcons"]);
 
-var currentTeam=null;
-function openModal(ti,tn,to){var sel=selections[ti]||[];if(sel.length===0)return;currentTeam={idx:ti,name:tn,owner:to,players:sel};document.getElementById("modal-team").textContent=tn+" — "+to;var h="";sel.forEach(function(p){h+='<div class="modal-player"><span>'+p.name+'</span><span>Keeper Rd '+p.kr+'</span></div>'});document.getElementById("modal-players").innerHTML=h;document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show")}
-function closeModal(){document.getElementById("modal").classList.remove("show");currentTeam=null}
-var QUIPS=[
-"What a dogshit set of keepers. Truly impressive how bad these are.",
-"Holy hell, you are absolutely terrible at fantasy football.",
-"Really? That's who you're keeping? You dumb son of a bitch.",
-"Bold strategy. Let's see if it pays off. Spoiler: you're fucked.",
-"Your keepers are the fantasy football equivalent of a flaming bag of shit on a doorstep.",
-"I've seen better picks from a drunk toddler smashing a keyboard.",
-"Somewhere, the league taco just pissed himself laughing at your keepers.",
-"Congrats asshole, you just locked in a last place finish.",
-"These keepers scream 'I spent draft night with my head up my ass.'",
-"Even your bye weeks are gonna outscore these bums. Jesus Christ.",
-"I ran the numbers. You're absolutely fucked six ways to Sunday.",
-"This is the roster equivalent of showing up to a gunfight with your dick in your hand.",
-"Ah yes, the classic 'I have no goddamn idea what I'm doing' keeper strategy.",
-"The waiver wire just saw your keepers and laughed its ass off.",
-"If these were stocks, the SEC would investigate you for being this stupid.",
-"These picks have big 'toilet bowl game in Week 14' energy.",
-"You kept THOSE guys? On purpose? With your whole chest? What the fuck?",
-"This is giving strong 'I'm paying for last place punishment' vibes. Start practicing.",
-"Somewhere a fantasy football expert just projectile vomited looking at these.",
-"These aren't just the worst keepers in the league. These are the worst keepers in the goddamn history of keepers.",
-"Your keepers called. They said 'cut us, we'd rather be free agents than play for your sorry ass.'",
-"I've seen more upside in a pile of horse shit on a hot day.",
-"Tell me you don't know a damn thing about football without telling me.",
-"These keepers are proof that God has abandoned your fantasy team.",
-"At least you'll have a high draft pick next year. Again. Because you suck.",
-"Brevak is going to skull-fuck your roster with these keepers. Absolutely embarrassing.",
-"Those picks are ass. Brevak's team is going to bend you over and spank you all season.",
-"You really submitted those? Brevak is laughing his ass off right now you stupid bastard.",
-"Brevak saw your keepers and already ordered the championship trophy engraving. Thanks for the free win, dipshit.",
-"Imagine keeping these clowns and thinking you can beat Brevak. That's adorable you delusional bastard."
-];
-var STRICKERT_QUIPS=[
-"These keepers are so bad that even Strickert's dumpster fire roster is better. Let that sink in.",
-"Congratulations, you just managed to build a team worse than Strickert's. That takes genuine effort.",
-"Strickert saw your keepers and finally felt good about his own team for the first time in his life. You did that.",
-"You know it's bad when Strickert is texting the group chat like 'at least I'm not THAT guy.' And he's right.",
-"Somehow you made picks so terrible that Son of Pintang looks like a goddamn dynasty. Impressive work, jackass."
-];
-function getQuip(teamName){var pool=QUIPS.slice();if(teamName!=="Son of Pintang")pool=pool.concat(STRICKERT_QUIPS);return pool[Math.floor(Math.random()*pool.length)]}
-var W3F_KEY="fa8f51dc-22b5-40f3-9a9c-2e02e2cf2c5c";
-function sendKeepers(){var t=currentTeam;var btn=document.querySelector(".modal-submit");btn.textContent="Sending...";btn.style.opacity="0.6";btn.style.pointerEvents="none";var msg="Team: "+t.name+"\nOwner: "+t.owner+"\n\nKeepers:\n";t.players.forEach(function(p){msg+="  "+p.name+" — Keeper Rd "+p.kr+"\n"});msg+="\nSubmitted: "+new Date().toLocaleString("en-US",{timeZone:"America/Detroit"})+" ET";var payload={access_key:W3F_KEY,subject:"\uD83C\uDFC8 Keeper Submission: "+t.name+" ("+t.owner+")",from_name:"Keeper Bot",message:msg};fetch("https://api.web3forms.com/submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}).then(function(r){return r.json()}).then(function(d){document.getElementById("modal-form").style.display="none";document.getElementById("modal-sent").style.display="block";var ch="<div style='text-align:center;font-family:Oswald,sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px'>"+t.name+" — "+t.owner+"</div>";t.players.forEach(function(p){ch+="<div style='padding:12px 16px;background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.2);border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center'><span style='font-family:Anton,sans-serif;font-size:1.15rem;color:#f5c842;letter-spacing:.5px'>"+p.name+"</span><span style='font-family:Oswald,sans-serif;font-size:.95rem;color:#ccc;white-space:nowrap;margin-left:12px'>Keeper Rd "+p.kr+"</span></div>"});document.getElementById("modal-confirm-players").innerHTML=ch;document.getElementById("modal-quip").textContent=getQuip(t.name);btn.textContent="Yes, submit now";btn.style.opacity="1";btn.style.pointerEvents="auto"}).catch(function(err){document.getElementById("modal-form").style.display="none";document.getElementById("modal-sent").style.display="block";var ch="<div style='text-align:center;font-family:Oswald,sans-serif;font-size:.85rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px'>"+t.name+" — "+t.owner+"</div>";t.players.forEach(function(p){ch+="<div style='padding:12px 16px;background:rgba(243,156,18,.1);border:1px solid rgba(243,156,18,.2);border-radius:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center'><span style='font-family:Anton,sans-serif;font-size:1.15rem;color:#f5c842;letter-spacing:.5px'>"+p.name+"</span><span style='font-family:Oswald,sans-serif;font-size:.95rem;color:#ccc;white-space:nowrap;margin-left:12px'>Keeper Rd "+p.kr+"</span></div>"});document.getElementById("modal-confirm-players").innerHTML=ch;document.getElementById("modal-quip").textContent=getQuip(t.name);btn.textContent="Yes, submit now";btn.style.opacity="1";btn.style.pointerEvents="auto"})}
-document.getElementById("modal").addEventListener("click",function(e){if(e.target===this)closeModal()});
-
-var G=document.getElementById("G");
-TM.forEach(function(t,ti){
-  var c=document.createElement("div");c.className="card";
-  var pd=t.p.map(function(n){return{name:n,x:gs(n)}});
-  pd.sort(function(a,b){return a.x.sv-b.x.sv});
-  var r="";pd.forEach(function(p){
-    var rc=p.x.s==="r"?"rr":p.x.s==="g"?"rg":"re";
-    var tc=p.x.s==="r"?"st-r":p.x.s==="g"?"st-g":"st-e";
-    var tt=p.x.s==="r"?"INELIGIBLE":p.x.s==="g"?"1 MORE YR":"ELIGIBLE";
-    var kd="Rd "+p.x.kr;
-    var fb=p.x.dr==="FA"?" fa-b":"";
-    var sub=p.x.maxY?'<span class="sub">3 years max</span>':"";
-    var sel=p.x.s!=="r";
-    var esc=p.name.replace(/'/g,"\\'");
-    var click=sel?' data-team="'+ti+'" data-player="'+p.name.replace(/"/g,"&quot;")+'" onclick="toggleSelect('+ti+",'"+esc+"',"+p.x.kr+',this)"':"";
-    r+='<tr class="'+rc+(sel?" selectable":"")+'"'+click+'><td><span class="pn">'+p.name+"</span>"+sub+'</td><td><span class="rdb'+fb+'">'+p.x.dr+'</span></td><td><span class="kv">'+kd+'</span></td><td><span class="st '+tc+'">'+tt+"</span></td></tr>"
-  });
-  var bg=TC[t.n]||"#333";
-  var esc2=t.n.replace(/'/g,"\\'");
-  var esc3=t.o.replace(/'/g,"\\'");
-  c.setAttribute("data-team",t.n);
-  c.innerHTML='<div class="card-head" style="background:linear-gradient(135deg,'+bg+'22,#0d1019)"><div class="card-stripe" style="background:'+bg+'"></div><div class="card-info"><div class="card-name">'+t.n+'</div><div class="card-owner">'+t.o+'</div></div><button class="submit-btn" id="btn-'+ti+"\" onclick=\"openModal("+ti+",'"+esc2+"','"+esc3+"')\">Submit Keepers</button></div><table class=\"rtbl\"><thead><tr><th>Player</th><th>Draft Rd</th><th>Keeper Rd</th><th>Status</th></tr></thead><tbody>"+r+"</tbody></table>";
-  G.appendChild(c)
-});
-
-// ═══════ TEAM PICKER ═══════
-var pg=document.getElementById("pick-grid");
-TM.forEach(function(t){
-  var b=document.createElement("button");
-  b.className="pick-btn";
-  b.textContent=t.n;
-  b.onclick=function(){pickTeam(t.n)};
-  pg.appendChild(b);
-});
-function pickTeam(name){
-  var grid=document.getElementById("G");
-  var cards=Array.from(grid.children);
-  var mine=cards.find(function(c){return c.getAttribute("data-team")===name});
-  if(mine){grid.insertBefore(mine,grid.firstChild);mine.style.border="2px solid #f39c12";mine.style.boxShadow="0 0 20px rgba(243,156,18,.15)";var btn=mine.querySelector(".submit-btn");if(btn)btn.style.display="inline-block";setTimeout(function(){mine.scrollIntoView({behavior:"smooth",block:"start"})},100)}
-  cards.forEach(function(c){if(c.getAttribute("data-team")!==name){var rows=c.querySelectorAll("tr.selectable");rows.forEach(function(r){r.classList.remove("selectable");r.removeAttribute("onclick");r.style.cursor="default"})}});
-  document.getElementById("picker").classList.add("hide");
+function getPos(name) {
+  if (defNames.has(name)) return "DEF";
+  var b = blurbs[name];
+  return b ? b.pos : "?";
 }
 
-var DD={1:[["Ja'Marr Chase","Cruzin' USA"],["Bijan Robinson","Team America"],["Jahmyr Gibbs","Son of Pintang"],["Saquon Barkley","Days of Thunder"],["Christian McCaffrey","Doom Crew"],["CeeDee Lamb","Sloppy Toppies"],["Josh Jacobs","Always Open"],["Justin Jefferson","Fancy Like Applebees"],["Malik Nabers","Poutine Powerhouse"],["Amon-Ra St. Brown","Out of Luck Forever"],["Ashton Jeanty","Bramsels in Distress"],["Derrick Henry","That's What Cheesehead"]],2:[["Drake London","That's What Cheesehead"],["A.J. Brown","Bramsels in Distress"],["Kyren Williams","Out of Luck Forever"],["Josh Allen","Poutine Powerhouse"],["Omarion Hampton","Fancy Like Applebees"],["Tee Higgins","Always Open"],["James Cook III","Sloppy Toppies"],["Kenneth Walker III","Doom Crew"],["Davante Adams","Days of Thunder"],["James Conner","Son of Pintang"],["Lamar Jackson","Team America"],["Alvin Kamara","Cruzin' USA"]],3:[["Jayden Daniels","Cruzin' USA"],["Mike Evans","Team America"],["Terry McLaurin","Son of Pintang"],["TreVeyon Henderson","Days of Thunder"],["Jalen Hurts","Doom Crew"],["Breece Hall","Sloppy Toppies"],["David Montgomery","Always Open"],["RJ Harvey","Fancy Like Applebees"],["Tony Pollard","Poutine Powerhouse"],["D'Andre Swift","Out of Luck Forever"],["Garrett Wilson","Bramsels in Distress"],["George Kittle","That's What Cheesehead"]],4:[["Jonathan Taylor","That's What Cheesehead"],["Joe Burrow","Bramsels in Distress"],["Tyreek Hill","Out of Luck Forever"],["Isiah Pacheco","Poutine Powerhouse"],["Marvin Harrison Jr.","Fancy Like Applebees"],["Kyle Pitts Sr.","Always Open"],["DeVonta Smith","Sloppy Toppies"],["Calvin Ridley","Doom Crew"],["Tetairoa McMillan","Days of Thunder"],["DJ Moore","Son of Pintang"],["Courtland Sutton","Team America"],["Aaron Jones Sr.","Cruzin' USA"]],5:[["DK Metcalf","Cruzin' USA"],["Xavier Worthy","Team America"],["Jakobi Meyers","Son of Pintang"],["Jaylen Warren","Days of Thunder"],["George Pickens","Doom Crew"],["Zay Flowers","Sloppy Toppies"],["Patrick Mahomes","Always Open"],["Ladd McConkey","Fancy Like Applebees"],["Ricky Pearsall","Poutine Powerhouse"],["Bo Nix","Out of Luck Forever"],["Sam LaPorta","Bramsels in Distress"],["Jameson Williams","That's What Cheesehead"]],6:[["Rashee Rice","That's What Cheesehead"],["Rome Odunze","Bramsels in Distress"],["Jaxon Smith-Njigba","Out of Luck Forever"],["Brock Bowers","Poutine Powerhouse"],["Kyler Murray","Fancy Like Applebees"],["Jaylen Waddle","Always Open"],["J.K. Dobbins","Sloppy Toppies"],["Emeka Egbuka","Doom Crew"],["Matthew Golden","Days of Thunder"],["Stefon Diggs","Son of Pintang"],["Zach Charbonnet","Team America"],["Joe Mixon","Cruzin' USA"]],7:[["Jauan Jennings","Cruzin' USA"],["Chris Olave","Team America"],["Chuba Hubbard","Son of Pintang"],["Travis Hunter","Days of Thunder"],["Jacory Croskey-Merritt","Doom Crew"],["Tucker Kraft","Sloppy Toppies"],["Travis Etienne Jr.","Always Open"],["Quinshon Judkins","Fancy Like Applebees"],["Braelon Allen","Poutine Powerhouse"],["Austin Ekeler","Out of Luck Forever"],["Chase Brown","Bramsels in Distress"],["Tank Bigsby","That's What Cheesehead"]],8:[["Deebo Samuel","That's What Cheesehead"],["Javonte Williams","Bramsels in Distress"],["Rhamondre Stevenson","Out of Luck Forever"],["Brian Thomas Jr.","Poutine Powerhouse"],["Khalil Shakir","Fancy Like Applebees"],["Jordan Addison","Always Open"],["Rashid Shaheed","Sloppy Toppies"],["David Njoku","Doom Crew"],["Cam Skattebo","Days of Thunder"],["Evan Engram","Son of Pintang"],["Jared Goff","Team America"],["Nico Collins","Cruzin' USA"]],9:[["Jake Ferguson","Cruzin' USA"],["T.J. Hockenson","Team America"],["Travis Kelce","Son of Pintang"],["Tyler Warren","Days of Thunder"],["Jerome Ford","Doom Crew"],["Keon Coleman","Sloppy Toppies"],["Cooper Kupp","Always Open"],["Dalton Kincaid","Fancy Like Applebees"],["Brian Robinson","Poutine Powerhouse"],["Michael Pittman Jr.","Out of Luck Forever"],["Bhayshul Tuten","Bramsels in Distress"],["Chris Godwin","That's What Cheesehead"]],10:[["Jaydon Blue","That's What Cheesehead"],["Rashod Bateman","Bramsels in Distress"],["Ray Davis","Out of Luck Forever"],["Marvin Mims Jr.","Poutine Powerhouse"],["Caleb Williams","Fancy Like Applebees"],["Darnell Mooney","Always Open"],["Kaleb Johnson","Sloppy Toppies"],["Isaac Guerendo","Doom Crew"],["Mark Andrews","Days of Thunder"],["Justin Herbert","Son of Pintang"],["Jayden Reed","Team America"],["Dylan Sampson","Cruzin' USA"]],11:[["Keenan Allen","Cruzin' USA"],["Bucky Irving","Team America"],["Rachaad White","Son of Pintang"],["Dak Prescott","Days of Thunder"],["Christian Kirk","Doom Crew"],["Brock Purdy","Sloppy Toppies"],["Dallas Goedert","Always Open"],["Trey Benson","Fancy Like Applebees"],["Colston Loveland","Poutine Powerhouse"],["Kyle Williams","Out of Luck Forever"],["Jayden Higgins","Bramsels in Distress"],["Nick Chubb","That's What Cheesehead"]],12:[["Brandon Aiyuk","That's What Cheesehead"],["Cameron Dicker","Bramsels in Distress"],["Steelers DEF","Out of Luck Forever"],["Ollie Gordon II","Poutine Powerhouse"],["Brandon Aubrey","Fancy Like Applebees"],["Eagles DEF","Always Open"],["Woody Marks","Sloppy Toppies"],["Broncos DEF","Doom Crew"],["De'Von Achane","Days of Thunder"],["Vikings DEF","Son of Pintang"],["Chiefs DEF","Team America"],["Chris Boswell","Cruzin' USA"]],13:[["Packers DEF","Cruzin' USA"],["Jake Bates","Team America"],["Puka Nacua","Son of Pintang"],["Chase McLaughlin","Days of Thunder"],["Josh Downs","Doom Crew"],["C.J. Stroud","Sloppy Toppies"],["Cedric Tillman","Always Open"],["Ravens DEF","Fancy Like Applebees"],["Tyler Bass","Poutine Powerhouse"],["Trey McBride","Out of Luck Forever"],["Texans DEF","Bramsels in Distress"],["Joshua Palmer","That's What Cheesehead"]],14:[["Baker Mayfield","That's What Cheesehead"],["Jerry Jeudy","Bramsels in Distress"],["Jake Elliott","Out of Luck Forever"],["Lions DEF","Poutine Powerhouse"],["Tyrone Tracy Jr.","Fancy Like Applebees"],["Wil Lutz","Always Open"],["Chargers DEF","Sloppy Toppies"],["Jordan Mason","Doom Crew"],["Seahawks DEF","Days of Thunder"],["Ka'imi Fairbairn","Son of Pintang"],["J.J. McCarthy","Team America"],["Xavier Legette","Cruzin' USA"]]};
-var DG=document.getElementById("D");
-Object.entries(DD).forEach(function(e){var r=e[0],p=e[1],d=document.createElement("div");d.className="drd";d.innerHTML='<h3>Round '+r+'</h3>'+p.map(function(x){var ik=K25.has(x[0])||K25.has(x[0].replace(" DEF",""));return'<div class="dp"><span><span class="dp-p">'+x[0]+'</span>'+(ik?'<span class="dp-k">K</span>':'')+'</span><span class="dp-t">'+x[1]+'</span></div>'}).join("");DG.appendChild(d)});
-var Y=[2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025];
-var SD=[{n:"Jason Balmer",f:[2,7,4,2,1,2,3,3,9,1,3,2,5,4],c:2,a:3.7},{n:"Will Yeager",f:[8,8,6,3,10,1,9,2,2,3,5,1,4,3],c:2,a:5.0},{n:"Brent Brevak",f:[1,6,9,6,9,4,1,1,4,5,10,5,1,7],c:4,a:5.3},{n:"Chris Cook",f:[7,5,8,4,7,6,8,4,1,4,1,11,11,9],c:2,a:6.6},{n:"Willie Brown",f:[null,2,5,5,6,7,5,5,12,2,11,3,12,5],c:0,a:6.7},{n:"Jeremy Bramley",f:[4,4,11,1,3,3,2,8,8,12,9,10,6,6],c:1,a:6.7},{n:"Brandon Cepelnik",f:[null,null,13,7,5,8,4,6,5,6,6,9,7,1],c:1,a:7.0},{n:"Justin Beatty",f:[null,null,null,null,null,null,7,12,7,7,4,4,2,12],c:0,a:7.9},{n:"Matt Strickert",f:[null,null,2,8,8,10,12,10,6,9,8,8,8,2],c:0,a:8.3},{n:"Chuck Bush",f:[5,1,7,10,4,9,10,9,10,8,12,7,9,10],c:1,a:8.5},{n:"Nick Duncan",f:[3,10,10,null,null,null,null,null,null,11,2,6,10,8],c:0,a:8.6},{n:"Jeramie Ryan",f:[null,null,14,9,2,5,11,11,11,10,7,12,3,11],c:0,a:9.6}];
-var SC=document.getElementById("S"),h='<table class="stbl"><thead><tr><th>Owner</th>';
-Y.forEach(function(y){h+="<th>'"+String(y).slice(2)+"</th>"});
-h+='<th>\u{1F3C6}</th><th>Avg</th></tr></thead><tbody>';
-SD.forEach(function(s){h+='<tr><td>'+s.n+'</td>';s.f.forEach(function(f){if(f===null)h+='<td style="color:#333">\u2014</td>';else if(f===1)h+='<td class="gc">'+f+'</td>';else if(f<=3)h+='<td class="t3">'+f+'</td>';else h+='<td>'+f+'</td>'});h+='<td class="gc">'+s.c+'</td><td>'+s.a+'</td></tr>'});
-h+='</tbody></table>';SC.innerHTML=h;
+function getPosClass(pos) {
+  return "pos-" + pos.toLowerCase();
+}
+
+// ═══════════════════════════════════════
+// HEADSHOT LOADING (ESPN CDN)
+// ═══════════════════════════════════════
+var headshotCache = {};
+var espnSearchBase = "https://site.web.api.espn.com/apis/common/v3/search";
+
+function loadHeadshot(name, imgEl) {
+  if (headshotCache[name]) {
+    imgEl.src = headshotCache[name];
+    return;
+  }
+  imgEl.src = "";
+  imgEl.classList.add("placeholder");
+  imgEl.alt = "🏈";
+
+  // Try ESPN search API
+  var url = espnSearchBase + "?query=" + encodeURIComponent(name) + "&limit=1&type=player&sport=football&league=nfl";
+  fetch(url).then(function(r){ return r.json(); }).then(function(data){
+    var items = data.items || data.results || [];
+    if (items.length > 0) {
+      var item = items[0];
+      var id = item.id || (item.$ref && item.$ref.match(/athletes\/(\d+)/) && item.$ref.match(/athletes\/(\d+)/)[1]);
+      if (id) {
+        var headshot = "https://a.espncdn.com/i/headshots/nfl/players/full/" + id + ".png";
+        headshotCache[name] = headshot;
+        imgEl.src = headshot;
+        imgEl.classList.remove("placeholder");
+        imgEl.onerror = function(){ imgEl.classList.add("placeholder"); imgEl.alt="🏈"; imgEl.src=""; };
+      }
+    }
+  }).catch(function(){
+    imgEl.classList.add("placeholder");
+    imgEl.alt = "🏈";
+  });
+}
+
+// ═══════════════════════════════════════
+// POPUP LOGIC
+// ═══════════════════════════════════════
+var overlay = document.getElementById("popup-overlay");
+var popupName = document.getElementById("popup-name");
+var popupTeam = document.getElementById("popup-team");
+var popupBlurb = document.getElementById("popup-blurb");
+var popupImg = document.getElementById("popup-img");
+
+function openPopup(name) {
+  var b = blurbs[name];
+  if (!b) return;
+  popupName.textContent = name;
+  popupTeam.textContent = b.team + " · " + b.pos;
+  popupBlurb.textContent = b.blurb;
+  loadHeadshot(name, popupImg);
+  overlay.classList.add("active");
+}
+
+document.getElementById("popup-close").addEventListener("click", function(){
+  overlay.classList.remove("active");
+});
+overlay.addEventListener("click", function(e){
+  if (e.target === overlay) overlay.classList.remove("active");
+});
+
+// ═══════════════════════════════════════
+// RENDER ROSTER CARDS
+// ═══════════════════════════════════════
+var grid = document.getElementById("roster-grid");
+
+teams.forEach(function(team){
+  var card = document.createElement("div");
+  card.className = "team-card";
+
+  var rows = "";
+  team.players.forEach(function(name){
+    var pos = getPos(name);
+    var posClass = getPosClass(pos);
+    var hasBlurb = !!blurbs[name];
+
+    if (hasBlurb) {
+      rows += '<tr><td><span class="player-name" onclick="openPopup(\'' + name.replace(/'/g, "\\'") + '\')">' + name + '</span></td><td><span class="pos-badge ' + posClass + '">' + pos + '</span></td></tr>';
+    } else {
+      rows += '<tr><td>' + name + '</td><td><span class="pos-badge ' + posClass + '">' + pos + '</span></td></tr>';
+    }
+  });
+
+  card.innerHTML = '<div class="team-header"><span class="team-name">' + team.name + '</span><span class="team-owner">' + team.owner + '</span></div>' +
+    '<table class="roster-table"><thead><tr><th>Player</th><th>Pos</th></tr></thead><tbody>' + rows + '</tbody></table>';
+
+  grid.appendChild(card);
+});
 </script>
 </body>
 </html>
