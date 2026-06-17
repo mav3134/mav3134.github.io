@@ -639,14 +639,43 @@ function renderLeagueStats(table) {
   var rows = table.rows || [];
   if (!rows.length) { document.getElementById('ls-content').innerHTML = '<div class="do-loading">No data found</div>'; return; }
 
-  var html = '<table class="stbl"><thead><tr>';
-  // First row as headers
+  // Find how many columns actually have data
   var headerRow = rows[0].c || [];
-  headerRow.forEach(function(cell, idx) {
-    var v = cellVal(cell);
+  var maxCol = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    for (var j = r.length - 1; j >= 0; j--) {
+      var v = cellVal(r[j]).trim();
+      if (v && v !== '-' && v !== '\u2014') { if (j + 1 > maxCol) maxCol = j + 1; break; }
+    }
+  }
+  // Also check header row for max columns
+  for (var j = headerRow.length - 1; j >= 0; j--) {
+    var v = cellVal(headerRow[j]).trim();
+    if (v) { if (j + 1 > maxCol) maxCol = j + 1; break; }
+  }
+
+  // Store current champion (whoever has 1 in the most recent year column)
+  window._currentChampion = '';
+  // The last year column is maxCol - 3 (before Champs and Avg cols) — find it
+  // Actually, scan data rows: the 2nd-to-last col is Champs, last is Avg Finish
+  // Year columns are indices 1 through maxCol-3
+  var lastYearCol = maxCol - 3;
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    var name = cellVal(r[0]).trim();
+    var val = cellVal(r[lastYearCol]).trim();
+    if (val === '1' && name) { window._currentChampion = name; break; }
+  }
+
+  var html = '<table class="stbl"><thead><tr>';
+  for (var idx = 0; idx < maxCol; idx++) {
+    var v = cellVal(headerRow[idx]);
     if (idx === 0) html += '<th>' + v + '</th>';
+    else if (idx === maxCol - 2) html += '<th>&#127942;</th>';
+    else if (idx === maxCol - 1) html += '<th>Avg Finish</th>';
     else html += '<th>' + (v.length > 4 ? "'" + v.slice(-2) : v) + '</th>';
-  });
+  }
   html += '</tr></thead><tbody>';
 
   for (var i = 1; i < rows.length; i++) {
@@ -654,8 +683,8 @@ function renderLeagueStats(table) {
     var c0 = cellVal(r[0]).trim();
     if (!c0) continue;
     html += '<tr>';
-    r.forEach(function(cell, idx) {
-      var v = cellVal(cell);
+    for (var idx = 0; idx < maxCol; idx++) {
+      var v = cellVal(r[idx]);
       if (idx === 0) {
         html += '<td>' + v + '</td>';
       } else {
@@ -665,7 +694,7 @@ function renderLeagueStats(table) {
         else if (num <= 3 && num > 0) html += '<td class="t3">' + v + '</td>';
         else html += '<td>' + v + '</td>';
       }
-    });
+    }
     html += '</tr>';
   }
   html += '</tbody></table>';
@@ -674,63 +703,109 @@ function renderLeagueStats(table) {
 
 // ─── LEGACY POOL ───
 function fetchLegacyPool() {
-  fetchSheet('Legacy Pool', function(err, table) {
-    var el = document.getElementById('lp-content');
-    if (err) {
-      el.innerHTML = '<div class="do-error">Could not load legacy pool.<br>Make sure your Google Sheet is published to the web.</div>';
-      return;
+  var el = document.getElementById('lp-content');
+  // First fetch League Stats to get current champion, then fetch Legacy Pool
+  fetchSheet('League Stats', function(err, statsTable) {
+    var champion = '';
+    if (!err && statsTable) {
+      var sRows = statsTable.rows || [];
+      var sCols = (sRows[0] && sRows[0].c) ? sRows[0].c.length : 0;
+      // Find max non-empty column to determine the last year column
+      var sMaxCol = 0;
+      for (var i = 1; i < sRows.length; i++) {
+        var r = sRows[i].c || [];
+        for (var j = r.length - 1; j >= 0; j--) {
+          var v = cellVal(r[j]).trim();
+          if (v && v !== '-') { if (j + 1 > sMaxCol) sMaxCol = j + 1; break; }
+        }
+      }
+      var lastYrCol = sMaxCol - 3; // year columns end before Champs + Avg
+      for (var i = 1; i < sRows.length; i++) {
+        var r = sRows[i].c || [];
+        var name = cellVal(r[0]).trim();
+        var val = cellVal(r[lastYrCol]).trim();
+        if (val === '1' && name) { champion = name; break; }
+      }
     }
-    renderLegacyPool(table);
+    // Use stored champion if we already loaded league stats
+    if (!champion && window._currentChampion) champion = window._currentChampion;
+
+    fetchSheet('Legacy Pool', function(err2, table) {
+      if (err2) {
+        el.innerHTML = '<div class="do-error">Could not load legacy pool.<br>Make sure your Google Sheet is published to the web.</div>';
+        return;
+      }
+      renderLegacyPool(table, champion);
+    });
   });
 }
 
-function renderLegacyPool(table) {
+function renderLegacyPool(table, champion) {
   var rows = table.rows || [];
   if (!rows.length) { document.getElementById('lp-content').innerHTML = '<div class="do-loading">No data found</div>'; return; }
 
-  // Parse headers
-  var headers = (rows[0].c || []).map(function(c){ return cellVal(c); });
+  // Parse headers from row 1
+  var allHeaders = (rows[0].c || []).map(function(c){ return cellVal(c).trim(); });
+  // Strip empty trailing headers
+  while (allHeaders.length && !allHeaders[allHeaders.length - 1]) allHeaders.pop();
 
-  // Find the most recent year with a Legacy Total
+  // Collect data rows - only include rows where year cell has data
+  var dataRows = [];
   var latestTotal = 0, latestYear = '', payouts = {};
   for (var i = 1; i < rows.length; i++) {
     var r = rows[i].c || [];
     var year = cellVal(r[0]).trim();
     if (!year) continue;
+    // Check if this row has any actual data beyond just the year
+    var hasData = false;
+    for (var j = 1; j < r.length && j < allHeaders.length; j++) {
+      if (cellVal(r[j]).trim()) { hasData = true; break; }
+    }
+    if (!hasData) continue;
+    dataRows.push(r);
     var total = parseFloat(cellVal(r[3])) || 0;
-    if (total > latestTotal) { latestTotal = total; latestYear = year; }
-    // Get payout info from most recent row with data
+    if (total >= latestTotal) { latestTotal = total; latestYear = year; }
     var p1 = parseFloat(cellVal(r[4])) || 0;
     if (p1 > 0) payouts = { first: cellVal(r[4]), second: cellVal(r[5]), third: cellVal(r[6]), consolation: cellVal(r[7]) };
   }
 
-  // Summary cards
+  // Summary cards - Legacy Pool total
   var html = '<div class="lp-grid">';
   html += '<div class="lp-card"><h4>Current Legacy Pool</h4><div class="lp-val gold">$' + latestTotal + '</div><div class="lp-sub">Through ' + latestYear + '</div></div>';
-  if (payouts.first) {
-    html += '<div class="lp-card"><h4>1st Place Payout</h4><div class="lp-val">$' + payouts.first + '</div></div>';
-    html += '<div class="lp-card"><h4>2nd Place</h4><div class="lp-val">$' + payouts.second + '</div></div>';
-    html += '<div class="lp-card"><h4>3rd Place</h4><div class="lp-val">$' + payouts.third + '</div></div>';
-  }
   html += '</div>';
 
-  // Full table
+  // Current Legacy Champion
+  if (champion) {
+    html += '<div style="text-align:center;margin:24px 0 20px;padding:20px;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #333;border-radius:8px">';
+    html += '<div style="font-family:Oswald,sans-serif;font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Current Legacy Champion</div>';
+    html += '<div style="font-family:Anton,sans-serif;font-size:1.8rem;background:linear-gradient(180deg,#f1c40f,#e67e22);-webkit-background-clip:text;-webkit-text-fill-color:transparent">&#127942; ' + champion + ' &#127942;</div>';
+    html += '</div>';
+  }
+
+  // Payout cards
+  if (payouts.first) {
+    html += '<div class="lp-grid">';
+    html += '<div class="lp-card"><h4>1st Place Payout</h4><div class="lp-val gold">$' + payouts.first + '</div></div>';
+    html += '<div class="lp-card"><h4>2nd Place</h4><div class="lp-val">$' + payouts.second + '</div></div>';
+    html += '<div class="lp-card"><h4>3rd Place</h4><div class="lp-val">$' + payouts.third + '</div></div>';
+    if (payouts.consolation) html += '<div class="lp-card"><h4>Consolation</h4><div class="lp-val">$' + payouts.consolation + '</div></div>';
+    html += '</div>';
+  }
+
+  // Full table with headers from row 1
   html += '<div style="overflow-x:auto;margin-top:24px"><table class="stbl"><thead><tr>';
-  headers.forEach(function(h){ html += '<th>' + h + '</th>'; });
+  allHeaders.forEach(function(h){ html += '<th>' + h + '</th>'; });
   html += '</tr></thead><tbody>';
-  for (var i = 1; i < rows.length; i++) {
-    var r = rows[i].c || [];
-    var year = cellVal(r[0]).trim();
-    if (!year) continue;
+  dataRows.forEach(function(r) {
     html += '<tr>';
-    r.forEach(function(cell, idx) {
-      var v = cellVal(cell);
+    for (var idx = 0; idx < allHeaders.length; idx++) {
+      var v = cellVal(r[idx]);
       if (!v && idx > 0) html += '<td style="color:#444">\u2014</td>';
       else if (idx >= 3 && parseFloat(v) > 0) html += '<td class="t3">$' + v + '</td>';
       else html += '<td>' + (idx >= 1 && parseFloat(v) > 0 ? '$' + v : v) + '</td>';
-    });
+    }
     html += '</tr>';
-  }
+  });
   html += '</tbody></table></div>';
 
   document.getElementById('lp-content').innerHTML = html;
