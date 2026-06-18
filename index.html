@@ -630,6 +630,14 @@ function renderDraftOrder(table) {
     return { headers: headers, rows: dataRows };
   }
 
+  // Normalize driver name for matching
+  function cleanName(n) {
+    return (n || '').replace(/^\*+\s*/, '').replace(/\s*\#+$/, '').replace(/\(i\)/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function matchKey(n) {
+    return cleanName(n).toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
   // Left box: columns A:D (indices 0-3)
   var left = extractBlock(0, 3);
   // Right box: columns T:V (indices 19-21)
@@ -637,20 +645,52 @@ function renderDraftOrder(table) {
 
   // Build car number map from whichever block has "Vehicle Number"
   var carMap = {};
+  var carMapByKey = {};
   [left, right].forEach(function(block) {
     var numIdx = -1, nameIdx = -1;
     block.headers.forEach(function(h, i) {
       if (/vehicle/i.test(h)) numIdx = i;
-      if (/^name$/i.test(h)) nameIdx = i;
+      if (/^name$/i.test(h) || /^driver$/i.test(h)) nameIdx = i;
     });
     if (numIdx >= 0 && nameIdx >= 0) {
       block.rows.forEach(function(r) {
-        var dName = (r[nameIdx] || '').replace(/^\*\s*/, '').replace(/\s*\#$/, '').replace(/\(i\)/g, '').trim();
+        var dName = cleanName(r[nameIdx]);
         var dNum = (r[numIdx] || '').trim();
-        if (dName && /^\d+$/.test(dNum)) carMap[dName] = dNum;
+        if (dName && /^\d+$/.test(dNum)) {
+          carMap[dName] = dNum;
+          carMapByKey[matchKey(dName)] = dNum;
+        }
       });
     }
   });
+
+  // Also fetch live car numbers from NASCAR API (2026 season) to override stale sheet data
+  fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
+    if (Array.isArray(drivers)) {
+      drivers.forEach(function(d) {
+        var name = ((d.First_Name||d.FirstName||'')+ ' '+(d.Last_Name||d.LastName||'')).trim();
+        var badge = d.Badge || d.Car_Number || '';
+        if (name && badge) {
+          carMap[name] = String(badge);
+          carMapByKey[matchKey(name)] = String(badge);
+        }
+      });
+      // Re-render with updated badges
+      document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order', false);
+      document.getElementById('do-right').innerHTML = renderBlock(right, 'Live Scoring', true);
+    }
+  }).catch(function(){});
+
+  function findCarNum(name) {
+    var cn = cleanName(name);
+    if (carMap[cn]) return carMap[cn];
+    var key = matchKey(name);
+    if (carMapByKey[key]) return carMapByKey[key];
+    // Try without Jr/Sr suffixes
+    var stripped = key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim();
+    if (carMapByKey[stripped]) return carMapByKey[stripped];
+    return '';
+  }
 
   // Render a block as a table inside a box
   function renderBlock(block, title, isStandings) {
@@ -667,7 +707,7 @@ function renderDraftOrder(table) {
     // For standings box: skip Vehicle Number column, rename Name→Driver
     var showCols = [];
     block.headers.forEach(function(h, i) {
-      if (isStandings && i === numColIdx) return; // skip vehicle number
+      if (isStandings && i === numColIdx) return;
       var label = h;
       if (label.toLowerCase() === 'name') label = 'Driver';
       showCols.push({idx: i, label: label});
@@ -676,7 +716,7 @@ function renderDraftOrder(table) {
     var html = '<div class="do-box"><div class="do-box-head">' + title + '</div>';
     html += '<table class="do-table"><thead><tr>';
     showCols.forEach(function(col) {
-      if (isStandings) html += '<th style="text-align:center">' + col.label + '</th>';
+      if (isStandings && col.label.toLowerCase() === 'position') html += '<th style="text-align:center">' + col.label + '</th>';
       else html += '<th>' + col.label + '</th>';
     });
     html += '</tr></thead><tbody>';
@@ -686,16 +726,16 @@ function renderDraftOrder(table) {
         var v = r[col.idx] || '';
         var i = col.idx;
         if ((i === driverColIdx) && v) {
-          var cleanName = v.replace(/^\*\s*/, '').replace(/\s*\#$/, '').replace(/\(i\)/g, '').trim();
-          var carNum = carMap[cleanName] || '';
+          var cn = cleanName(v);
+          var carNum = findCarNum(v);
           var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
-          if (isStandings) html += '<td style="text-align:center"><div class="do-driver" style="justify-content:center">' + badge + v + '</div></td>';
-          else html += '<td><div class="do-driver">' + badge + v + '</div></td>';
+          html += '<td><div class="do-driver">' + badge + cn + '</div></td>';
         } else if (i === orderColIdx && /^\d+$/.test(v)) {
           html += '<td class="do-pos">' + v + '</td>';
+        } else if (isStandings && (i === posColIdx)) {
+          html += '<td style="text-align:center">' + v + '</td>';
         } else {
-          if (isStandings) html += '<td style="text-align:center">' + v + '</td>';
-          else html += '<td>' + v + '</td>';
+          html += '<td>' + v + '</td>';
         }
       });
       html += '</tr>';
@@ -705,7 +745,7 @@ function renderDraftOrder(table) {
   }
 
   document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order', false);
-  document.getElementById('do-right').innerHTML = renderBlock(right, 'NASCAR Standings', true);
+  document.getElementById('do-right').innerHTML = renderBlock(right, 'Live Scoring', true);
   document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
 }
 
