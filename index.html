@@ -549,47 +549,94 @@ function fetchDraftOrder() {
 function renderDraftOrder(table) {
   var rows = table.rows || [];
   var cols = table.cols || [];
-  // Find header row to orient - look for "Draft Order" or "Name" headers
-  // The sheet has two sections: NASCAR drivers (Name, Vehicle Number, Position)
-  // and Draft Order (Draft Order, Player, Driver, Place)
-  // Parse all rows and find the draft order section
   var driverMap = {}; // name -> car number
   var draftOrder = [];
-  var mode = 'unknown';
 
-  for (var i = 0; i < rows.length; i++) {
-    var r = rows[i].c || [];
-    var c0 = cellVal(r[0]).trim();
-    var c1 = cellVal(r[1]).trim();
-    var c2 = cellVal(r[2]).trim();
-    var c3 = r.length > 3 ? cellVal(r[3]).trim() : '';
+  // Check column headers from gviz cols array
+  var colLabels = cols.map(function(c){ return (c.label || '').trim(); });
 
-    // Detect section headers
-    if (c0 === 'Name' && c1 === 'Vehicle Number') { mode = 'drivers'; continue; }
-    if (c0 === 'Draft Order' && c1 === 'Player') { mode = 'order'; continue; }
-    if (!c0 && !c1) continue;
+  // Determine layout: find which columns hold what data
+  // Option A: headers are in cols (row 0 is data)
+  // Option B: headers are in row 0 (gviz sometimes does this)
+  var nameCol = -1, numCol = -1, posCol = -1;
+  var doCol = -1, playerCol = -1, driverCol = -1, placeCol = -1;
 
-    if (mode === 'drivers' && c0 && c1) {
-      driverMap[c0.replace(/^\*\s*/, '').replace(/\s*#$/, '').replace(/\(i\)/, '').trim()] = c1;
-    }
-    if (mode === 'order' && c0 && c1) {
-      var pos = parseInt(c0);
-      if (pos > 0 && pos <= 12) {
-        draftOrder.push({
-          pos: pos,
-          owner: c1,
-          driver: c2,
-          place: c3 ? parseInt(c3) : 0
-        });
+  // First check col labels
+  colLabels.forEach(function(l, i) {
+    if (l === 'Name') nameCol = i;
+    if (l === 'Vehicle Number') numCol = i;
+    if (l === 'Position' && nameCol >= 0) posCol = i;
+    if (l === 'Draft Order') doCol = i;
+    if (l === 'Player' && doCol >= 0) playerCol = i;
+    if (l === 'Driver') driverCol = i;
+    if (l === 'Place') placeCol = i;
+  });
+
+  // If cols didn't have labels, scan row 0 for headers
+  if (nameCol < 0 && rows.length > 0) {
+    var r0 = rows[0].c || [];
+    r0.forEach(function(cell, i) {
+      var v = cellVal(cell).trim();
+      if (v === 'Name') nameCol = i;
+      if (v === 'Vehicle Number') numCol = i;
+      if (v === 'Position' && nameCol >= 0) posCol = i;
+      if (v === 'Draft Order') doCol = i;
+      if (v === 'Player' && doCol >= 0) playerCol = i;
+      if (v === 'Driver') driverCol = i;
+      if (v === 'Place') placeCol = i;
+    });
+  }
+
+  // Also scan ALL rows for headers (they might be mid-sheet)
+  if (nameCol < 0 || doCol < 0) {
+    for (var i = 0; i < rows.length && i < 60; i++) {
+      var r = rows[i].c || [];
+      var vals = r.map(function(c){ return cellVal(c).trim(); });
+      for (var j = 0; j < vals.length; j++) {
+        if (vals[j] === 'Name' && j+1 < vals.length && vals[j+1] === 'Vehicle Number') {
+          nameCol = j; numCol = j+1; posCol = j+2;
+        }
+        if (vals[j] === 'Draft Order' && j+1 < vals.length && vals[j+1] === 'Player') {
+          doCol = j; playerCol = j+1; driverCol = j+2; placeCol = j+3;
+        }
       }
     }
   }
 
-  // Sort by position
+  // Parse all rows for driver data and draft order data
+  var startRow = 0;
+  // Skip header row if it matched
+  for (var i = startRow; i < rows.length; i++) {
+    var r = rows[i].c || [];
+
+    // Try to read driver data
+    if (nameCol >= 0 && numCol >= 0) {
+      var dName = cellVal(r[nameCol]).replace(/^\*\s*/, '').replace(/\s*\#$/, '').replace(/\(i\)/g, '').trim();
+      var dNum = cellVal(r[numCol]).trim();
+      if (dName && dNum && dName !== 'Name' && /^\d+$/.test(dNum)) {
+        driverMap[dName] = dNum;
+      }
+    }
+
+    // Try to read draft order data
+    if (doCol >= 0 && playerCol >= 0) {
+      var draftPos = cellVal(r[doCol]).trim();
+      var owner = cellVal(r[playerCol]).trim();
+      var driver = driverCol >= 0 ? cellVal(r[driverCol]).trim() : '';
+      var place = placeCol >= 0 ? cellVal(r[placeCol]).trim() : '';
+      if (draftPos && owner && draftPos !== 'Draft Order' && /^\d+$/.test(draftPos)) {
+        var pos = parseInt(draftPos);
+        if (pos >= 1 && pos <= 12) {
+          draftOrder.push({ pos: pos, owner: owner, driver: driver, place: place ? parseInt(place) : 0 });
+        }
+      }
+    }
+  }
+
   draftOrder.sort(function(a,b){ return a.pos - b.pos; });
 
   if (!draftOrder.length) {
-    document.getElementById('do-content').innerHTML = '<div class="do-error">No draft order data found in the sheet.</div>';
+    document.getElementById('do-content').innerHTML = '<div class="do-error">No draft order data found. Make sure the sheet is published to the web and the "Draft Order" tab has data.</div>';
     return;
   }
 
