@@ -107,8 +107,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-pos{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;color:#c8102e;width:40px}
 .do-owner{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff}
 .do-driver{display:flex;align-items:center;gap:10px;color:#bbb}
-.car-badge{width:36px;height:24px;object-fit:contain;border-radius:3px;background:rgba(255,255,255,.05);padding:2px;flex-shrink:0}
-.car-num{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:24px;background:linear-gradient(135deg,#333,#222);border:1px solid #444;border-radius:4px;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:700;color:#f39c12;padding:0 6px;flex-shrink:0}
+.car-badge{width:36px;height:24px;object-fit:contain;border-radius:3px;flex-shrink:0}
+.car-num{display:inline-block;width:32px;height:22px;object-fit:contain;flex-shrink:0;vertical-align:middle}
 .do-place{font-family:'Oswald',sans-serif;font-weight:600;color:#888;text-align:center}
 .do-place.top3{color:#f1c40f}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
@@ -210,12 +210,16 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="blurb-tip" id="blurb-tip"><div class="blurb-topbar"><div class="blurb-head"><div class="blurb-photo" id="blurb-photo">🏈</div><div><div class="blurb-pname" id="blurb-pname"></div><div class="blurb-pteam" id="blurb-pteam"></div></div></div><img class="blurb-team-logo" id="blurb-team-logo" src="" alt=""></div><div class="blurb-text" id="blurb-text"></div></div>
 <div class="foot">It's in the league &bull; Est. 2012</div>
 <script>
-// ═══ TAB SWITCHING ═══
+// ═══ TAB SWITCHING (persists via URL hash) ═══
 function switchTab(id){
   document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active')});
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
   document.getElementById('tab-'+id).classList.add('active');
-  document.querySelector('[onclick="switchTab(\''+id+'\')"]').classList.add('active');
+  var btns=document.querySelectorAll('.tab-btn');
+  btns.forEach(function(b){if(b.getAttribute('onclick')==="switchTab('"+id+"')")b.classList.add('active')});
+  location.hash=id;
+  // Only show picker on keepers tab if no team selected
+  if(id==='keepers'&&!activeTeam){document.getElementById('picker').classList.remove('hide')}
   if(id==='draft-order'&&!draftOrderLoaded){fetchDraftOrder();draftOrderLoaded=true}
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
   if(id==='legacy-pool'&&!legacyPoolLoaded){fetchLegacyPool();legacyPoolLoaded=true}
@@ -436,7 +440,7 @@ var BL={
 // ═══ HELPERS ═══
 function lookup(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"])if(DR[n+s]!==undefined)return DR[n+s];return null}
 function nm(n,set){if(set.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(set.has(c))return true;for(var k of set)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim()===c)return true;return false}
-function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:draftRd-1;var sortVal=isFA?15:draftRd;if(keeperRd<=3){var reason=keeperRd<=0?"Rd 1 pick":"Keeper Rd "+keeperRd;return{status:"ineligible",reason:reason,rd:displayRd,kv:keeperRd,sv:sortVal}}
+function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(keeperRd<=3){return{status:"ineligible",reason:"Keeper Rd "+keeperRd,rd:displayRd,kv:keeperRd,sv:sortVal}}
 if(nm(n,K2))return{status:"ineligible",reason:"Max years (3rd season)",rd:displayRd,kv:keeperRd,sv:sortVal};
 if(nm(n,K25))return{status:"last-year",reason:"2nd year - final keep",rd:displayRd,kv:keeperRd,sv:sortVal};
 return{status:"eligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
@@ -526,9 +530,25 @@ function openModal(tn){var sel=selections[tn]||[];if(!sel.length)return;document
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function sendKeepers(){var tn=window._submitTeam,sel=selections[tn]||[],team=TM.find(function(t){return t.n===tn}),owner=team?team.o:"Unknown";var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","The commish has been notified. No takebacks, you degenerate.","Submitted. Your league-mates are already laughing.","Done deal. Try not to regret this by August."];fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({teamName:tn,owner:owner,players:sel}),headers:{"Content-Type":"text/plain"}}).then(function(){document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)});document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)]}).catch(function(){alert("Error submitting. Try again.")})}
 
-// ═══ TEAM PICKER ═══
+// ═══ TEAM PICKER (persists via sessionStorage) ═══
 var pg=document.getElementById("pick-grid");
-TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;document.getElementById("picker").classList.add("hide")});pg.appendChild(b)});
+TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;try{sessionStorage.setItem('ff-team',t.n)}catch(e){}document.getElementById("picker").classList.add("hide")});pg.appendChild(b)});
+
+// ═══ PAGE LOAD: restore tab + team ═══
+(function(){
+  // Restore team selection
+  try{var saved=sessionStorage.getItem('ff-team');if(saved){activeTeam=saved;document.getElementById('picker').classList.add('hide')}}catch(e){}
+  // Restore tab from hash
+  var hash=(location.hash||'').replace('#','');
+  if(hash&&document.getElementById('tab-'+hash)){
+    switchTab(hash);
+  } else if(!activeTeam){
+    // First visit, keepers tab, show picker
+  } else {
+    // Has team, no hash, stay on keepers, hide picker
+    document.getElementById('picker').classList.add('hide');
+  }
+})();
 
 // ═══ DRAFT RESULTS (keeper tab) ═══
 var draftByRound={};
@@ -633,30 +653,49 @@ function renderDraftOrder(table) {
   });
 
   // Render a block as a table inside a box
-  function renderBlock(block, title) {
-    var driverColIdx = -1, orderColIdx = -1;
+  function renderBlock(block, title, isStandings) {
+    var driverColIdx = -1, posColIdx = -1, numColIdx = -1, orderColIdx = -1, playerColIdx = -1;
     block.headers.forEach(function(h, i) {
-      if (/driver/i.test(h)) driverColIdx = i;
+      var hl = h.toLowerCase();
+      if (hl === 'driver' || hl === 'name') driverColIdx = i;
+      if (hl === 'position' || hl === 'place') posColIdx = i;
+      if (/vehicle/i.test(h)) numColIdx = i;
       if (/draft.?order/i.test(h)) orderColIdx = i;
-      if (/^name$/i.test(h)) driverColIdx = i;
+      if (hl === 'player') playerColIdx = i;
+    });
+
+    // For standings box: skip Vehicle Number column, rename Name→Driver
+    var showCols = [];
+    block.headers.forEach(function(h, i) {
+      if (isStandings && i === numColIdx) return; // skip vehicle number
+      var label = h;
+      if (label.toLowerCase() === 'name') label = 'Driver';
+      showCols.push({idx: i, label: label});
     });
 
     var html = '<div class="do-box"><div class="do-box-head">' + title + '</div>';
     html += '<table class="do-table"><thead><tr>';
-    block.headers.forEach(function(h) { html += '<th>' + (h || '') + '</th>'; });
+    showCols.forEach(function(col) {
+      if (isStandings) html += '<th style="text-align:center">' + col.label + '</th>';
+      else html += '<th>' + col.label + '</th>';
+    });
     html += '</tr></thead><tbody>';
     block.rows.forEach(function(r) {
       html += '<tr>';
-      r.forEach(function(v, i) {
-        if (i === driverColIdx && v) {
+      showCols.forEach(function(col) {
+        var v = r[col.idx] || '';
+        var i = col.idx;
+        if ((i === driverColIdx) && v) {
           var cleanName = v.replace(/^\*\s*/, '').replace(/\s*\#$/, '').replace(/\(i\)/g, '').trim();
           var carNum = carMap[cleanName] || '';
-          var badge = carNum ? '<span class="car-num">' + carNum + '</span> ' : '';
-          html += '<td><div class="do-driver">' + badge + v + '</div></td>';
+          var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
+          if (isStandings) html += '<td style="text-align:center"><div class="do-driver" style="justify-content:center">' + badge + v + '</div></td>';
+          else html += '<td><div class="do-driver">' + badge + v + '</div></td>';
         } else if (i === orderColIdx && /^\d+$/.test(v)) {
           html += '<td class="do-pos">' + v + '</td>';
         } else {
-          html += '<td>' + v + '</td>';
+          if (isStandings) html += '<td style="text-align:center">' + v + '</td>';
+          else html += '<td>' + v + '</td>';
         }
       });
       html += '</tr>';
@@ -665,8 +704,8 @@ function renderDraftOrder(table) {
     return html;
   }
 
-  document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order');
-  document.getElementById('do-right').innerHTML = renderBlock(right, 'NASCAR Standings');
+  document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order', false);
+  document.getElementById('do-right').innerHTML = renderBlock(right, 'NASCAR Standings', true);
   document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
 }
 
