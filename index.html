@@ -92,11 +92,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .modal-sent .check{font-size:3rem;margin-bottom:8px;color:#27ae60}
 .modal-sent p{font-family:'Oswald',sans-serif;color:#27ae60;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
 /* ═══ DRAFT ORDER TAB ═══ */
-.do-wrap{max-width:1200px;margin:0 auto;padding:20px 16px}
+.do-wrap{max-width:900px;margin:0 auto;padding:20px 16px}
 .do-header{text-align:center;margin-bottom:20px}
 .do-header h2{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .do-live{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
-.do-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .do-box{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden}
 .do-box-head{padding:10px 14px;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#c8102e;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
 .do-table{width:100%;border-collapse:collapse}
@@ -104,6 +103,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem;transition:all .3s}
 .do-table tr:last-child td{border-bottom:none}
 .do-table tr:hover td{background:rgba(200,16,46,.1)}
+.do-table tr.do-picked td{background:rgba(243,156,18,.08)}
+.do-table tr.do-picked:hover td{background:rgba(243,156,18,.14)}
 .do-pos{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;color:#c8102e;width:40px}
 .do-owner{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff}
 .do-driver{display:flex;align-items:center;gap:10px;color:#bbb}
@@ -152,7 +153,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dp-p{font-weight:700;font-size:.82rem}.dp-t{color:#555;font-size:.75rem}
 .dp-k{color:#27ae60;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;margin-left:4px;text-transform:uppercase;letter-spacing:.5px}
 .foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
-@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}.pick-grid{grid-template-columns:repeat(3,1fr)}.blurb-tip{width:calc(100vw - 20px);max-width:380px}.tab-btn{padding:12px 16px;font-size:.72rem}.do-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}.pick-grid{grid-template-columns:repeat(3,1fr)}.blurb-tip{width:calc(100vw - 20px);max-width:380px}.tab-btn{padding:12px 16px;font-size:.72rem}}
 </style>
 </head>
 <body>
@@ -180,10 +181,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <h2>2026 Draft Order</h2>
     <div class="do-live">NASCAR-Based &bull; Auto-updates every 60s <span class="live-dot"></span></div>
   </div>
-  <div class="do-grid">
-    <div id="do-left"><div class="do-loading">Loading...</div></div>
-    <div id="do-right"><div class="do-loading">Loading...</div></div>
-  </div>
+  <div id="do-content"><div class="do-loading">Loading...</div></div>
   <div id="do-timestamp" style="text-align:center;margin-top:12px;font-family:Oswald,sans-serif;font-size:.7rem;color:#444;text-transform:uppercase;letter-spacing:1.5px"></div>
 </div>
 </div>
@@ -440,8 +438,8 @@ var BL={
 // ═══ HELPERS ═══
 function lookup(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"])if(DR[n+s]!==undefined)return DR[n+s];return null}
 function nm(n,set){if(set.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(set.has(c))return true;for(var k of set)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim()===c)return true;return false}
-function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(keeperRd<=3){return{status:"ineligible",reason:"Keeper Rd "+keeperRd,rd:displayRd,kv:keeperRd,sv:sortVal}}
-if(nm(n,K2))return{status:"ineligible",reason:"Max years (3rd season)",rd:displayRd,kv:keeperRd,sv:sortVal};
+function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(keeperRd<=3){return{status:"ineligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
+if(nm(n,K2))return{status:"ineligible",reason:"3 Years Maxed Out",rd:displayRd,kv:keeperRd,sv:sortVal};
 if(nm(n,K25))return{status:"last-year",reason:"2nd year - final keep",rd:displayRd,kv:keeperRd,sv:sortVal};
 return{status:"eligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
 
@@ -579,8 +577,7 @@ function fetchSheet(sheetName, callback) {
 function fetchDraftOrder() {
   fetchSheet('Draft Order', function(err, table) {
     if (err) {
-      document.getElementById('do-left').innerHTML = '<div class="do-error">Could not load draft order.<br><br>Make sure your Google Sheet is published to the web:<br><b>File &rarr; Share &rarr; Publish to web &rarr; Entire Document &rarr; Publish</b></div>';
-      document.getElementById('do-right').innerHTML = '';
+      document.getElementById('do-content').innerHTML = '<div class="do-error">Could not load draft order.<br><br>Make sure your Google Sheet is published to the web:<br><b>File &rarr; Share &rarr; Publish to web &rarr; Entire Document &rarr; Publish</b></div>';
       return;
     }
     renderDraftOrder(table);
@@ -638,9 +635,9 @@ function renderDraftOrder(table) {
     return cleanName(n).toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
   }
 
-  // Left box: columns A:D (indices 0-3)
+  // Left box: columns A:D (Draft Order, Player, Driver, Place)
   var left = extractBlock(0, 3);
-  // Right box: columns T:V (indices 19-21)
+  // Right box: columns T:V (Name/Driver, Vehicle Number, Position)
   var right = extractBlock(19, 21);
 
   // Build car number map from whichever block has "Vehicle Number"
@@ -664,7 +661,90 @@ function renderDraftOrder(table) {
     }
   });
 
-  // Also fetch live car numbers from NASCAR API (2026 season) to override stale sheet data
+  function findCarNum(name) {
+    var cn = cleanName(name);
+    if (carMap[cn]) return carMap[cn];
+    var key = matchKey(name);
+    if (carMapByKey[key]) return carMapByKey[key];
+    var stripped = key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim();
+    if (carMapByKey[stripped]) return carMapByKey[stripped];
+    return '';
+  }
+
+  // Build draft order lookup: driver name → {player, draftOrder}
+  var draftMap = {};
+  var doDriverIdx = -1, doPlayerIdx = -1, doOrderIdx = -1;
+  left.headers.forEach(function(h, i) {
+    var hl = h.toLowerCase();
+    if (/draft.?order/i.test(h)) doOrderIdx = i;
+    if (hl === 'player') doPlayerIdx = i;
+    if (hl === 'driver') doDriverIdx = i;
+  });
+  if (doDriverIdx >= 0) {
+    left.rows.forEach(function(r) {
+      var driver = cleanName(r[doDriverIdx]);
+      var player = (doPlayerIdx >= 0 ? r[doPlayerIdx] : '') || '';
+      var order = (doOrderIdx >= 0 ? r[doOrderIdx] : '') || '';
+      if (driver && player) {
+        draftMap[matchKey(driver)] = { player: player, order: order };
+      }
+    });
+  }
+
+  // Build standings list from right box
+  var standings = [];
+  var stDriverIdx = -1, stPosIdx = -1, stNumIdx = -1;
+  right.headers.forEach(function(h, i) {
+    var hl = h.toLowerCase();
+    if (hl === 'name' || hl === 'driver') stDriverIdx = i;
+    if (hl === 'position') stPosIdx = i;
+    if (/vehicle/i.test(h)) stNumIdx = i;
+  });
+  right.rows.forEach(function(r) {
+    var driver = r[stDriverIdx] || '';
+    var pos = stPosIdx >= 0 ? (r[stPosIdx] || '') : '';
+    if (driver) standings.push({ driver: driver, pos: pos });
+  });
+
+  // Render combined table
+  function renderCombined() {
+    if (!standings.length) {
+      document.getElementById('do-content').innerHTML = '<div class="do-error">No data found.</div>';
+      return;
+    }
+
+    var html = '<div class="do-box"><div class="do-box-head">Live Scoring</div>';
+    html += '<table class="do-table"><thead><tr>';
+    html += '<th style="text-align:center;width:60px">Pos</th>';
+    html += '<th>Driver</th>';
+    html += '<th>Player</th>';
+    html += '<th style="text-align:center;width:80px">Draft Order</th>';
+    html += '</tr></thead><tbody>';
+
+    standings.forEach(function(s) {
+      var cn = cleanName(s.driver);
+      var key = matchKey(s.driver);
+      var dm = draftMap[key] || draftMap[key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim()] || null;
+      var carNum = findCarNum(s.driver);
+      var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
+      var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' class="do-picked"' : '';
+
+      html += '<tr' + rowClass + '>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888">' + s.pos + '</td>';
+      html += '<td><div class="do-driver">' + badge + cn + '</div></td>';
+      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;color:' + (dm ? '#f5c842' : '#444') + '">' + (dm ? dm.player : '') + '</td>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:' + (dm && dm.order ? '#f39c12' : '#444') + '">' + (dm ? dm.order : '') + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    document.getElementById('do-content').innerHTML = html;
+    document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+  }
+
+  renderCombined();
+
+  // Fetch live car numbers from NASCAR API to override stale sheet data
   fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
     if (Array.isArray(drivers)) {
       drivers.forEach(function(d) {
@@ -675,78 +755,9 @@ function renderDraftOrder(table) {
           carMapByKey[matchKey(name)] = String(badge);
         }
       });
-      // Re-render with updated badges
-      document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order', false);
-      document.getElementById('do-right').innerHTML = renderBlock(right, 'Live Scoring', true);
+      renderCombined();
     }
   }).catch(function(){});
-
-  function findCarNum(name) {
-    var cn = cleanName(name);
-    if (carMap[cn]) return carMap[cn];
-    var key = matchKey(name);
-    if (carMapByKey[key]) return carMapByKey[key];
-    // Try without Jr/Sr suffixes
-    var stripped = key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim();
-    if (carMapByKey[stripped]) return carMapByKey[stripped];
-    return '';
-  }
-
-  // Render a block as a table inside a box
-  function renderBlock(block, title, isStandings) {
-    var driverColIdx = -1, posColIdx = -1, numColIdx = -1, orderColIdx = -1, playerColIdx = -1;
-    block.headers.forEach(function(h, i) {
-      var hl = h.toLowerCase();
-      if (hl === 'driver' || hl === 'name') driverColIdx = i;
-      if (hl === 'position' || hl === 'place') posColIdx = i;
-      if (/vehicle/i.test(h)) numColIdx = i;
-      if (/draft.?order/i.test(h)) orderColIdx = i;
-      if (hl === 'player') playerColIdx = i;
-    });
-
-    // For standings box: skip Vehicle Number column, rename Name→Driver
-    var showCols = [];
-    block.headers.forEach(function(h, i) {
-      if (isStandings && i === numColIdx) return;
-      var label = h;
-      if (label.toLowerCase() === 'name') label = 'Driver';
-      showCols.push({idx: i, label: label});
-    });
-
-    var html = '<div class="do-box"><div class="do-box-head">' + title + '</div>';
-    html += '<table class="do-table"><thead><tr>';
-    showCols.forEach(function(col) {
-      if (isStandings && col.label.toLowerCase() === 'position') html += '<th style="text-align:center">' + col.label + '</th>';
-      else html += '<th>' + col.label + '</th>';
-    });
-    html += '</tr></thead><tbody>';
-    block.rows.forEach(function(r) {
-      html += '<tr>';
-      showCols.forEach(function(col) {
-        var v = r[col.idx] || '';
-        var i = col.idx;
-        if ((i === driverColIdx) && v) {
-          var cn = cleanName(v);
-          var carNum = findCarNum(v);
-          var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
-          html += '<td><div class="do-driver">' + badge + cn + '</div></td>';
-        } else if (i === orderColIdx && /^\d+$/.test(v)) {
-          html += '<td class="do-pos">' + v + '</td>';
-        } else if (isStandings && (i === posColIdx)) {
-          html += '<td style="text-align:center">' + v + '</td>';
-        } else {
-          html += '<td>' + v + '</td>';
-        }
-      });
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    return html;
-  }
-
-  document.getElementById('do-left').innerHTML = renderBlock(left, 'Draft Order', false);
-  document.getElementById('do-right').innerHTML = renderBlock(right, 'Live Scoring', true);
-  document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
 }
 
 // Auto-refresh draft order every 60 seconds
