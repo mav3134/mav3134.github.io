@@ -3,14 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fantasy Football League Hub</title>
+<title>Pegs in a Blanket</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Anton&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;min-height:100vh}
-.topbar{background:linear-gradient(180deg,#1a1f2e,#0d1019);border-bottom:3px solid #c8102e;padding:6px 20px;display:flex;justify-content:space-between;align-items:center}
-.topbar-brand{font-family:'Anton',sans-serif;font-size:.8rem;color:#888;letter-spacing:3px;text-transform:uppercase}
-.topbar-date{font-size:.75rem;color:#666}
 .hero{background:linear-gradient(135deg,#0d1019,#1a1f2e 40%,#0d1019);padding:20px 24px 14px;text-align:center;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8102e,#ff6b35,#c8102e,transparent)}
 .hero h1{font-family:'Anton',sans-serif;font-size:2.2rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
@@ -38,8 +35,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .card-info{position:relative;z-index:1}
 .card-name{font-family:'Oswald',sans-serif;font-size:1.05rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff;line-height:1.2}
 .card-owner{font-size:.78rem;color:#666;text-transform:uppercase;letter-spacing:1px}
-.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#333,#222);color:#555;transition:all .2s;white-space:nowrap;display:none}
-.submit-btn.active{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 0 12px rgba(243,156,18,.3);display:inline-block}
+.submit-btn{position:relative;z-index:1;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 14px;border-radius:4px;border:none;cursor:pointer;background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;box-shadow:0 0 12px rgba(243,156,18,.3);transition:all .2s;white-space:nowrap;display:none}
+.submit-btn.visible{display:inline-block}
+.submit-btn:hover{background:linear-gradient(135deg,#e67e22,#d35400);transform:scale(1.03)}
 .rtbl{width:100%;border-collapse:collapse;font-size:.82rem}
 .rtbl th{text-align:left;padding:7px 10px;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
 .rtbl th:nth-child(2),.rtbl th:nth-child(3),.rtbl th:nth-child(4){text-align:center}
@@ -160,11 +158,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 </style>
 </head>
 <body>
-<div class="topbar"><span class="topbar-brand">Fantasy Football &bull; League #88520</span><span class="topbar-date">2025-26 Season</span></div>
-<div class="hero"><h1>Fantasy Football <span>League Hub</span></h1><div class="hero-sub">Rosters &bull; Draft Order &bull; League Stats &bull; Legacy Pool</div></div>
+<div class="hero"><h1><span>Pegs in a Blanket</span></h1><div class="hero-sub">Rosters &bull; Draft Order &bull; League Stats &bull; Legacy Pool</div></div>
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switchTab('keepers')">Keepers</button>
-  <button class="tab-btn" onclick="switchTab('draft-order')">Draft Order <span class="live-dot"></span></button>
+  <button class="tab-btn" onclick="switchTab('draft-order')">Draft Order</button>
   <button class="tab-btn" onclick="switchTab('league-stats')">League Stats</button>
   <button class="tab-btn" onclick="switchTab('legacy-pool')">Legacy Pool</button>
 </div>
@@ -182,7 +179,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="do-wrap">
   <div class="do-header">
     <h2>2026 Draft Order</h2>
-    <div class="do-live">NASCAR-Based &bull; Auto-updates every 60s <span class="live-dot"></span></div>
+    <div class="do-live">Auto-updates every 60s</div>
   </div>
   <div id="do-content"><div class="do-loading">Loading...</div></div>
   <div id="do-timestamp" style="text-align:center;margin-top:12px;font-family:Oswald,sans-serif;font-size:.7rem;color:#444;text-transform:uppercase;letter-spacing:1.5px"></div>
@@ -219,8 +216,9 @@ function switchTab(id){
   var btns=document.querySelectorAll('.tab-btn');
   btns.forEach(function(b){if(b.getAttribute('onclick')==="switchTab('"+id+"')")b.classList.add('active')});
   location.hash=id;
-  // Only show picker on keepers tab if no team selected
+  // Show picker on keepers tab if no team selected, hide on other tabs
   if(id==='keepers'&&!activeTeam){document.getElementById('picker').classList.remove('hide')}
+  else if(id!=='keepers'){document.getElementById('picker').classList.add('hide')}
   if(id==='draft-order'&&!draftOrderLoaded){fetchDraftOrder();draftOrderLoaded=true}
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
   if(id==='legacy-pool'&&!legacyPoolLoaded){fetchLegacyPool();legacyPoolLoaded=true}
@@ -523,7 +521,7 @@ document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
     updateBtn(teamName);
   });
 });
-function updateBtn(tn){var id="btn-"+tn.replace(/[^a-zA-Z]/g,""),btn=document.getElementById(id);if(!btn)return;var sel=selections[tn]||[];if(sel.length>0){btn.classList.add("active");btn.style.display="inline-block";btn.textContent="Submit "+sel.length+" Keeper"+(sel.length>1?"s":"")}else{btn.classList.remove("active");btn.style.display="none"}}
+function updateBtn(tn){var id="btn-"+tn.replace(/[^a-zA-Z]/g,""),btn=document.getElementById(id);if(!btn)return;var sel=selections[tn]||[];if(sel.length===0){btn.textContent="Submit No Keepers"}else if(sel.length===1){btn.textContent="Submit 1 Keeper"}else{btn.textContent="Submit "+sel.length+" Keepers"}}
 
 // ═══ SUBMIT MODAL ═══
 var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwvodVdAkx6o310q9KtMUeAoUwYH1P5IuLnxXH6bL4OoFYy418JJ85lu1tOB9gGp00/exec";
@@ -531,24 +529,28 @@ function openModal(tn){var sel=selections[tn]||[];if(!sel.length)return;document
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function sendKeepers(){var tn=window._submitTeam,sel=selections[tn]||[],team=TM.find(function(t){return t.n===tn}),owner=team?team.o:"Unknown";var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","The commish has been notified. No takebacks, you degenerate.","Submitted. Your league-mates are already laughing.","Done deal. Try not to regret this by August."];fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({teamName:tn,owner:owner,players:sel}),headers:{"Content-Type":"text/plain"}}).then(function(){document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)});document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)]}).catch(function(){alert("Error submitting. Try again.")})}
 
-// ═══ TEAM PICKER (persists via sessionStorage) ═══
+// ═══ TEAM PICKER (always shows on keepers tab load) ═══
 var pg=document.getElementById("pick-grid");
-TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;try{sessionStorage.setItem('ff-team',t.n)}catch(e){}document.getElementById("picker").classList.add("hide")});pg.appendChild(b)});
+TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;document.getElementById("picker").classList.add("hide");showActiveBtn()});pg.appendChild(b)});
 
-// ═══ PAGE LOAD: restore tab + team ═══
+function showActiveBtn(){
+  // Show submit button on active team's card
+  document.querySelectorAll('.submit-btn').forEach(function(btn){btn.classList.remove('visible')});
+  if(!activeTeam)return;
+  var id="btn-"+activeTeam.replace(/[^a-zA-Z]/g,"");
+  var btn=document.getElementById(id);
+  if(btn){btn.classList.add('visible');updateBtn(activeTeam)}
+}
+
+// ═══ PAGE LOAD: restore tab, always show picker for keepers ═══
 (function(){
-  // Restore team selection
-  try{var saved=sessionStorage.getItem('ff-team');if(saved){activeTeam=saved;document.getElementById('picker').classList.add('hide')}}catch(e){}
-  // Restore tab from hash
   var hash=(location.hash||'').replace('#','');
   if(hash&&document.getElementById('tab-'+hash)){
     switchTab(hash);
-  } else if(!activeTeam){
-    // First visit, keepers tab, show picker
-  } else {
-    // Has team, no hash, stay on keepers, hide picker
-    document.getElementById('picker').classList.add('hide');
+    // If keepers tab, show picker
+    if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
   }
+  // Default is keepers tab with picker showing — already the default state
 })();
 
 // ═══ DRAFT RESULTS (actual snake draft order) ═══
