@@ -92,19 +92,22 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .modal-sent .check{font-size:3rem;margin-bottom:8px;color:#27ae60}
 .modal-sent p{font-family:'Oswald',sans-serif;color:#27ae60;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
 /* ═══ DRAFT ORDER TAB ═══ */
-.do-wrap{max-width:900px;margin:0 auto;padding:20px 16px}
-.do-header{text-align:center;margin-bottom:20px}
+.do-wrap{max-width:680px;margin:0 auto;padding:20px 16px}
+.do-header{text-align:center;margin-bottom:16px}
 .do-header h2{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .do-live{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
 .do-box{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden}
-.do-box-head{padding:10px 14px;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#c8102e;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
+.do-box-head{padding:8px 12px;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#c8102e;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
 .do-table{width:100%;border-collapse:collapse}
-.do-table th{padding:10px 12px;text-align:left;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
-.do-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.85rem;transition:all .3s}
+.do-table th{padding:6px 8px;text-align:left;font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
+.do-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
 .do-table tr:last-child td{border-bottom:none}
 .do-table tr:hover td{background:rgba(200,16,46,.1)}
 .do-table tr.do-picked td{background:rgba(243,156,18,.08)}
 .do-table tr.do-picked:hover td{background:rgba(243,156,18,.14)}
+.do-table tr{position:relative;transition:transform .8s cubic-bezier(.4,0,.2,1),opacity .4s;will-change:transform}
+.do-table tr.do-moving-up{z-index:2;filter:brightness(1.1)}
+.do-table tr.do-moving-down{z-index:1}
 .do-pos{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;color:#c8102e;width:40px}
 .do-owner{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#fff}
 .do-driver{display:flex;align-items:center;gap:10px;color:#bbb}
@@ -580,11 +583,11 @@ function fetchDraftOrder() {
       document.getElementById('do-content').innerHTML = '<div class="do-error">Could not load draft order.<br><br>Make sure your Google Sheet is published to the web:<br><b>File &rarr; Share &rarr; Publish to web &rarr; Entire Document &rarr; Publish</b></div>';
       return;
     }
-    renderDraftOrder(table);
+    renderDraftOrder(table, false);
   });
 }
 
-function renderDraftOrder(table) {
+function renderDraftOrder(table, animate) {
   var rows = table.rows || [];
   var cols = table.cols || [];
   if (!rows.length) {
@@ -706,19 +709,38 @@ function renderDraftOrder(table) {
     if (driver) standings.push({ driver: driver, pos: pos });
   });
 
+  // Track previous row positions for animation
+  var prevRowPositions = {};
+
+  function capturePositions() {
+    var rows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
+    var positions = {};
+    rows.forEach(function(tr) {
+      var key = tr.getAttribute('data-key');
+      var rect = tr.getBoundingClientRect();
+      positions[key] = { top: rect.top, height: rect.height };
+    });
+    return positions;
+  }
+
   // Render combined table
-  function renderCombined() {
+  function renderCombined(animate) {
     if (!standings.length) {
       document.getElementById('do-content').innerHTML = '<div class="do-error">No data found.</div>';
       return;
     }
 
+    // Capture old positions before re-render
+    if (animate) {
+      prevRowPositions = capturePositions();
+    }
+
     var html = '<div class="do-box"><div class="do-box-head">Live Scoring</div>';
     html += '<table class="do-table"><thead><tr>';
-    html += '<th style="text-align:center;width:60px">Pos</th>';
+    html += '<th style="text-align:center;width:44px">Pos</th>';
     html += '<th>Driver</th>';
     html += '<th>Player</th>';
-    html += '<th style="text-align:center;width:80px">Draft Order</th>';
+    html += '<th style="text-align:center;width:50px">Pick</th>';
     html += '</tr></thead><tbody>';
 
     standings.forEach(function(s) {
@@ -727,22 +749,55 @@ function renderDraftOrder(table) {
       var dm = draftMap[key] || draftMap[key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim()] || null;
       var carNum = findCarNum(s.driver);
       var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
-      var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' class="do-picked"' : '';
+      var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' do-picked' : '';
 
-      html += '<tr' + rowClass + '>';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888">' + s.pos + '</td>';
+      html += '<tr data-key="' + key + '" class="' + rowClass + '">';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:#888">' + s.pos + '</td>';
       html += '<td><div class="do-driver">' + badge + cn + '</div></td>';
-      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;color:' + (dm ? '#f5c842' : '#444') + '">' + (dm ? dm.player : '') + '</td>';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:' + (dm && dm.order ? '#f39c12' : '#444') + '">' + (dm ? dm.order : '') + '</td>';
+      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;font-size:.8rem;color:' + (dm ? '#f5c842' : '#333') + '">' + (dm ? dm.player : '') + '</td>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:' + (dm && dm.order ? '#f39c12' : '#333') + '">' + (dm ? dm.order : '') + '</td>';
       html += '</tr>';
     });
 
     html += '</tbody></table></div>';
     document.getElementById('do-content').innerHTML = html;
     document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+
+    // FLIP animation: animate rows from old positions to new
+    if (animate && Object.keys(prevRowPositions).length) {
+      var newRows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
+      newRows.forEach(function(tr) {
+        var key = tr.getAttribute('data-key');
+        if (!prevRowPositions[key]) return;
+        var oldTop = prevRowPositions[key].top;
+        var newRect = tr.getBoundingClientRect();
+        var delta = oldTop - newRect.top;
+        if (Math.abs(delta) < 2) return; // didn't move
+
+        // Disable transition, jump to old position
+        tr.style.transition = 'none';
+        tr.style.transform = 'translateY(' + delta + 'px)';
+        tr.classList.add(delta > 0 ? 'do-moving-down' : 'do-moving-up');
+
+        // Force reflow
+        tr.offsetHeight;
+
+        // Enable transition and animate to new position
+        tr.style.transition = 'transform .8s cubic-bezier(.4,0,.2,1)';
+        tr.style.transform = 'translateY(0)';
+
+        // Cleanup after animation
+        tr.addEventListener('transitionend', function handler() {
+          tr.style.transition = '';
+          tr.style.transform = '';
+          tr.classList.remove('do-moving-up', 'do-moving-down');
+          tr.removeEventListener('transitionend', handler);
+        });
+      });
+    }
   }
 
-  renderCombined();
+  renderCombined(animate);
 
   // Fetch live car numbers from NASCAR API to override stale sheet data
   fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
@@ -755,7 +810,7 @@ function renderDraftOrder(table) {
           carMapByKey[matchKey(name)] = String(badge);
         }
       });
-      renderCombined();
+      renderCombined(false); // no animation for badge update
     }
   }).catch(function(){});
 }
@@ -764,7 +819,7 @@ function renderDraftOrder(table) {
 setInterval(function() {
   if (document.getElementById('tab-draft-order').classList.contains('active')) {
     fetchSheet('Draft Order', function(err, table) {
-      if (!err && table) renderDraftOrder(table);
+      if (!err && table) renderDraftOrder(table, true);
     });
   }
 }, 60000);
