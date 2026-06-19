@@ -551,14 +551,67 @@ TM.forEach(function(t){var b=document.createElement("button");b.className="pick-
   }
 })();
 
-// ═══ DRAFT RESULTS (keeper tab) ═══
-var draftByRound={};
-TM.forEach(function(team){team.p.forEach(function(pn){var rd=lookup(pn);if(rd!==null){if(!draftByRound[rd])draftByRound[rd]=[];draftByRound[rd].push([pn,team.n])}})});
+// ═══ DRAFT RESULTS (actual snake draft order) ═══
+var DRAFT_ORD=["Cruzin' USA","Team America","Son of Pintang","Days of Thunder","Doom Crew","Sloppy Toppies","Always Open","Fancy Like Applebees","Poutine Powerhouse","Out of Luck Forever","Bramsels in Distress","That's What Cheesehead"];
+
+// Map every drafted player to their current team
+var playerTeamMap={};
+TM.forEach(function(t){t.p.forEach(function(pn){playerTeamMap[pn]=t.n})});
+
+// Build draft board: for each round, find picks in snake order
+var allDrafted={};
+for(var pn in DR){allDrafted[pn]=DR[pn]}
+var ks2=new Set();K25.forEach(function(k){ks2.add(k)});K2.forEach(function(k){ks2.add(k)});
+
+// Group players by round, then by current team
+var roundPlayers={};
+for(var pn in allDrafted){
+  var rd=allDrafted[pn];
+  if(!roundPlayers[rd])roundPlayers[rd]={};
+  var tm=playerTeamMap[pn]||'_unrostered';
+  roundPlayers[rd][tm]=pn;
+}
+
 var dd=document.getElementById("D");
-var ks=new Set();K25.forEach(function(k){ks.add(k)});K2.forEach(function(k){ks.add(k)});
-Object.keys(draftByRound).sort(function(a,b){return a-b}).forEach(function(rd){
+var pickNum=0;
+var rounds=Object.keys(roundPlayers).map(Number).sort(function(a,b){return a-b});
+rounds.forEach(function(rd){
+  var order=rd%2===1?DRAFT_ORD.slice():DRAFT_ORD.slice().reverse();
+  var teamPick=roundPlayers[rd]||{};
+  // Collect unrostered players for this round
+  var unrostered=teamPick['_unrostered']?[teamPick['_unrostered']]:[];
+  // Some teams may have multiple players from same round (traded for), collect extras
+  var assigned={};var extras=[];
+  for(var tm in teamPick){
+    if(tm==='_unrostered')continue;
+    assigned[tm]=teamPick[tm];
+  }
+  // For multi-player same round on one team, only keep one per slot
+  var allPlayersThisRound=[];
+  for(var pn in allDrafted){if(allDrafted[pn]===rd)allPlayersThisRound.push(pn)}
+
   var div=document.createElement("div");div.className="drd";
-  div.innerHTML='<h3>Round '+rd+'</h3>'+draftByRound[rd].map(function(p){var isK=ks.has(p[0]);return '<div class="dp"><span><span class="dp-p">'+p[0]+'</span>'+(isK?'<span class="dp-k"> K</span>':'')+'</span><span class="dp-t">'+p[1]+'</span></div>'}).join("");
+  var html='<h3>Round '+rd+'</h3>';
+  order.forEach(function(teamName){
+    pickNum++;
+    var player=assigned[teamName]||unrostered.shift()||'';
+    if(!player){
+      // Find any unassigned player from this round
+      for(var i=0;i<allPlayersThisRound.length;i++){
+        var candidate=allPlayersThisRound[i];
+        var candidateTeam=playerTeamMap[candidate]||'';
+        // If this candidate's current team already has a pick assigned, it might be a trade acquisition
+        var alreadyUsed=false;
+        for(var t in assigned){if(assigned[t]===candidate){alreadyUsed=true;break}}
+        if(!alreadyUsed&&!candidateTeam){player=candidate;allPlayersThisRound.splice(i,1);break}
+      }
+    }
+    if(!player)return;
+    var isK=ks2.has(player);
+    var displayTeam=playerTeamMap[player]||teamName;
+    html+='<div class="dp"><span><span style="color:#555;font-family:Oswald,sans-serif;font-size:.7rem;margin-right:6px">'+pickNum+'.</span><span class="dp-p">'+player+'</span>'+(isK?'<span class="dp-k"> K</span>':'')+'</span><span class="dp-t">'+displayTeam+'</span></div>';
+  });
+  div.innerHTML=html;
   dd.appendChild(div);
 });
 
