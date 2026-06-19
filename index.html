@@ -99,13 +99,13 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-box{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden}
 .do-box-head{padding:8px 12px;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#c8102e;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
 .do-table{width:100%;border-collapse:collapse}
-.do-table th{padding:6px 8px;text-align:left;font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
-.do-table td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
+.do-table th{padding:6px 4px;text-align:left;font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e}
+.do-table td{padding:5px 4px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
 .do-table tr:last-child td{border-bottom:none}
 .do-table tr:hover td{background:rgba(200,16,46,.1)}
 .do-table tr.do-picked td{background:rgba(243,156,18,.08)}
 .do-table tr.do-picked:hover td{background:rgba(243,156,18,.14)}
-.do-table tr{position:relative;transition:transform .8s cubic-bezier(.4,0,.2,1),opacity .4s;will-change:transform}
+.do-table tr{position:relative;transition:transform 1.2s cubic-bezier(.4,0,.2,1),opacity .4s;will-change:transform}
 .do-table tr.do-moving-up{z-index:2;filter:brightness(1.1)}
 .do-table tr.do-moving-down{z-index:1}
 .do-pos{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.1rem;color:#c8102e;width:40px}
@@ -737,10 +737,10 @@ function renderDraftOrder(table, animate) {
 
     var html = '<div class="do-box"><div class="do-box-head">Live Scoring</div>';
     html += '<table class="do-table"><thead><tr>';
-    html += '<th style="text-align:center;width:44px">Pos</th>';
-    html += '<th>Driver</th>';
-    html += '<th>Player</th>';
-    html += '<th style="text-align:center;width:50px">Pick</th>';
+    html += '<th style="text-align:center;width:40px;padding-left:8px">Pos</th>';
+    html += '<th style="padding-left:8px">Driver</th>';
+    html += '<th style="padding-left:6px">Player</th>';
+    html += '<th style="text-align:center;width:36px;padding-left:2px;padding-right:8px">Pick</th>';
     html += '</tr></thead><tbody>';
 
     standings.forEach(function(s) {
@@ -752,10 +752,10 @@ function renderDraftOrder(table, animate) {
       var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' do-picked' : '';
 
       html += '<tr data-key="' + key + '" class="' + rowClass + '">';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:#888">' + s.pos + '</td>';
-      html += '<td><div class="do-driver">' + badge + cn + '</div></td>';
-      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;font-size:.8rem;color:' + (dm ? '#f5c842' : '#333') + '">' + (dm ? dm.player : '') + '</td>';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:' + (dm && dm.order ? '#f39c12' : '#333') + '">' + (dm ? dm.order : '') + '</td>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:#888;padding-left:8px">' + s.pos + '</td>';
+      html += '<td style="padding-left:8px"><div class="do-driver">' + badge + cn + '</div></td>';
+      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;font-size:.8rem;color:' + (dm ? '#f5c842' : '#333') + ';padding-left:6px">' + (dm ? dm.player : '') + '</td>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:' + (dm && dm.order ? '#f39c12' : '#333') + ';padding-left:2px;padding-right:8px">' + (dm ? dm.order : '') + '</td>';
       html += '</tr>';
     });
 
@@ -783,7 +783,7 @@ function renderDraftOrder(table, animate) {
         tr.offsetHeight;
 
         // Enable transition and animate to new position
-        tr.style.transition = 'transform .8s cubic-bezier(.4,0,.2,1)';
+        tr.style.transition = 'transform 1.2s cubic-bezier(.4,0,.2,1)';
         tr.style.transform = 'translateY(0)';
 
         // Cleanup after animation
