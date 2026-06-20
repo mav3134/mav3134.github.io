@@ -154,65 +154,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dp-p{font-weight:700;font-size:.82rem}.dp-t{color:#555;font-size:.75rem}
 .dp-k{color:#27ae60;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;margin-left:4px;text-transform:uppercase;letter-spacing:.5px}
 .foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
-/* ═══ DRAFT ROOM ═══ */
-.dr-wrap{padding:12px 16px;max-width:1400px;margin:0 auto}
-.dr-clock{text-align:center;padding:12px 16px;margin-bottom:10px;background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:6px;position:relative;overflow:hidden}
-.dr-clock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e)}
-.dr-clock-label{font-family:'Oswald',sans-serif;font-size:.65rem;color:#888;text-transform:uppercase;letter-spacing:2px}
-.dr-clock-name{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;letter-spacing:1px;color:#f5c842;margin-top:2px}
-.dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
-.dr-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:10px}
-.dr-title{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.dr-undo{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;cursor:pointer;transition:all .15s}
-.dr-undo:not(:disabled):hover{border-color:#f39c12;color:#f5c842}
-.dr-undo:disabled{opacity:.3;cursor:default}
-.dr-pick-count{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-left:auto}
-.dr-subtabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
-.dr-sub{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #333;background:linear-gradient(180deg,#1e2333,#141822);color:#888;cursor:pointer;transition:all .15s}
-.dr-sub:hover{border-color:#555;color:#ccc}
-.dr-sub.active{border-color:#c8102e;color:#fff;background:linear-gradient(180deg,#2a1520,#1a1015)}
-.dr-layout{display:flex;gap:12px;height:calc(100vh - 260px);min-height:500px}
-.dr-order-panel{width:280px;flex-shrink:0;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
-.dr-player-panel{flex:1;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
-.dr-panel-head{padding:8px 12px;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#c8102e;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e;flex-shrink:0}
-.dr-order-list{overflow-y:auto;flex:1;padding:4px}
-.dr-order-item{padding:5px 6px;margin:2px 0;border-radius:4px;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:#ccc;background:rgba(255,255,255,.03);border:1px solid #2a2d3a;cursor:grab;display:flex;align-items:center;gap:4px;transition:all .15s;user-select:none}
-.dr-order-item:hover{border-color:#555;background:rgba(255,255,255,.06)}
-.dr-order-item.drafted{cursor:default;opacity:.5;background:rgba(200,16,46,.1);border-color:rgba(200,16,46,.2)}
-.dr-order-item .dr-pick-num{font-size:.6rem;color:#555;min-width:20px}
-.dr-order-item .dr-picked-player{margin-left:auto;font-size:.68rem;font-weight:600;white-space:nowrap}
-.dr-order-item.dragging{opacity:.4;border-color:#f39c12}
-/* Position colors */
-.pos-qb{color:#f1c40f!important}.pos-rb{color:#3498db!important}.pos-wr{color:#27ae60!important}.pos-te{color:#e67e22!important}.pos-k{color:#888!important}.pos-def{color:#9b59b6!important}
-.row-qb td{background:rgba(241,196,15,.06)!important}.row-rb td{background:rgba(52,152,219,.06)!important}.row-wr td{background:rgba(39,174,96,.06)!important}.row-te td{background:rgba(230,126,34,.06)!important}.row-k td{background:rgba(136,136,136,.04)!important}.row-def td{background:rgba(155,89,182,.06)!important}
-.dr-player-table{overflow-y:auto;flex:1}
-.dr-ptbl{width:100%;border-collapse:collapse;font-size:.78rem}
-.dr-ptbl th{padding:5px 6px;text-align:left;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#555;background:rgba(255,255,255,.03);border-bottom:1px solid #1a1f2e;position:sticky;top:0;z-index:1}
-.dr-ptbl td{padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.03);white-space:nowrap}
-.dr-ptbl tr{transition:background .15s}
-.dr-ptbl tr:hover td{filter:brightness(1.3)}
-.dr-ptbl tr.dr-drafted td{opacity:.35;text-decoration:line-through}
-.dr-ptbl tr.dr-dragover td{outline:1px solid rgba(243,156,18,.5)!important;filter:brightness(1.5)}
-.dr-ptbl .dr-pname{font-weight:700;font-size:.82rem}
-.dr-ptbl .dr-drafted-by{font-family:'Oswald',sans-serif;font-size:.68rem;text-decoration:none;font-weight:600;padding-left:6px}
-/* Team Roster Panel */
-.dr-team-select{font-family:'Oswald',sans-serif;font-size:.75rem;padding:5px 10px;border-radius:4px;border:1px solid #444;background:#1a1f2e;color:#ccc;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
-.dr-team-select option{background:#1a1f2e;color:#ccc}
-.dr-roster-panel{width:260px;flex-shrink:0;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;display:none;flex-direction:column}
-.dr-roster-panel.open{display:flex}
-.dr-roster-head{padding:8px 12px;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#f39c12;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.dr-roster-close{background:none;border:none;color:#888;font-size:1.1rem;cursor:pointer;padding:0 4px}
-.dr-roster-close:hover{color:#fff}
-.dr-roster-body{overflow-y:auto;flex:1;padding:6px}
-.dr-slot{padding:5px 8px;margin:2px 0;border-radius:4px;font-size:.78rem;border:1px dashed #2a2d3a;background:rgba(255,255,255,.01);min-height:28px;display:flex;align-items:center;gap:6px}
-.dr-slot-label{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:1px;min-width:36px}
-.dr-slot-player{font-weight:700;color:#ccc;font-size:.78rem}
-.dr-slot.filled{border-style:solid;border-color:#2a2d3a;background:rgba(39,174,96,.06)}
-.dr-slot.filled .dr-slot-player{color:#5dde8e}
-.dr-slot.keeper{border-color:rgba(200,16,46,.3);background:rgba(200,16,46,.08)}
-.dr-slot.keeper .dr-slot-player{color:#e05555}
-.dr-slot-sep{font-family:'Oswald',sans-serif;font-size:.6rem;color:#444;text-transform:uppercase;letter-spacing:2px;padding:6px 8px 2px;margin-top:4px}
-@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}.pick-grid{grid-template-columns:repeat(3,1fr)}.blurb-tip{width:calc(100vw - 20px);max-width:380px}.tab-btn{padding:12px 16px;font-size:.72rem}.dr-layout{flex-direction:column;height:auto}.dr-order-panel{width:100%;max-height:200px}}
+@media(max-width:600px){.grid{grid-template-columns:1fr;padding:0 8px}.hero h1{font-size:1.6rem}.pick-grid{grid-template-columns:repeat(3,1fr)}.blurb-tip{width:calc(100vw - 20px);max-width:380px}.tab-btn{padding:12px 16px;font-size:.72rem}}
 </style>
 </head>
 <body>
@@ -222,7 +164,6 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
   <button class="tab-btn" onclick="switchTab('draft-order')">Draft Order</button>
   <button class="tab-btn" onclick="switchTab('league-stats')">League Stats</button>
   <button class="tab-btn" onclick="switchTab('legacy-pool')">Legacy Pool</button>
-  <button class="tab-btn" onclick="switchTab('draft-room')">Draft Room</button>
 </div>
 
 <!-- ═══ KEEPERS TAB ═══ -->
@@ -261,51 +202,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 </div>
 </div>
 
-<!-- ═══ DRAFT ROOM TAB ═══ -->
-<div class="tab-panel" id="tab-draft-room">
-<div class="dr-wrap">
-  <div class="dr-clock" id="dr-clock">
-    <div class="dr-clock-label">On the Clock</div>
-    <div class="dr-clock-name" id="dr-clock-name">—</div>
-    <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
-  </div>
-  <div class="dr-toolbar">
-    <div class="dr-title">Draft Room</div>
-    <button class="dr-undo" id="dr-undo" onclick="draftUndo()" disabled>↩ Undo</button>
-    <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
-      <option value="">View Team Roster...</option>
-    </select>
-    <span class="dr-pick-count" id="dr-pick-count">Pick 0 / 0</span>
-  </div>
-  <div class="dr-subtabs" id="dr-subtabs">
-    <button class="dr-sub active" onclick="switchDraftSub('All Players')">All Players</button>
-    <button class="dr-sub" onclick="switchDraftSub('QB')">QB</button>
-    <button class="dr-sub" onclick="switchDraftSub('RB')">RB</button>
-    <button class="dr-sub" onclick="switchDraftSub('WR')">WR</button>
-    <button class="dr-sub" onclick="switchDraftSub('TE')">TE</button>
-    <button class="dr-sub" onclick="switchDraftSub('K')">K</button>
-    <button class="dr-sub" onclick="switchDraftSub('DEF')">DEF</button>
-  </div>
-  <div class="dr-layout">
-    <div class="dr-order-panel" id="dr-order-panel">
-      <div class="dr-panel-head">Draft Order</div>
-      <div id="dr-order-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
-    </div>
-    <div class="dr-player-panel">
-      <div class="dr-panel-head">Available Players</div>
-      <div id="dr-player-table" class="dr-player-table"><div class="do-loading">Loading players...</div></div>
-    </div>
-    <div class="dr-roster-panel" id="dr-roster-panel">
-      <div class="dr-roster-head"><span id="dr-roster-team-name">Team</span><button class="dr-roster-close" onclick="closeTeamRoster()">✕</button></div>
-      <div class="dr-roster-body" id="dr-roster-body"></div>
-    </div>
-  </div>
-</div>
-</div>
-
 <!-- MODALS -->
 <div class="pick-overlay" id="picker"><div class="pick-modal"><h2>Who Are You?</h2><div class="pick-sub">Select your team to pick keepers</div><div class="pick-grid" id="pick-grid"></div></div></div>
-<div class="modal-overlay" id="modal"><div class="modal"><div id="modal-form"><h3>Save Keepers</h3><div class="modal-team" id="modal-team"></div><div class="modal-players" id="modal-players"></div><p class="modal-msg">You are saving your own picks and not being a dick and doing someone else's right?</p><div class="modal-actions"><button class="modal-cancel" onclick="cancelModal()">I'm sorry, I'll go back and do mine</button><button class="modal-submit" onclick="saveKeepers()">Yes, save now</button></div></div><div class="modal-sent" id="modal-sent"><div class="check">&#10003;</div><p>Keepers Saved!</p><div id="modal-confirm-players" style="margin:16px 0"></div><div id="modal-quip" style="font-family:'Roboto Condensed',sans-serif;font-size:1rem;color:#e05555;text-align:center;margin:16px 0;padding:12px 16px;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.15);border-radius:6px;font-style:italic;line-height:1.4"></div><div style="text-align:center;margin-top:18px"><button class="modal-cancel" onclick="closeModal()" style="padding:10px 40px;display:inline-block">Close</button></div></div></div></div>
+<div class="modal-overlay" id="modal"><div class="modal"><div id="modal-form"><h3>Submit Keepers</h3><div class="modal-team" id="modal-team"></div><div class="modal-players" id="modal-players"></div><p class="modal-msg">You are submitting your own picks and not being a dick and doing someone else's right?</p><div class="modal-actions"><button class="modal-cancel" onclick="closeModal()">I'm sorry, I'll go back and do mine</button><button class="modal-submit" onclick="sendKeepers()">Yes, submit now</button></div></div><div class="modal-sent" id="modal-sent"><div class="check">&#10003;</div><p>Keepers Submitted!</p><p class="detail" style="color:#888;margin-top:4px">Sent to the commish</p><div id="modal-confirm-players" style="margin:16px 0"></div><div id="modal-quip" style="font-family:'Roboto Condensed',sans-serif;font-size:1rem;color:#e05555;text-align:center;margin:16px 0;padding:12px 16px;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.15);border-radius:6px;font-style:italic;line-height:1.4"></div><div style="text-align:center;margin-top:18px"><button class="modal-cancel" onclick="closeModal()" style="padding:10px 40px;display:inline-block">Close</button></div></div></div></div>
 <div class="blurb-tip" id="blurb-tip"><div class="blurb-topbar"><div class="blurb-head"><div class="blurb-photo" id="blurb-photo">🏈</div><div><div class="blurb-pname" id="blurb-pname"></div><div class="blurb-pteam" id="blurb-pteam"></div></div></div><img class="blurb-team-logo" id="blurb-team-logo" src="" alt=""></div><div class="blurb-text" id="blurb-text"></div></div>
 <div class="foot">It's in the league &bull; Est. 2012</div>
 <script>
@@ -323,9 +222,8 @@ function switchTab(id){
   if(id==='draft-order'&&!draftOrderLoaded){fetchDraftOrder();draftOrderLoaded=true}
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
   if(id==='legacy-pool'&&!legacyPoolLoaded){fetchLegacyPool();legacyPoolLoaded=true}
-  if(id==='draft-room'&&!draftRoomLoaded){initDraftRoom();draftRoomLoaded=true}
 }
-var draftOrderLoaded=false,leagueStatsLoaded=false,legacyPoolLoaded=false,draftRoomLoaded=false;
+var draftOrderLoaded=false,leagueStatsLoaded=false,legacyPoolLoaded=false;
 
 // ═══ GOOGLE SHEETS CONFIG ═══
 var SHEET_ID='1dqt9-QHx3q6eGI1K_mEZ5uxW1f1_7qlgBuDMQBOuG4s';
@@ -366,12 +264,12 @@ var BL={
 "Christian Watson":"When healthy, this man is a guided missile — 4.36 speed at 6'4 is genuinely unfair and his big play ability borders on divine intervention. He'll rip off a 75-yard bomb that makes you feel like a genius. Then he'll disappear for three straight weeks and get hurt reaching for the TV remote.",
 "Derrick Henry":"Father Time has been trying to tackle this man for years and keeps getting stiff-armed into the shadow realm. A 250-pound wrecking ball who makes linebackers reconsider their career choices. In Baltimore he's a damn cheat code with Lamar pulling defenders away. Still completely useless in the passing game — catching a screen is his Vietnam.",
 "Jonathan Taylor":"A rushing TD leader in 2025 who proved that when the Colts' offense is even remotely functional, he's one of the most dominant backs in football. His effortless burst through the hole and vision make him look like prime AP when things are clicking. The injury history and Indianapolis' general dysfunction remain concerns, but when healthy and featured he's an elite RB1 who can win you your league. Max years reached — can't be kept.",
-"George Kittle":"The most entertaining tight end in football who blocks like a psychopath and celebrates like he just shotgunned six beers in the parking lot. Suffered a torn Achilles late in 2025 and his recovery timeline is the biggest question mark heading into 2026 — he may not be ready for the start of the season. When healthy his run-after-catch ability is elite and Purdy loves targeting him. But at his age with that injury, the risk is real and his ranking has dropped significantly.",
+"George Kittle":"The most entertaining tight end in football — blocks like a psychopath, catches like a receiver, celebrates like he just shotgunned six beers in the parking lot. His run-after-catch ability is elite-tier nasty. Durability has been an issue, and some weeks he gets like two targets because Shanahan forgot he exists.",
 "Tyjae Spears":"Quick, shifty, and explosive in the open field — the kind of back who makes the first guy miss and hits the afterburners. His receiving chops are legit on wheel routes. Unfortunately he's stuck in a Tennessee offense with all the creativity of a wet cardboard box.",
 "Kimani Vidal":"A bowling ball of a runner who absolutely refuses to go down on first contact. He showed flashes of being a legit NFL back with surprising pass-catching ability. Buried on a depth chart though, getting about as many touches as the team waterboy.",
 "Keaton Mitchell":"This little dude ran a 4.27 forty and looked like a video game glitch the few times he touched the ball — pure electric speed. Then his knee exploded and he's been trying to get back ever since. The ultimate 'stash and pray' guy, which is fantasy code for 'waste of a roster spot 90% of the time.'",
-"Bhayshul Tuten":"With Travis Etienne leaving for the Saints in free agency, Tuten is now the expected starter in Jacksonville's backfield entering 2026. His rookie year showed real promise — 386 scrimmage yards and 7 TDs in 15 games with some legitimately violent runs. He will compete with Chris Rodriguez Jr. and the recently-signed Jakobi Meyers could help open up running lanes. If he wins the job outright, the touchdown upside makes him a sneaky RB2 candidate.",
-"Jacory Croskey-Merritt":"Landed with the Washington Commanders and brought his tree-trunk legs and violent running style to the NFL. The college tape was nasty and he showed enough in his first year to keep the dream alive. With the Commanders building something under their new regime, Croskey-Merritt could develop into a legitimate contributor if he earns more touches. The physical tools are undeniable.",
+"Bhayshul Tuten":"The Jaguars took him in Round 4 and he flashed serious upside as a rookie — 386 scrimmage yards and 7 TDs in 15 games behind Travis Etienne, including some legitimately violent runs that reminded everyone why he was one of college football's most exciting backs. With Etienne leaving for the Saints in free agency, Tuten is now in prime position to take over as Jacksonville's lead back. If he wins the job, his touchdown upside and violent running style make him a sneaky RB2 candidate.",
+"Jacory Croskey-Merritt":"The Arizona product was drafted in the 2025 class and brought his tree-trunk legs and violent running style to the NFL. The college tape was nasty — he runs through arm tackles like they're suggestions — and he showed enough in his rookie year to keep the dream alive. His pass-catching ability is still more theoretical than proven, but the physical tools suggest a player who could develop into a legitimate contributor with more opportunity.",
 "Blake Grupe":"A kicker. He kicks the ball. Sometimes it goes through the uprights. Sometimes it doesn't and you scream at your phone. His leg is decent from inside 50 but beyond that you're basically praying, which is appropriate for a guy who plays in the city of saints.",
 "Rashee Rice":"When he's on the field he's a YAC monster who turns five-yard slants into 40-yard TDs with Mahomes feeding him like a golden retriever at Thanksgiving. Route running in the intermediate game is chef's kiss. Off-field drama follows him like a bad smell though — one more incident and he's playing in the XFL.",
 "Josh Allen":"A 6'5 240-pound missile launcher who also happens to be the best rushing QB in football — 14 rushing TDs and the overall QB1 in 2025 like it was nothing. When he hurdles a safety, entire stadiums lose their minds. Still occasionally throws into triple coverage like he's playing backyard football with his cousins.",
@@ -379,13 +277,13 @@ var BL={
 "Brian Thomas Jr.":"His rookie year was absolutely bonkers — looked like a future top-5 receiver. Then his sophomore season hit and production fell off a cliff, 16.7 to 9.9 PPG, which is the kind of regression that makes you physically ill. The talent is otherworldly but Jacksonville's offense turned him into a ghost. Biggest blue-ball in fantasy.",
 "Breece Hall":"Before the ACL tear this man was on pace to be a top-3 dynasty asset — explosive, versatile, straight-up electric. He's shown flashes of that pre-injury form with legit three-down ability. The Jets are where fantasy dreams go to die though, and their offensive line creates holes about as often as a solar eclipse.",
 "Tony Pollard":"Went from Zeke's backup to a legitimate RB1 who proved he could handle a full workload and not spontaneously combust. His breakaway speed is elite — once he hits the second level, DBs are just chasing a dust cloud. He's in Tennessee though, where offense goes to die.",
-"Colston Loveland":"Put up 58 catches for 713 yards and 6 TDs as a rookie and earned an 85.3 PFF offensive grade — then absolutely went off down the stretch with 39 catches for 500 yards in his final 7 games including playoffs. He led the Bears in targets during the postseason with 25 looks across two games. With DJ Moore traded to Buffalo, Loveland is positioned as the TE1 overall candidate entering year two alongside Caleb Williams in Ben Johnson's offense. The ceiling is genuinely elite.",
-"Kyle Monangai":"The Bears seventh-rounder carved out a legitimate role as the RB2 behind D'Andre Swift, averaging 8.6 fantasy PPG with his violent downhill running style. He gained 5-plus yards on 43 percent of his carries and his usage increased in scoring position as the season went on. In Ben Johnson's offense that rushed for 2,400-plus team yards with 19 TDs, Monangai is the perfect complement to Swift's speed with his short-area burst and contact balance. At his current ADP he is basically a steal.",
+"Colston Loveland":"This kid was a top TE prospect for a reason — silky routes, reliable hands, athleticism that gives linebackers nightmares. Put up 193 receiving yards in the playoffs AS A ROOKIE like it was Tuesday. With Caleb Williams feeding him, the ceiling is genuinely terrifying.",
+"Kyle Monangai":"The Bears snagged this little bowling ball in the seventh round and he straight up balled out as a rookie — 783 rushing yards, 5 TDs, and 18 catches at 4.6 YPC behind D'Andre Swift. His 198 scrimmage yard explosion in Week 9 when Swift went down proved he can absolutely carry the load when called upon. He's built low to the ground with violent contact balance that makes arm tackles completely useless. In a Bears offense rolling with Caleb Williams, this backfield could be special.",
 "Isiah Pacheco":"Got outplayed by Kareem Hunt in 2025 and lost his grip on the starting job in Kansas City, which has to sting for a guy who was supposed to be the long-term answer. His power running style wears defenses down but the injuries keep piling up and Hunt just would not go away. Now a free agent after the Chiefs let him walk, he needs to find a new home where he can be THE guy again. The talent is still there but his body and his roster spot are both question marks.",
 "Emanuel Wilson":"Left the Packers and signed a one-year deal with the Seattle Seahawks, who desperately needed running back help after Kenneth Walker signed with KC and Zach Charbonnet tore his ACL. He was a decent backup in Green Bay showing enough power to move the pile consistently. In Seattle he has a real shot at meaningful carries for the first time in his career, which makes him a sneaky late-round flier with actual standalone value.",
 "Ricky Pearsall":"This man got literally shot before his rookie season and came back to ball out — the most gangster thing in recent NFL history. By the end of 2024 he was catching everything — 14 catches, 210 yards, 2 TDs in his last two games. Ice in his veins and legit WR2 upside.",
 "Alec Pierce":"The Colts signed him to a massive extension and traded Michael Pittman Jr. to clear the runway — this man is now Indianapolis's undisputed WR1 and the franchise is betting big on his 4.33 speed and deep threat ability. The physical tools have always been ridiculous and now he finally gets the target share to match. If he can develop his intermediate route tree and become more than just a deep ball merchant, the ceiling is genuinely scary. This is the make-or-break year.",
-"Luther Burden III":"Emerged as the Bears' WR1 down the stretch of his rookie year, earning a 76.7 PFF receiving grade and posting 2.34 yards per route run — sixth-best among rookie WRs with 70-plus targets since 2021. With DJ Moore shipped to Buffalo, Burden's target share is about to blow up alongside Colston Loveland and Rome Odunze in Ben Johnson's offense. HC Johnson says he is 'buying stock right now' on Burden, which tells you everything about how the team sees him entering year two.",
+"Luther Burden III":"The Bears drafted one of the most explosive college receivers in recent memory and he spent his rookie year learning the ropes in Chicago's loaded offense. His ability to create separation and turn short catches into long touchdowns is genuinely elite, but competing for targets with DJ Moore, Keenan Allen, and Rome Odunze limited his immediate impact. With Moore shipped to Buffalo, the door is wide open for Burden to step into a bigger role alongside Caleb Williams in year two.",
 "Eddy Pineiro":"A kicker with a big leg who can crush it from 50+. The consistency part? More of a 'some days yes, some days hell no' situation. He's the kind of kicker you stream then immediately regret when he shanks a 38-yarder that costs you your matchup by 0.4 points.",
 "Brock Bowers":"Finished as a top-4 tight end AS A ROOKIE, which is absolutely disgusting in the best way possible. His route running is already elite — moves like a WR trapped in a TE's body with hands softer than a cloud made of silk. The only thing holding him back is playing for the Raiders, who find creative new ways to be terrible every season.",
 "Dak Prescott":"When Dak is rolling he looks like a top-5 QB — arm talent is real, pocket presence is elite, he can absolutely shred a defense. He's got that killer 350-yards-4-TDs ability any given Sunday. Then he'll follow it with a three-pick stinker that makes you question every life decision that led you to drafting him.",
@@ -428,7 +326,7 @@ var BL={
 "Kareem Hunt":"The ultimate cockroach of the NFL — you think he's done and he keeps showing up and producing. Goal-line work is still effective because he runs with the fury of a man with something to prove. He's 31 though with more miles than a cross-country trucker.",
 "Tyler Loop":"If you're rostering Tyler Loop, things have gone sideways in ways you couldn't have predicted. He's a kicker. That's about all there is to say. May God have mercy on your fantasy team.",
 "J.J. McCarthy":"The future of the Vikings who showed glimpses of being the real deal before getting derailed by injury. Accuracy and poise suggest he could be special. Still a massive unknown though — banking on him is like putting a deposit on a house that hasn't been built yet.",
-"Brock Purdy":"Missed 8 games with toe and shoulder injuries in 2025, but when he played he was absolutely ridiculous — averaging a career-best 24.2 fantasy PPG with at least 20.7 points in 7 of 11 games. He has finished as a top-10 fantasy QB in points per game three straight years and people still refuse to respect him. The 2026 receiving corps has a new look with Mike Evans, Christian Kirk, and George Kittle (if healthy from his Achilles), plus CMC in the backfield. Way too cheap in drafts.",
+"Brock Purdy":"Mr. Irrelevant turned Mr. Incredible — last pick of the draft who became a top-10 QB surrounded by more weapons than a military base. Decision-making is elite with pinpoint accuracy in Shanahan's scheme. The knock is that literally any competent QB might look good with those receivers, which is the most annoying and partially true criticism in football.",
 "DeVonta Smith":"The Slim Reaper is 170 pounds of pure route-running wizardry who makes corners look foolish on double moves. One of the most technically skilled receivers in the game with elite hands. Weighs less than some linebackers' legs though, and when he takes a hit you hold your breath.",
 "Zay Flowers":"A shifty slot demon who runs routes with the precision of a Swiss watch and has quickness that makes man coverage look like a suggestion. He's Lamar's favorite target with genuinely excellent YAC. Fumbling issues gave everyone heart attacks though, and Baltimore's run-heavy offense caps his target ceiling.",
 "James Cook III":"Went from afterthought to Josh Allen's favorite backfield weapon with silky receiving skills. Breakaway speed is real and he complements Allen's offense perfectly. Josh Allen vultures approximately 47 TDs a year with his legs though, so Cook is perpetually getting cockblocked at the goal line by his own QB.",
@@ -436,7 +334,7 @@ var BL={
 "Dallas Goedert":"One of the most underrated TEs in football — route running and hands are genuinely elite. When featured, he can go toe-to-toe with any TE in the league. Plays second fiddle to the entire Eagles passing attack though, and injuries keep derailing his seasons like clockwork.",
 "CeeDee Lamb":"An absolute magician with the ball in his hands who turns slant routes into highlight-reel plays that make SportsCenter producers weep. Body control and ability to adjust to any throw is supernatural. Playing for the Cowboys, who are professionally committed to wasting talent, is his only crime.",
 "Blake Corum":"A tough, gritty Michigan back who earned carries behind Kyren Williams with his downhill running style. Won't wow you with speed but runs hard, finishes runs, doesn't fumble. The ultimate 'your flex when three guys are on bye' player.",
-"Jaxson Dart":"Proved he is the Giants franchise QB in his rookie year — 2,272 passing yards, 15 TDs, 5 INTs plus 487 rushing yards and 9 rushing TDs in 14 games, the third most rushing TDs by a rookie QB ever. His dual-threat ability is electric but his willingness to take hits led to a concussion that cost him two games. New HC John Harbaugh and weapons like Isaiah Likely, Darnell Mooney, and Calvin Austin should elevate him in year two. If he can learn to slide and protect himself, the upside is genuinely scary.",
+"Jaxson Dart":"The Giants traded back into Round 1 to grab the Ole Miss gunslinger and he spent his rookie year learning behind the scenes in New York. His arm talent and swagger are through the roof — he threw it all over the yard in college with genuine NFL-caliber arm strength and accuracy. Starting him in fantasy right now is premature with the Giants still figuring things out, but the long-term upside of a franchise QB in a major market is tantalizing.",
 "Jordan Love":"Went from 'Aaron Rodgers' mysterious successor' to a legit franchise QB who can sling it. Arm talent is absolutely filthy — throws ropes into tight windows that make you gasp. Consistency is maddening though — 4 TDs one week, 3 picks the next. Emotional rollercoaster.",
 "J.K. Dobbins":"Talent is undeniable — when healthy he runs with violent burst that defenders genuinely fear. His early 2024 start with the Chargers was electric enough to remind everyone. This man's body falls apart more reliably than IKEA furniture though. Re-signed with Denver and we're all waiting for the inevitable injury tweet.",
 "Quentin Johnston":"The 21st pick of the 2023 draft who has been a colossal disappointment — the kind of bust that makes GMs lose sleep. Physical tools of a number-one receiver but plays like he's wearing mittens and running in sand. Every offseason 'he's looked great in camp' and every season he looks like he's never seen a football.",
@@ -446,12 +344,12 @@ var BL={
 "Jaxon Smith-Njigba":"Finished as the WR2 in all of fantasy with 1,793 yards and 10 TDs because he decided to become the best slot receiver on earth overnight. Route running is so crisp it makes defensive coordinators cry. Went from 'was he a bust?' after year one to 'oh my God he's incredible' in year two — the most satisfying fantasy arc ever.",
 "Amon-Ra St. Brown":"The Egyptian Sun God who catches everything thrown near him with the consistency of a robot. Slot work is elite, contested catch ability defies his size, and Goff feeds him targets like he's the only receiver on the roster. The ultimate PPR cheat code — boring to watch, beautiful to own.",
 "Kyren Williams":"Went from undrafted afterthought to the Rams' bell cow who rushed for 183 yards in the playoffs like it was nothing. Vision and patience are legitimately impressive for a smaller back. TD upside is massive in McVay's offense, but he gets banged up enough that you spend half the season checking the injury report.",
-"D'Andre Swift":"Quietly produced an RB15 finish in 2025, averaging 14.3 fantasy PPG with 39 receptions and 10 carries inside the 5-yard line in Ben Johnson's Bears offense. He has the vision and burst to produce on screens and underneath throws, and the committee with Kyle Monangai actually helps him stay fresh. Not the explosive home-run threat he once was, but a reliable RB2 who gives you a solid floor every week in what should be an even better Chicago offense in 2026.",
+"D'Andre Swift":"Talent has never been in question — when he's got daylight he's one of the most explosive backs in the league with elite agility. Durability is made of glass and wishful thinking though. He'll give you three incredible weeks then miss four, turning your fantasy season into a support group.",
 "Trey McBride":"Emerged as a legit top-3 fantasy TE by becoming the Cardinals' entire passing offense. Volume is insane and catch rate is practically perfect. With Kyler leaving Arizona, the offense might crater so badly that even his absurd target share can't save him. Max years reached.",
 "Rhamondre Stevenson":"A bruising back who led the NFL in playoff rushing yards and helped the Patriots go on their miracle Super Bowl run. When he's the guy, he's a bulldozer who grinds out tough yards. Lost the lead-back role to TreVeyon Henderson during the regular season though, making him a frustrating timeshare.",
 "Wan'Dale Robinson":"A tiny slot receiver who is somehow the most productive pass-catcher on the Giants, which says more about the Giants than him. Ability to get open in short areas is real and he's a YAC weapon despite being 5'8. A PPR floor play on a team with no ceiling — the most depressing sentence in fantasy.",
 "Michael Pittman Jr.":"Got traded to Pittsburgh with a fat $59M extension proving somebody values a big-bodied possession receiver who does his job without drama. He's the definition of reliable — 70 catches, 900 yards, 5 TDs, set your watch to it. He'll never win or lose you a week. He's the missionary position of fantasy receivers.",
-"Tyler Allgeier":"Signed with the Arizona Cardinals this offseason after spending his first three years grinding behind Bijan Robinson in Atlanta. He is a no-nonsense runner who runs hard between the tackles and could serve as Trey Benson's primary competition for early-down work in Arizona. No longer just a handcuff, he has a real chance at meaningful touches on a team that could surprise people.",
+"Tyler Allgeier":"A no-nonsense grinder who runs hard between the tackles. He's Bijan Robinson's backup which means 8 carries a game and occasionally a vulture goal-line TD that makes Bijan owners scream. Handcuff at best, bench decoration until then.",
 "Mark Andrews":"Was once the undisputed TE1 in fantasy — his connection with Lamar was lethal and his red-zone dominance unmatched. Battling injuries and inconsistency lately, and watching him drop critical passes is like watching a surgeon accidentally cut the wrong thing. When he's on, still elite. When he's off, you want to launch your phone into orbit.",
 "Devaughn Vele":"A big-bodied receiver who showed flashes as a late-round rookie in Denver. At 6'4 he's got the frame for a legit outside threat. Buried on the depth chart though — relying on him is a move born of either genius or complete desperation. Probably the latter.",
 "Jake Bates":"The UFL legend who went from spring football to the NFL, the most 'only in America' story you'll hear. His leg is genuinely massive — 60-yarders like chip shots. Detroit's high-powered offense gives him plenty of extra points but not enough field goal attempts, which is a weird kicker problem.",
@@ -460,12 +358,12 @@ var BL={
 "Stefon Diggs":"Came back from his torn ACL and spent 2025 with the Patriots where he became Drake Maye's big-play threat with a three-game 100-yard streak that proved the doubters wrong. Now a free agent again after New England let him walk, looking for another team willing to bet on his aging legs. When healthy his route running is still among the best in football and he plays with an edge that borders on psychotic. The mouth runs as much as the routes and one bad game turns him into the most dramatic person in the building.",
 "Jahmyr Gibbs":"With David Montgomery traded to Houston, Gibbs is FINALLY the undisputed bellcow in Detroit and fantasy managers everywhere are weeping tears of joy. No more watching Montgomery waddle into the end zone to steal goal-line TDs — it is all Gibbs now. His speed, elusiveness, and receiving ability already made him look like he was playing a different sport, and now with a full workhorse role he is a legitimate top-3 RB pick. Every touch is a potential house call.",
 "Michael Carter":"A JAG (Just A Guy) running back who has bounced around the league collecting roster spots and giving fantasy managers nothing of value. He's fine as depth but starting him is admitting defeat. The human equivalent of a participation trophy.",
-"Travis Kelce":"The greatest tight end in NFL history who turns 37 in October and is finally showing his age. Averaged a career-worst 1.47 yards per route run last season and his target share has declined as the Chiefs became more run-heavy with Kenneth Walker. The connection with Mahomes still produces in big moments but the weekly floor has dropped considerably. Fine at his ninth-round price tag but the days of drafting him as a top-5 TE are officially over.",
+"Travis Kelce":"The greatest tight end in NFL history whose stats, rings, and cultural dominance make him a literal icon. Even in declining years he's a matchup nightmare Mahomes trusts with his life. Getting older than some of the wines he drinks, but writing off Kelce has been a losing bet for a decade.",
 "DJ Moore":"Got traded to Buffalo and paired with Josh Allen, which should be a dream scenario for a receiver with his YAC ability and deep speed. He's been underutilized his entire career and this might be the situation where he explodes. Buffalo has plenty of mouths to feed, but Moore's talent is undeniable when featured.",
 "Terry McLaurin":"The most loyal receiver in football who has balled out through approximately 47 different QBs and never once complained. Speed, route running, and contested catches are all top-tier — he's been a WR1 in basically every situation. He deserves better than what Washington has given him.",
 "Woody Marks":"The Texans grabbed him and he turned into a legitimate contributor alongside C.J. Stroud — even dropped a 112-yard game against the Steelers in the Wild Card round that had fantasy managers who stashed him feeling like geniuses. He's not going to wow you with speed but he runs hard, catches passes, and showed up when it mattered most in the playoffs. Houston's offense gives him real opportunity to be a viable flex play.",
 "C.J. Stroud":"Burst onto the scene like a supernova in his rookie year with poise beyond his years. Accuracy and pocket presence are genuinely elite for someone so young. The concern is whether defenses have figured him out — the sophomore slump is real. Max years reached.",
-"Jakobi Meyers":"Signed with the Jacksonville Jaguars this offseason after producing in the wasteland of the Raiders for years, which might actually be an upgrade believe it or not. His route running is technically sound, his hands are reliable, and now he gets to play with Trevor Lawrence in an offense that actually has some talent around it. He is never going to be a league winner but in PPR formats his catch rate and reliability make him a perfectly fine WR4 or bye-week fill-in.",
+"Jakobi Meyers":"The ultimate 'just a guy' receiver who somehow keeps producing despite playing in the worst offenses imaginable. Route running is technically sound, hands are reliable. He's on the Raiders though, meaning his ceiling is permanently capped at 'fine, I guess.' The human shrug emoji.",
 "Dalton Kincaid":"Has all the physical tools for a top-5 fantasy TE — elite route running with Josh Allen's trust in the red zone. Athletic ability is special and he should be Buffalo's focal point. The breakout keeps getting teased but never materializes, making him the biggest cocktease at the TE position.",
 "Ka'imi Fairbairn":"One of the most reliable kickers in the league who benefits from Houston's offense getting into field goal range. Accuracy is top-tier and he rarely misses inside 50. A set-and-forget kicker, the highest compliment you can give someone who kicks a ball for a living.",
 "Joe Burrow":"When healthy, a top-3 QB who carves up defenses with surgical precision and an ice-cold demeanor screaming 'I'm better than you.' His Chase connection is the best QB-WR duo in football. The wrist, the calf, the appendix — this man's body has more repair work than a NYC pothole. Elite talent, bubblewrap candidate.",
@@ -474,9 +372,9 @@ var BL={
 "Ashton Jeanty":"Rushed for 2,601 yards and 30 TDs in college then landed with the Raiders at #6 overall — only to run into the worst offensive line in football. His rookie year was a grind: 975 yards and 5 TDs on 266 carries behind a unit that couldn't block a gentle breeze. The talent is undeniable though — he led the league in broken tackles and yards after contact, proving the burst and balance are NFL-caliber. With a new coaching staff and the #1 overall pick incoming, year two could be a completely different story.",
 "Chase Brown":"Emerged as a legit starter in Cincy with explosive speed and breakaway ability that turns 5-yard runs into 50-yard TDs. Burst is genuinely elite and he makes the first defender miss more often than not. Still proving he can handle a full workload, and Zac Taylor sometimes forgets he exists for entire halves.",
 "Juwan Johnson":"A converted wide receiver at TE who has sneaky red-zone upside because he's basically a large WR that linebackers can't cover. He'll go three weeks invisible then randomly score two TDs on a Tuesday night. The ultimate boom-or-bust TE streamer — heavy emphasis on bust.",
-"Javonte Williams":"Signed with the Dallas Cowboys after his time in Denver never recaptured the pre-ACL magic. The violent, powerful runner who broke tackles like they owed him money has been replaced by a plodding back who runs like he is wearing concrete shoes. Dallas is betting on a change of scenery revival, and with George Pickens now in town the offense could be good enough to create opportunities. But expectations should be very, very low.",
+"Javonte Williams":"Before the ACL tear he was on the fast track to stardom — a violent, powerful runner who broke tackles like they owed him money. Since the knee he's been a shell of himself. Still has decent vision but the burst is gone and he runs like he's wearing concrete shoes.",
 "Elic Ayomanor":"The Titans grabbed him in the fourth round and the Canadian-born Stanford product put together a solid rookie campaign — 41 receptions for 515 yards and 4 TDs playing alongside first-overall pick Cam Ward. His body control and ability to adjust mid-air translated immediately to the NFL, and his contested catch ability gave Tennessee a reliable red-zone target. He's still developing but the tools and production suggest a player who could take a real leap in year two.",
-"Rome Odunze":"Started 2025 on fire as the WR3 in fantasy scoring through the first four weeks, leading the Bears in targets, receptions, yards, and touchdowns early on. Then a stress fracture in his foot ended his regular season in Week 13 and his production cratered in the second half. With DJ Moore traded to Buffalo, Odunze has a clear path to being the number one receiving option in what should be an elite offense under Ben Johnson. The foot is the concern — if healthy, the upside is massive.",
+"Rome Odunze":"A first-round pick with size and athleticism to be a true alpha at 6'3 with fluid route running. With DJ Moore shipped to Buffalo, the opportunity is wide open. He could absolutely explode in year two if Caleb Williams takes the next step.",
 "Cade Otton":"A solid, reliable TE who does all the little things right in Tampa's offense. Hands are sure, routes are clean, and he blocks well enough to stay on the field. Never a league winner but gives you 8-12 points consistently, which is more than most TEs can say.",
 "Jerry Jeudy":"One of the most frustrating WRs in the NFL — route running is genuinely elite, separation is top-tier, and he STILL can't put it together for a full season. Talent of a WR1 trapped in WR3 production. Watching him drop easy catches is maddening. Playing in Cleveland doesn't help, but at some point blame the player.",
 "Daniel Jones":"The Colts slapped the transition tag on him at a whopping $37.8 million, which is the most expensive game manager contract in NFL history and proof that the QB market is completely insane. He had a decent run in Indy showing enough competence to keep the job. His arm is average, his mobility never fully returned after the ACL, and his decision-making still ranges from fine to baffling. But Indianapolis is apparently committed to the bit.",
@@ -486,27 +384,27 @@ var BL={
 "Emeka Egbuka":"Tampa's first-round pick earned PFWA All-Rookie honors with 63 catches for 938 yards and 6 TDs — started red hot taking advantage of injuries to become the Bucs' WR1 early in the season. The second half was a different story though, as his production trended consistently downward and the team moved away from him once receivers got healthy. The talent is obviously real at 938 yards as a rookie, but the inconsistency left fantasy managers wanting to throw their phones into traffic.",
 "George Pickens":"The most talented AND most infuriating receiver in the NFL — physical gifts are absurd with body control and catch radius that belong on a highlight reel. The Steelers finally got fed up and he ended up franchise tagged by the Dallas Cowboys at $27.3 million, giving him a fresh start in a new city. When he decides to try, he looks like a top-10 receiver who can dominate any corner. The key phrase is 'when he decides to try' — his effort fluctuates more than Bitcoin and his attitude remains a constant headache.",
 "Christian McCaffrey":"THE number one fantasy scorer in 2025 with 404.9 points — nearly 40 more than the next guy. He does everything: runs, catches, blocks, probably does your taxes during the bye. He's a create-a-player with every stat maxed out. Drafting him first overall is never wrong.",
-"Rico Dowdle":"Signed with the Pittsburgh Steelers this offseason after his breakout run with the Cowboys that included back-to-back 30-plus point games. His burst and vision surprised everyone and he proved he can be a legit NFL starter when given the opportunity. Pittsburgh likes physical, hard-nosed runners and Dowdle fits that mold perfectly. The question is whether his late-career emergence was real or a small sample size mirage — but the Steelers are betting on real.",
+"Rico Dowdle":"Went from complete nobody to fantasy hero with back-to-back 30-plus point games that made waiver wire pickups feel like geniuses. His burst and vision were genuinely surprising, and he proved he can be a legit NFL starter when given the opportunity. The question entering 2026 is whether that production was real or a hot streak — the line between breakout star and flash in the pan is paper thin.",
 "Darren Waller":"Came out of retirement to play for the Dolphins in 2025 in one of the more surprising comebacks in recent memory. At 6-foot-6 with that freakish athletic ability, he showed he could still contribute when healthy. He is a free agent again now though, and at his age the next retirement could be the permanent one. If he is still on your roster, this spot might be better used on someone with a clearer path to playing time.",
 "Keenan Allen":"The master of the intermediate route who silently torched defenses for over a decade with technical precision and the surest hands in the game. His 2025 season in Chicago was a solid veteran presence alongside Caleb Williams but he is now a free agent looking for a new home. Older than most teammates' favorite childhood movies and his speed has declined to the point where linebackers can chase him down. Still a useful possession receiver if someone signs him.",
 "Oronde Gadsden":"A massive athletic freak from Syracuse drafted to be the next great hybrid TE. At 6'5 with WR-level route running, the tools are ridiculous. Rookie year was a learning curve but flashes were real. The kind of prospect you stash and hope develops into a top-5 TE in two years.",
 "Kenneth Walker III":"Super Bowl MVP who signed with Kansas City — already really damn good on his own, and now paired with the best offense in football. Explosiveness and contact balance are elite. Injury history is real though, and the Chiefs historically don't give any single back a true workhorse role.",
 "Brian Robinson":"Literally got shot twice before his rookie season and came back to be a productive NFL back, making every other injury excuse in sports sound pathetic. A hard-nosed grinder who won't make your jaw drop but will reliably grind out 70 yards and a TD. Pass-catching caps his PPR ceiling though.",
 "Tank Bigsby":"A powerful back who runs with bad intentions and has lower-body strength that makes arm tackles futile. Showed legit ability as a fill-in. Stuck behind Travis Etienne though, basically a handcuff hoping for the best.",
-"Jayden Reed":"Broke his clavicle in Week 2 and missed most of 2025, playing just 7 games with 22 targets — a gut punch after back-to-back top-30 finishes. The Packers rewarded him anyway with a three-year, $50.25 million extension before the 2026 draft, signaling he is a core piece going forward. With Romeo Doubs leaving in free agency and Dontayvion Wicks traded to the Eagles, the target share is wide open behind Christian Watson and alongside Matthew Golden. Healthy Reed in this streamlined receiver room could absolutely explode.",
+"Jayden Reed":"Was looking like a breakout candidate before injuries derailed his season and he landed on IR — gut punch for anyone who drafted him. When healthy, his YAC and versatility as a gadget player make him fun. Green Bay's WR room is insanely crowded though with Watson, Doubs, and a first-rounder.",
 "Chris Boswell":"The Boz is legitimately one of the best kickers in the NFL — accurate, clutch, benefits from a defense that keeps games close. The kind of kicker you draft and actually feel good about, which is rare and beautiful. Might lead the team in scoring, which is either a compliment to him or an insult to Pittsburgh's offense.",
 "Jordan Mason":"Got traded to the Vikings before the 2025 season and became Minnesota's lead back, rushing for 758 yards and 6 TDs at a solid 4.8 YPC while Aaron Jones battled injuries. His physical, downhill running style translated perfectly to the Vikings' scheme and he forced 31 missed tackles on 159 carries. Still basically invisible as a receiver (14 catches, 51 yards) which caps his PPR ceiling, and the timeshare with Jones limits his weekly upside to frustrating RB2/flex territory.",
 "Caleb Williams":"Led the Bears to the damn playoffs as a sophomore QB with 618 playoff passing yards. His ability to extend plays and throw on the move is genuinely special — makes throws that shouldn't be physically possible. Hero-ball tendencies still pop up, but the upside is through the roof.",
 "Ladd McConkey":"Was absolutely electric down the stretch of his rookie year — 17.6 PPR points from Weeks 8-18, 197 playoff yards. Then his sophomore season hit and the crowded Chargers offense ate his targets. Took a massive step back leaving fantasy managers feeling personally betrayed.",
 "Justin Jefferson":"When he's right, he's the most dynamic receiver in football — route running, separation, and absurd catch radius make him virtually uncoverable. Generational talent who can win your week in a single quarter. His 2025 was disappointing enough for bust lists though, and at his ADP anything less than WR1 feels like robbery.",
 "Quinshon Judkins":"The Browns nabbed him in Round 2 and he immediately became a must-start fantasy back — 827 rush yards and 7 TDs with another 171 receiving yards, totaling 998 scrimmage yards as a rookie. His violent downhill running style and ability to find the end zone made him Cleveland's most exciting offensive player, which admittedly isn't a high bar. Paired with Harold Fannin Jr. and Dylan Sampson, the Browns actually built something resembling a functional offense around their young core.",
-"RJ Harvey":"Landed with the Denver Broncos in the second round and immediately slotted into their backfield rotation alongside Javonte Williams and J.K. Dobbins. His explosive UCF production was not a fluke — the burst through the hole and touchdown-scoring ability translated to the NFL. Now entering his second year in Sean Payton's offense with Jaylen Waddle and Courtland Sutton stretching defenses, Harvey could see his role expand significantly as the most dynamic back in that room.",
-"Mason Taylor":"Landed with the New York Jets and profiles as an athletic pass-catching tight end who could develop into a real weapon. His route running for a TE is surprisingly polished and his hands are reliable. Competing for targets in the Jets offense will be tough, but the bloodline (dad is Jason Taylor) and athletic upside suggest he could carve out a role by mid-season. Patience is key with any young tight end.",
+"RJ Harvey":"The explosive UCF product was a second-round pick who brought his absurd touchdown-scoring ability to the NFL and showed his college production wasn't a fluke. His vision and acceleration through the hole are legitimately NFL-caliber, and he hit the ground running as a rookie. He's got the kind of highlight reel that makes scouts drool and his scoring upside near the goal line is elite.",
+"Mason Taylor":"An athletic LSU tight end prospect who profiles as a future receiving weapon at the next level. His route running for a tight end is surprisingly polished and he's got reliable hands with the bloodline to back it up — his dad is Jason Taylor. Rookie tight ends historically take years to produce in fantasy, so patience is the name of the game.",
 "Harold Fannin Jr.":"The Browns stole him in the third round and he immediately broke the 'rookie TEs don't produce' curse — 72 receptions for 731 yards and 6 TDs is absolutely absurd for a first-year tight end. His record-setting college production at Bowling Green wasn't a fluke; this kid just knows how to get open and catch footballs. At 6-foot-4 with receiver-level route running, he's already a top-10 fantasy TE and the ceiling is genuinely terrifying entering year two.",
 "Khalil Shakir":"The most underrated receiver in the NFL who consistently produces with technical precision and the surest hands in the game. Chemistry with Allen in the slot is real and he's a PPR machine. With DJ Moore in Buffalo too, targets could get tight, but Shakir's reliability has earned him snaps.",
 "Marvin Harrison Jr.":"The most hyped WR prospect since his literal father, and his rookie season was... fine. Just fine. Not the 1,400-yard explosion everyone expected. Route running is polished and hands are elite, but Arizona couldn't get him the ball consistently. Year two breakout is the hope, but Kyler leaving adds a huge question mark.",
 "Trey Benson":"A big, physical Florida State back who looked promising in limited rookie action. He's the heir apparent in Arizona's backfield with a possible massive workload increase. Passing game ability is raw though, limiting his PPR upside.",
-"Chris Rodriguez Jr.":"Signed a two-year, $10 million deal with the Jacksonville Jaguars and will compete with Bhayshul Tuten for the starting job left vacant by Travis Etienne's departure. His power running style makes him an ideal short-yardage and goal-line option, and the Jaguars clearly see him as more than just a backup. If he wins the lead role, the touchdown upside in a potentially improved Jacksonville offense could make him a solid flex play.",
+"Chris Rodriguez Jr.":"A power back from Kentucky who runs like a bowling ball with legs. Bounced around practice squads trying to carve out a role. Deep depth chart fodder and a fantasy afterthought.",
 "Jayden Higgins":"The Texans grabbed him in the second round out of Iowa State and the 6-foot-4 red-zone weapon delivered immediately — 41 catches for 525 yards and 6 TDs as a rookie playing alongside Nico Collins and C.J. Stroud. His contested catch ability at that size is his calling card and he tied Collins for the team lead in touchdown catches. With Christian Kirk gone this offseason, Higgins is positioned to step into the number two receiver role and his target share should jump significantly in year two.",
 "Brandon Aubrey":"Might be the most talented kicker in the NFL — leg that could kick a ball into orbit with multiple 60-yarders hit like extra points. Came from professional soccer which makes his story even cooler. A game-changing weapon at a position where most guys are interchangeable.",
 "Omarion Hampton":"Went to the Chargers in the first round and showed flashes of the explosive three-down back everyone expected — scored 20-plus fantasy points three times with his combination of speed and power. Jim Harbaugh's run-heavy scheme is the perfect fit for a workhorse back with his skill set. With Najee Harris gone and Mike McDaniel now calling plays, the runway is completely clear for Hampton to take the leap into potential fantasy stardom in year two.",
@@ -515,11 +413,11 @@ var BL={
 "Jaylen Waddle":"Traded to the Denver Broncos this offseason in a blockbuster deal that cost Denver a first-round pick — clearly they believe his declining Miami numbers were about the Dolphins, not him. His 2025 was solid (64 catches, 910 yards, 6 TDs) despite Miami falling apart around him with Tua leaving mid-season. Paired with Courtland Sutton and Bo Nix in Sean Payton's offense, Waddle could absolutely explode in a system that actually knows how to scheme receivers open. The speed is still elite and at 27 he has plenty left in the tank.",
 "Travis Etienne Jr.":"Helped Jacksonville win the AFC South and showed his three-down ability before signing a four-year deal with the Saints in 2026 free agency. His burst and pass-catching ability make him a PPR asset, and New Orleans desperately needed a dynamic back with Kamara breaking down. The concern is whether he can be THE guy as the Saints' featured back rather than part of a duo — consistency has always been his Achilles heel.",
 "Tyrone Tracy Jr.":"A converted WR who became a surprisingly effective RB as a rookie with vision and burst nobody expected. Receiving ability is a natural advantage at the position. Playing for the Giants is a massive handicap though — their offense generates about as much excitement as a DMV waiting room.",
-"Kyle Pitts Sr.":"The fourth overall pick who FINALLY showed signs of life late in 2025 but still only managed a TE19 finish in 12 games. The physical tools remain INSANE at 6-foot-6 with 4.44 speed, and the franchise tag keeps him in Atlanta for at least one more year. With Tua Tagovailoa now at QB and Drake London getting a mega extension, the pieces are in place for Pitts to actually deliver on his potential. Every year is supposed to be the breakout year — but the TE5 ranking says fantasy experts are buying in again.",
+"Kyle Pitts Sr.":"The fourth overall pick whose career has been the most disappointing TE trajectory since the invention of the position. Physical tools are INSANE — 6'6 with 4.44 speed — but bad QB play and offensive dysfunction have buried him. Every year 'this is the breakout year.' The hope is eternal, the patience is wearing thin.",
 "David Montgomery":"Got traded from the Lions to the Houston Texans this offseason after Detroit decided to make Jahmyr Gibbs the undisputed bellcow. His 2025 in Detroit was the same old story — bowling ball near the goal line who vultures TDs while looking pedestrian between the 20s. In Houston he replaces the injured Joe Mixon and should be the starter, which gives him more standalone value than he has had in years. The TD upside is real if the Texans use him the same way.",
 "Tee Higgins":"A legit number-one talent overshadowed by Ja'Marr Chase despite stats most WR1s would kill for. Contested catch ability at 6'4 is elite and he comes up huge in big moments. Franchise tag saga and injury history make him a fantasy headache, but with Burrow he's a top-15 receiver.",
 "Patrick Mahomes":"The best QB on Earth whose no-look passes and sidearm slings redefined the position. Three rings before 30 is insane and he's on pace to be the GOAT. Fantasy production has dipped as the Chiefs became more run-heavy, but he's still an elite QB1 you can never doubt.",
-"Josh Jacobs":"Was a solid RB2 in Green Bay before off-field legal issues created a cloud of uncertainty over his 2026 availability. His vision and power between the tackles are still excellent when he is on the field, and the Packers offense should remain productive. But the situation is fluid and his ADP has dropped significantly as a result. High-risk, potentially high-reward if everything gets resolved.",
+"Josh Jacobs":"Rejuvenated his career in Green Bay behind a solid O-line, proving he's still a legit starter. Vision and power between the tackles are still excellent. The explosive big plays have disappeared though — more grinder than game-breaker at this point.",
 "Zach Ertz":"A future Hall of Famer hanging on by a thread but still catches everything with legendary reliable hands. Route running IQ is still among the best. Father Time is winning though — separation has gone from 'decent' to 'nonexistent' and he's a red-zone-or-bust play.",
 "Jake Elliott":"A Pro Bowl kicker with a leg strong enough for 60-yarders and accuracy trusted in clutch situations. Playing for the Eagles means plenty of opportunities. One of the top-5 kickers in fantasy every year — the most boring yet comforting thing about a roster spot.",
 "Steelers DEF":"A defense that runs on spite, bad weather, and T.J. Watt terrorizing every QB who dares to drop back. Pittsburgh's defense has been elite for approximately 47 consecutive years and shows no signs of stopping. They'll randomly hold a team to 6 points and make you look like a genius for streaming them.",
@@ -566,7 +464,7 @@ TM.forEach(function(team){
     var sub=s.status==="ineligible"&&s.reason?'<span class="sub">'+s.reason+'</span>':"";
     rows+='<tr class="'+rc+sel+'><td><span class="pn" data-blurb="'+n.replace(/"/g,"&quot;")+'">'+n+'</span>'+sub+'</td><td>'+rdBadge+'</td><td><span class="kv">'+kd+'</span></td><td><span class="st '+tc+'">'+tt+'</span></td></tr>';
   });
-  card.innerHTML='<div class="card-head"><div class="card-stripe" style="background:'+color+'"></div><div class="card-info"><div class="card-name">'+team.n+'</div><div class="card-owner">'+team.o+'</div></div><button class="submit-btn" id="btn-'+team.n.replace(/[^a-zA-Z]/g,"")+'" onclick="openModal(\''+team.n.replace(/'/g,"\\'")+'\')">Save Keepers</button></div><table class="rtbl"><thead><tr><th>Player</th><th>Draft Rd</th><th>Keeper Rd</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  card.innerHTML='<div class="card-head"><div class="card-stripe" style="background:'+color+'"></div><div class="card-info"><div class="card-name">'+team.n+'</div><div class="card-owner">'+team.o+'</div></div><button class="submit-btn" id="btn-'+team.n.replace(/[^a-zA-Z]/g,"")+'" onclick="openModal(\''+team.n.replace(/'/g,"\\'")+'\')">Submit Keepers</button></div><table class="rtbl"><thead><tr><th>Player</th><th>Draft Rd</th><th>Keeper Rd</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
   grid.appendChild(card);
 });
 
@@ -574,7 +472,7 @@ TM.forEach(function(team){
 var tip=document.getElementById("blurb-tip"),tipPhoto=document.getElementById("blurb-photo"),tipName=document.getElementById("blurb-pname"),tipTeam=document.getElementById("blurb-pteam"),tipText=document.getElementById("blurb-text"),tipLogo=document.getElementById("blurb-team-logo");
 var hsCache={},tipTimer=null;
 var TEAM_ABBR={"pit":"Pittsburgh Steelers","cin":"Cincinnati Bengals","no":"New Orleans Saints","sea":"Seattle Seahawks","buf":"Buffalo Bills","ten":"Tennessee Titans","jax":"Jacksonville Jaguars","bal":"Baltimore Ravens","det":"Detroit Lions","ne":"New England Patriots","hou":"Houston Texans","den":"Denver Broncos","lac":"Los Angeles Chargers","phi":"Philadelphia Eagles","atl":"Atlanta Falcons","chi":"Chicago Bears","kc":"Kansas City Chiefs","gb":"Green Bay Packers","sf":"San Francisco 49ers","lar":"Los Angeles Rams","dal":"Dallas Cowboys","nyj":"New York Jets","nyg":"New York Giants","car":"Carolina Panthers","ari":"Arizona Cardinals","ind":"Indianapolis Colts","mia":"Miami Dolphins","tb":"Tampa Bay Buccaneers","min":"Minnesota Vikings","wsh":"Washington Commanders","lv":"Las Vegas Raiders","cle":"Cleveland Browns"};
-var PT={"Baker Mayfield":"tb","Drake London":"atl","Christian Watson":"gb","Derrick Henry":"bal","Jonathan Taylor":"ind","George Kittle":"sf","Tyjae Spears":"ten","Kimani Vidal":"lac","Keaton Mitchell":"bal","Bhayshul Tuten":"jax","Jacory Croskey-Merritt":"wsh","Blake Grupe":"no","Rashee Rice":"kc","Josh Allen":"buf","Michael Wilson":"ari","Brian Thomas Jr.":"jax","Breece Hall":"nyj","Tony Pollard":"ten","Colston Loveland":"chi","Kyle Monangai":"chi","Isiah Pacheco":"kc","Emanuel Wilson":"sea","Ricky Pearsall":"sf","Alec Pierce":"ind","Luther Burden III":"chi","Eddy Pineiro":"car","Brock Bowers":"lv","Dak Prescott":"dal","Mike Evans":"sf","Jameson Williams":"det","Saquon Barkley":"phi","De'Von Achane":"mia","Tyler Warren":"ind","Jaylen Warren":"pit","Tetairoa McMillan":"ari","Davante Adams":"lar","Dalton Schultz":"hou","Chuba Hubbard":"car","Chase McLaughlin":"tb","Cam Skattebo":"nyg","Trevor Lawrence":"jax","Nico Collins":"hou","Ja'Marr Chase":"cin","Aaron Jones Sr.":"min","Kenneth Gainwell":"tb","Hunter Henry":"ne","Jauan Jennings":"min","DK Metcalf":"pit","Drake Maye":"ne","Jake Ferguson":"dal","Alvin Kamara":"no","Darius Slayton":"nyg","Evan McPherson":"cin","Jared Goff":"det","Chris Olave":"no","Courtland Sutton":"den","Bijan Robinson":"atl","Bucky Irving":"tb","Brenton Strange":"jax","Dylan Sampson":"cle","Zach Charbonnet":"sea","Xavier Worthy":"kc","Lamar Jackson":"bal","Tre Tucker":"lv","Kareem Hunt":"kc","Tyler Loop":"tb","J.J. McCarthy":"min","Brock Purdy":"sf","DeVonta Smith":"phi","Zay Flowers":"bal","James Cook III":"buf","TreVeyon Henderson":"ne","Dallas Goedert":"phi","CeeDee Lamb":"dal","Blake Corum":"lar","Jaxson Dart":"nyg","Jordan Love":"gb","J.K. Dobbins":"den","Quentin Johnston":"lac","Jason Myers":"sea","Tucker Kraft":"gb","Bo Nix":"den","Jaxon Smith-Njigba":"sea","Amon-Ra St. Brown":"det","Kyren Williams":"lar","D'Andre Swift":"chi","Trey McBride":"ari","Rhamondre Stevenson":"ne","Wan'Dale Robinson":"nyg","Michael Pittman Jr.":"pit","Tyler Allgeier":"ari","Mark Andrews":"bal","Devaughn Vele":"den","Jake Bates":"det","Justin Herbert":"lac","Puka Nacua":"lar","Stefon Diggs":"ne","Jahmyr Gibbs":"det","Michael Carter":"ari","Travis Kelce":"kc","DJ Moore":"buf","Terry McLaurin":"wsh","Woody Marks":"hou","C.J. Stroud":"hou","Jakobi Meyers":"jax","Dalton Kincaid":"buf","Ka'imi Fairbairn":"hou","Joe Burrow":"cin","A.J. Brown":"ne","Troy Franklin":"den","Ashton Jeanty":"lv","Chase Brown":"cin","Juwan Johnson":"no","Javonte Williams":"dal","Elic Ayomanor":"ten","Rome Odunze":"chi","Cade Otton":"tb","Jerry Jeudy":"cle","Daniel Jones":"ind","Cameron Dicker":"lac","Devin Neal":"no","Jalen Hurts":"phi","Emeka Egbuka":"tb","George Pickens":"dal","Christian McCaffrey":"sf","Rico Dowdle":"pit","Darren Waller":"mia","Keenan Allen":"chi","Oronde Gadsden":"lac","Kenneth Walker III":"kc","Brian Robinson":"wsh","Tank Bigsby":"jax","Jayden Reed":"gb","Chris Boswell":"pit","Jordan Mason":"min","Caleb Williams":"chi","Ladd McConkey":"lac","Justin Jefferson":"min","Quinshon Judkins":"cle","RJ Harvey":"den","Mason Taylor":"nyj","Harold Fannin Jr.":"cle","Khalil Shakir":"buf","Marvin Harrison Jr.":"ari","Trey Benson":"ari","Chris Rodriguez Jr.":"jax","Jayden Higgins":"hou","Brandon Aubrey":"dal","Omarion Hampton":"lac","Matthew Stafford":"lar","Jordan Addison":"min","Jaylen Waddle":"den","Travis Etienne Jr.":"no","Tyrone Tracy Jr.":"nyg","Kyle Pitts Sr.":"atl","David Montgomery":"hou","Tee Higgins":"cin","Patrick Mahomes":"kc","Josh Jacobs":"gb","Zach Ertz":"wsh","Jake Elliott":"phi"};
+var PT={"Baker Mayfield":"tb","Drake London":"atl","Christian Watson":"gb","Derrick Henry":"bal","Jonathan Taylor":"ind","George Kittle":"sf","Tyjae Spears":"ten","Kimani Vidal":"lac","Keaton Mitchell":"bal","Bhayshul Tuten":"jax","Jacory Croskey-Merritt":"ari","Blake Grupe":"no","Rashee Rice":"kc","Josh Allen":"buf","Michael Wilson":"ari","Brian Thomas Jr.":"jax","Breece Hall":"nyj","Tony Pollard":"ten","Colston Loveland":"chi","Kyle Monangai":"chi","Isiah Pacheco":"kc","Emanuel Wilson":"sea","Ricky Pearsall":"sf","Alec Pierce":"ind","Luther Burden III":"chi","Eddy Pineiro":"car","Brock Bowers":"lv","Dak Prescott":"dal","Mike Evans":"sf","Jameson Williams":"det","Saquon Barkley":"phi","De'Von Achane":"mia","Tyler Warren":"ind","Jaylen Warren":"pit","Tetairoa McMillan":"ari","Davante Adams":"lar","Dalton Schultz":"hou","Chuba Hubbard":"car","Chase McLaughlin":"tb","Cam Skattebo":"nyg","Trevor Lawrence":"jax","Nico Collins":"hou","Ja'Marr Chase":"cin","Aaron Jones Sr.":"min","Kenneth Gainwell":"tb","Hunter Henry":"ne","Jauan Jennings":"min","DK Metcalf":"pit","Drake Maye":"ne","Jake Ferguson":"dal","Alvin Kamara":"no","Darius Slayton":"nyg","Evan McPherson":"cin","Jared Goff":"det","Chris Olave":"no","Courtland Sutton":"den","Bijan Robinson":"atl","Bucky Irving":"tb","Brenton Strange":"jax","Dylan Sampson":"cle","Zach Charbonnet":"sea","Xavier Worthy":"kc","Lamar Jackson":"bal","Tre Tucker":"lv","Kareem Hunt":"kc","Tyler Loop":"tb","J.J. McCarthy":"min","Brock Purdy":"sf","DeVonta Smith":"phi","Zay Flowers":"bal","James Cook III":"buf","TreVeyon Henderson":"ne","Dallas Goedert":"phi","CeeDee Lamb":"dal","Blake Corum":"lar","Jaxson Dart":"nyg","Jordan Love":"gb","J.K. Dobbins":"den","Quentin Johnston":"lac","Jason Myers":"sea","Tucker Kraft":"gb","Bo Nix":"den","Jaxon Smith-Njigba":"sea","Amon-Ra St. Brown":"det","Kyren Williams":"lar","D'Andre Swift":"chi","Trey McBride":"ari","Rhamondre Stevenson":"ne","Wan'Dale Robinson":"nyg","Michael Pittman Jr.":"pit","Tyler Allgeier":"atl","Mark Andrews":"bal","Devaughn Vele":"den","Jake Bates":"det","Justin Herbert":"lac","Puka Nacua":"lar","Stefon Diggs":"ne","Jahmyr Gibbs":"det","Michael Carter":"ari","Travis Kelce":"kc","DJ Moore":"buf","Terry McLaurin":"wsh","Woody Marks":"hou","C.J. Stroud":"hou","Jakobi Meyers":"lv","Dalton Kincaid":"buf","Ka'imi Fairbairn":"hou","Joe Burrow":"cin","A.J. Brown":"ne","Troy Franklin":"den","Ashton Jeanty":"lv","Chase Brown":"cin","Juwan Johnson":"no","Javonte Williams":"den","Elic Ayomanor":"ten","Rome Odunze":"chi","Cade Otton":"tb","Jerry Jeudy":"cle","Daniel Jones":"ind","Cameron Dicker":"lac","Devin Neal":"no","Jalen Hurts":"phi","Emeka Egbuka":"tb","George Pickens":"dal","Christian McCaffrey":"sf","Rico Dowdle":"car","Darren Waller":"mia","Keenan Allen":"chi","Oronde Gadsden":"lac","Kenneth Walker III":"kc","Brian Robinson":"wsh","Tank Bigsby":"jax","Jayden Reed":"gb","Chris Boswell":"pit","Jordan Mason":"min","Caleb Williams":"chi","Ladd McConkey":"lac","Justin Jefferson":"min","Quinshon Judkins":"cle","RJ Harvey":"lac","Mason Taylor":"jax","Harold Fannin Jr.":"cle","Khalil Shakir":"buf","Marvin Harrison Jr.":"ari","Trey Benson":"ari","Chris Rodriguez Jr.":"jax","Jayden Higgins":"hou","Brandon Aubrey":"dal","Omarion Hampton":"lac","Matthew Stafford":"lar","Jordan Addison":"min","Jaylen Waddle":"den","Travis Etienne Jr.":"no","Tyrone Tracy Jr.":"nyg","Kyle Pitts Sr.":"atl","David Montgomery":"hou","Tee Higgins":"cin","Patrick Mahomes":"kc","Josh Jacobs":"gb","Zach Ertz":"wsh","Jake Elliott":"phi"};
 var DEF_LOGOS={"Steelers":"pit","Bengals":"cin","Saints":"no","Seahawks":"sea","Bills":"buf","Titans":"ten","Jaguars":"jax","Ravens":"bal","Lions":"det","Patriots":"ne","Texans":"hou","Broncos":"den","Chargers":"lac","Eagles":"phi","Falcons":"atl"};
 var DEF_CITIES={"Steelers":"Pittsburgh Steelers","Bengals":"Cincinnati Bengals","Saints":"New Orleans Saints","Seahawks":"Seattle Seahawks","Bills":"Buffalo Bills","Titans":"Tennessee Titans","Jaguars":"Jacksonville Jaguars","Ravens":"Baltimore Ravens","Lions":"Detroit Lions","Patriots":"New England Patriots","Texans":"Houston Texans","Broncos":"Denver Broncos","Chargers":"Los Angeles Chargers","Eagles":"Philadelphia Eagles","Falcons":"Atlanta Falcons"};
 function showBlurb(el){
@@ -623,47 +521,25 @@ document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
     updateBtn(teamName);
   });
 });
-function updateBtn(tn){var id="btn-"+tn.replace(/[^a-zA-Z]/g,""),btn=document.getElementById(id);if(!btn)return;var sel=selections[tn]||[];if(sel.length===0){btn.textContent="Save No Keepers"}else if(sel.length===1){btn.textContent="Save 1 Keeper"}else{btn.textContent="Save "+sel.length+" Keepers"}}
+function updateBtn(tn){var id="btn-"+tn.replace(/[^a-zA-Z]/g,""),btn=document.getElementById(id);if(!btn)return;var sel=selections[tn]||[];if(sel.length===0){btn.textContent="Submit No Keepers"}else if(sel.length===1){btn.textContent="Submit 1 Keeper"}else{btn.textContent="Submit "+sel.length+" Keepers"}}
 
 // ═══ SUBMIT MODAL ═══
-var savedKeepers={};
-function openModal(tn){var sel=selections[tn]||[];document.getElementById("modal-team").textContent=tn;var ph=document.getElementById("modal-players");ph.innerHTML="";if(sel.length===0){ph.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers selected</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";ph.appendChild(d)})}document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");window._submitTeam=tn}
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwvodVdAkx6o310q9KtMUeAoUwYH1P5IuLnxXH6bL4OoFYy418JJ85lu1tOB9gGp00/exec";
+function openModal(tn){var sel=selections[tn]||[];if(!sel.length)return;document.getElementById("modal-team").textContent=tn;var ph=document.getElementById("modal-players");ph.innerHTML="";sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";ph.appendChild(d)});document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");window._submitTeam=tn}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
-function cancelModal(){closeModal();activeTeam=null;document.querySelectorAll('.submit-btn').forEach(function(b){b.classList.remove('visible')});document.querySelectorAll('.card').forEach(function(c){c.style.border='';c.style.boxShadow=''});document.getElementById("picker").classList.remove("hide")}
-function saveKeepers(){var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn)}
-function applyHighlights(tn){var grid=document.getElementById("G");var cards=grid.querySelectorAll(".card");cards.forEach(function(card){var name=card.querySelector(".card-name");if(!name)return;var teamName=name.textContent;var saved=savedKeepers[teamName]||[];var rows=card.querySelectorAll(".rtbl tr.selectable");rows.forEach(function(tr){var pn=tr.getAttribute("data-player");var isSaved=saved.some(function(s){return s.name===pn});if(isSaved){tr.classList.add("selected")}else if(teamName!==activeTeam){tr.classList.remove("selected")}})})}
+function sendKeepers(){var tn=window._submitTeam,sel=selections[tn]||[],team=TM.find(function(t){return t.n===tn}),owner=team?team.o:"Unknown";var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","The commish has been notified. No takebacks, you degenerate.","Submitted. Your league-mates are already laughing.","Done deal. Try not to regret this by August."];fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({teamName:tn,owner:owner,players:sel}),headers:{"Content-Type":"text/plain"}}).then(function(){document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)});document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)]}).catch(function(){alert("Error submitting. Try again.")})}
 
 // ═══ TEAM PICKER (always shows on keepers tab load) ═══
 var pg=document.getElementById("pick-grid");
 TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;document.getElementById("picker").classList.add("hide");showActiveBtn()});pg.appendChild(b)});
 
 function showActiveBtn(){
+  // Show submit button on active team's card
   document.querySelectorAll('.submit-btn').forEach(function(btn){btn.classList.remove('visible')});
   if(!activeTeam)return;
   var id="btn-"+activeTeam.replace(/[^a-zA-Z]/g,"");
   var btn=document.getElementById(id);
   if(btn){btn.classList.add('visible');updateBtn(activeTeam)}
-  // Move selected team first, randomize the rest
-  var grid=document.getElementById("G");
-  var cards=Array.from(grid.querySelectorAll('.card'));
-  var activeCard=null,otherCards=[];
-  cards.forEach(function(card){
-    var name=card.querySelector('.card-name');
-    if(name&&name.textContent===activeTeam){
-      activeCard=card;
-      card.style.border='1px solid #f39c12';
-      card.style.boxShadow='0 0 16px rgba(243,156,18,.2)';
-    } else {
-      otherCards.push(card);
-      card.style.border='';
-      card.style.boxShadow='';
-    }
-  });
-  // Shuffle other cards
-  for(var i=otherCards.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var temp=otherCards[i];otherCards[i]=otherCards[j];otherCards[j]=temp}
-  // Re-append: active first, then shuffled rest
-  if(activeCard)grid.insertBefore(activeCard,grid.firstChild);
-  otherCards.forEach(function(card){grid.appendChild(card)});
 }
 
 // ═══ PAGE LOAD: restore tab, always show picker for keepers ═══
@@ -1192,510 +1068,6 @@ function renderLegacyPool(table, champion) {
   html += '</tbody></table></div>';
 
   document.getElementById('lp-content').innerHTML = html;
-}
-// ═══════════════════════════════════════
-// DRAFT ROOM
-// ═══════════════════════════════════════
-var DRAFT_DB=[
-[1,"Bijan Robinson","ATL","RB",331.3,0,0,0,1478,7,79,820,4,3],
-[2,"Ja'Marr Chase","CIN","WR",251.1,0,0,0,14,0,125,1412,8,1],
-[3,"Jahmyr Gibbs","DET","RB",328.4,0,0,0,1223,13,77,616,5,1],
-[4,"Puka Nacua","LAR","WR",310.5,0,0,0,105,1,129,1715,10,1],
-[5,"Jaxon Smith-Njigba","SEA","WR",300.4,0,0,0,36,0,119,1793,10,1],
-[6,"Amon-Ra St. Brown","DET","WR",265.5,0,0,0,9,0,117,1401,11,0],
-[7,"Christian McCaffrey","SF","RB",365.6,0,0,0,1202,10,102,924,7,0],
-[8,"CeeDee Lamb","DAL","WR",163.4,0,0,0,2,0,75,1077,3,0],
-[9,"Jonathan Taylor","IND","RB",339.3,0,0,0,1585,18,46,378,2,1],
-[10,"Justin Jefferson","MIN","WR",159.5,0,0,0,7,0,84,1048,2,0],
-[11,"James Cook III","BUF","RB",285.7,0,0,0,1621,12,33,291,2,3],
-[12,"Drake London","ATL","WR",167.9,0,0,0,0,0,68,919,7,1],
-[13,"Ashton Jeanty","LV","RB",217.6,0,0,0,975,5,55,346,5,1],
-[14,"De'Von Achane","MIA","RB",289.3,0,0,0,1350,8,67,488,4,0],
-[15,"Nico Collins","HOU","WR",190.7,0,0,0,15,1,71,1117,6,1],
-[16,"Brock Bowers","LV","TE",144.2,0,0,0,2,0,64,680,7,0],
-[17,"Chase Brown","CIN","RB",248.1,0,0,0,1019,6,69,437,5,0],
-[18,"Saquon Barkley","PHI","RB",213.8,0,0,0,1140,7,37,273,2,1],
-[19,"George Pickens","DAL","WR",245.4,0,0,0,0,0,93,1429,9,0],
-[20,"Omarion Hampton","LAC","RB",119.7,0,0,0,545,4,32,192,1,0],
-[21,"Trey McBride","ARI","TE",252.9,0,0,0,0,0,126,1239,11,0],
-[22,"A.J. Brown","NE","WR",181.3,0,0,0,0,0,78,1003,7,0],
-[23,"Chris Olave","NO","WR",219.0,0,0,0,-3,0,100,1163,9,0],
-[24,"Kenneth Walker III","KC","RB",176.4,0,0,0,1027,5,31,282,0,0],
-[25,"Derrick Henry","BAL","RB",272.0,0,0,0,1595,16,15,150,0,3],
-[26,"Josh Allen","BUF","QB",374.5,3668,25,10,579,14,0,0,0,3],
-[27,"Rashee Rice","KC","WR",123.6,0,0,0,20,1,53,571,5,0],
-[28,"Tetairoa McMillan","CAR","WR",176.4,0,0,0,0,0,70,1014,7,1],
-[29,"Malik Nabers","NYG","WR",48.1,0,0,0,0,0,18,271,2,0],
-[30,"Jeremiyah Love","ARI","RB","-","-","-","-","-","-","-","-","-","-"],
-[31,"Tee Higgins","CIN","WR",182.1,0,0,0,0,0,59,846,11,0],
-[32,"DeVonta Smith","PHI","WR",163.3,0,0,0,0,0,77,1008,4,0],
-[33,"Lamar Jackson","BAL","QB",221.8,2549,21,7,349,2,0,0,0,3],
-[34,"Drake Maye","NE","QB",358.9,4394,31,8,450,4,0,0,0,3],
-[35,"Kyren Williams","LAR","RB",245.3,0,0,0,1252,10,36,281,3,2],
-[36,"Zay Flowers","BAL","WR",200.3,0,0,0,62,1,86,1211,5,3],
-[37,"Breece Hall","NYJ","RB",189.7,0,0,0,1065,4,36,350,1,2],
-[38,"Garrett Wilson","NYJ","WR",81.5,0,0,0,0,0,36,395,4,0],
-[39,"Josh Jacobs","GB","RB",219.1,0,0,0,929,13,36,282,1,2],
-[40,"Colston Loveland","CHI","TE",136.1,0,0,0,-2,0,58,713,6,0],
-[41,"Ladd McConkey","LAC","WR",147.9,0,0,0,0,0,66,789,6,0],
-[42,"Javonte Williams","DAL","RB",225.3,0,0,0,1201,11,35,137,2,2],
-[43,"Travis Etienne Jr.","NO","RB",235.9,0,0,0,1107,7,36,292,6,0],
-[44,"Terry McLaurin","WAS","WR",95.2,0,0,0,0,0,38,582,3,0],
-[45,"Joe Burrow","CIN","QB",139.4,1809,17,5,41,0,0,0,0,0],
-[46,"Davante Adams","LAR","WR",192.9,0,0,0,0,0,60,789,14,0],
-[47,"Emeka Egbuka","TB","WR",164.2,0,0,0,9,0,63,938,6,0],
-[48,"Jaylen Waddle","DEN","WR",162.1,0,0,0,28,0,64,910,6,0],
-[49,"Luther Burden III","CHI","WR",104.4,0,0,0,37,0,47,652,2,0],
-[50,"Jameson Williams","DET","WR",187.4,0,0,0,12,0,65,1117,7,0],
-[51,"Cam Skattebo","NYG","RB",115.7,0,0,0,410,5,24,207,2,1],
-[52,"Bucky Irving","TB","RB",123.5,0,0,0,588,1,30,277,3,1],
-[53,"Mike Evans","SF","WR",69.8,0,0,0,0,0,30,368,3,0],
-[54,"Quinshon Judkins","CLE","RB",156.8,0,0,0,827,7,26,171,0,0],
-[55,"Christian Watson","GB","WR",114.9,0,0,0,3,0,35,611,6,0],
-[56,"D'Andre Swift","CHI","RB",211.6,0,0,0,1087,9,34,299,1,2],
-[57,"TreVeyon Henderson","NE","RB",188.7,0,0,0,911,9,35,221,1,1],
-[58,"Jalen Hurts","PHI","QB",305.0,3224,25,6,421,8,0,0,0,4],
-[59,"Jayden Daniels","WAS","QB",117.1,1262,8,3,278,2,0,0,0,2],
-[60,"Tyler Warren","IND","TE",150.5,0,0,0,8,1,76,817,4,0],
-[61,"Rome Odunze","CHI","WR",124.1,0,0,0,0,0,44,661,6,0],
-[62,"DJ Moore","BUF","WR",145.2,0,0,0,79,1,50,682,6,1],
-[63,"David Montgomery","HOU","RB",154.9,0,0,0,716,8,24,192,0,1],
-[64,"Tucker Kraft","GB","TE",101.2,0,0,0,3,0,32,489,6,0],
-[65,"Bhayshul Tuten","JAC","RB",83.6,0,0,0,307,5,10,79,2,1],
-[66,"Caleb Williams","CHI","QB",323.3,3942,27,7,383,3,0,0,0,1],
-[67,"Jadarian Price","SEA","RB","-","-","-","-","-","-","-","-","-","-"],
-[68,"Justin Herbert","LAC","QB",299.8,3727,26,13,498,2,0,0,0,2],
-[69,"Jaylen Warren","PIT","RB",197.1,0,0,0,958,6,40,333,2,0],
-[70,"Carnell Tate","TEN","WR","-","-","-","-","-","-","-","-","-","-"],
-[71,"Alec Pierce","IND","WR",159.8,0,0,0,0,0,47,1003,6,0],
-[72,"Marvin Harrison Jr.","ARI","WR",107.3,0,0,0,0,0,41,608,4,0],
-[73,"DK Metcalf","PIT","WR",157.7,0,0,0,12,1,59,850,6,0],
-[74,"Courtland Sutton","DEN","WR",182.7,0,0,0,0,0,74,1017,7,0],
-[75,"Trevor Lawrence","JAC","QB",350.1,4007,29,12,359,9,0,0,0,3],
-[76,"Harold Fannin Jr.","CLE","TE",150.4,0,0,0,13,1,72,731,6,1],
-[77,"Chuba Hubbard","CAR","RB",110.4,0,0,0,511,1,30,223,3,1],
-[78,"Rhamondre Stevenson","NE","RB",162.8,0,0,0,603,7,32,345,2,3],
-[79,"Jaxson Dart","NYG","QB",246.5,2272,15,5,487,9,0,0,0,2],
-[80,"Rico Dowdle","PIT","RB",196.8,0,0,0,1076,6,39,297,1,1],
-[81,"Tony Pollard","TEN","RB",169.3,0,0,0,1082,5,33,206,0,3],
-[82,"Dak Prescott","DAL","QB",323.8,4552,30,10,177,2,0,0,0,2],
-[83,"Brian Thomas Jr.","JAC","WR",114.8,0,0,0,21,1,48,707,2,0],
-[84,"RJ Harvey","DEN","RB",183.1,0,0,0,540,7,47,356,5,1],
-[85,"Sam LaPorta","DET","TE",86.9,0,0,0,0,0,40,489,3,0],
-[86,"Kyle Pitts Sr.","ATL","TE",166.8,0,0,0,0,0,88,928,5,0],
-[87,"Chris Godwin Jr.","TB","WR",66.5,0,0,0,0,0,33,360,2,0],
-[88,"Michael Wilson","ARI","WR",181.6,0,0,0,0,0,78,1006,7,0],
-[89,"Jordyn Tyson","NO","WR","-","-","-","-","-","-","-","-","-","-"],
-[90,"Kyle Monangai","CHI","RB",137.7,0,0,0,783,5,18,164,0,0],
-[91,"Brock Purdy","SF","QB",187.4,2167,20,10,147,3,0,0,0,2],
-[92,"Parker Washington","JAC","WR",155.7,0,0,0,0,0,58,847,5,0],
-[93,"Blake Corum","LAR","RB",118.2,0,0,0,746,6,8,36,0,0],
-[94,"Makai Lemon","PHI","WR","-","-","-","-","-","-","-","-","-","-"],
-[95,"Jakobi Meyers","JAC","WR",138.3,0,0,0,13,0,75,835,3,1],
-[96,"Michael Pittman Jr.","PIT","WR",162.4,0,0,0,0,0,80,784,7,0],
-[97,"J.K. Dobbins","DEN","RB",110.4,0,0,0,772,4,11,37,0,0],
-[98,"Patrick Mahomes II","KC","QB",295.7,3587,22,11,422,5,0,0,0,0],
-[99,"Bo Nix","DEN","QB",315.8,3931,25,11,356,5,0,0,0,2],
-[100,"Wan'Dale Robinson","TEN","WR",171.9,0,0,0,5,0,92,1014,4,0],
-[101,"Matthew Stafford","LAR","QB",358.3,4707,46,8,1,0,0,0,0,3],
-[102,"Ricky Pearsall","SF","WR",70.6,0,0,0,-2,0,36,528,0,0],
-[103,"Jordan Addison","MIN","WR",114.1,0,0,0,81,1,42,610,3,0],
-[104,"Travis Kelce","KC","TE",155.2,0,0,0,1,0,76,851,5,0],
-[105,"Aaron Jones Sr.","MIN","RB",104.7,0,0,0,548,2,28,199,1,1],
-[106,"Kenneth Gainwell","TB","RB",184.8,0,0,0,537,5,73,486,3,1],
-[107,"Dalton Kincaid","BUF","TE",106.6,0,0,0,0,0,39,571,5,0],
-[108,"Quentin Johnston","LAC","WR",145.7,0,0,0,7,0,51,735,8,1],
-[109,"Jared Goff","DET","QB",305.1,4564,34,8,45,0,0,0,0,5],
-[110,"Kyler Murray","MIN","QB",80.8,962,6,3,173,1,0,0,0,1],
-[111,"Jake Ferguson","DAL","TE",147.1,0,0,0,1,0,82,600,8,2],
-[112,"Jayden Reed","GB","WR",39.0,0,0,0,28,0,19,207,1,0],
-[113,"Jacory Croskey-Merritt","WAS","RB",135.8,0,0,0,805,8,9,68,0,2],
-[114,"Josh Downs","IND","WR",107.4,0,0,0,-2,0,58,566,4,1],
-[115,"George Kittle","SF","TE",133.0,0,0,0,-3,0,57,628,7,0],
-[116,"Rachaad White","WAS","RB",123.0,0,0,0,572,4,40,218,0,0],
-[117,"Dallas Goedert","PHI","TE",155.1,0,0,0,0,0,60,591,11,0],
-[118,"Jordan Love","GB","QB",241.3,3381,23,6,199,0,0,0,0,2],
-[119,"Isaiah Likely","NYG","TE",48.2,0,0,0,0,0,27,307,1,1],
-[120,"Baker Mayfield","TB","QB",282.9,3693,26,11,382,1,0,0,0,3],
-[121,"Xavier Worthy","KC","WR",88.9,0,0,0,87,0,42,532,1,0],
-[122,"Jayden Higgins","HOU","WR",109.0,0,0,0,0,0,41,525,6,0],
-[123,"Tyrone Tracy Jr.","NYG","RB",142.8,0,0,0,740,2,36,288,2,1],
-[124,"Jordan Mason","MIN","RB",121.9,0,0,0,758,6,14,51,0,1],
-[125,"Tyler Shough","NO","QB",164.0,2384,10,6,186,3,0,0,0,2],
-[126,"Khalil Shakir","BUF","WR",130.4,0,0,0,5,0,72,719,4,1],
-[127,"Woody Marks","HOU","RB",139.1,0,0,0,703,2,24,208,3,0],
-[128,"Tyler Allgeier","ARI","RB",116.0,0,0,0,514,8,14,96,0,0],
-[129,"Zach Charbonnet","SEA","RB",171.4,0,0,0,730,12,20,144,0,0],
-[130,"Mark Andrews","BAL","TE",107.0,0,0,0,48,1,48,422,5,0],
-[131,"Jonathon Brooks","CAR","RB","-","-","-","-","-","-","-","-","-","-"],
-[132,"Chris Rodriguez Jr.","JAC","RB",90.5,0,0,0,500,6,3,30,0,0],
-[133,"Romeo Doubs","NE","WR",137.9,0,0,0,0,0,55,724,6,0],
-[134,"Malik Willis","MIA","QB",51.1,422,3,0,123,2,0,0,0,1],
-[135,"KC Concepcion","CLE","WR","-","-","-","-","-","-","-","-","-","-"],
-[136,"Jalen Coker","CAR","WR",73.9,0,0,0,0,0,33,394,3,1],
-[137,"Oronde Gadsden II","LAC","TE",106.9,0,0,0,0,0,49,664,3,1],
-[138,"Isiah Pacheco","DET","RB",77.8,0,0,0,462,1,19,101,1,0],
-[139,"Juwan Johnson","NO","TE",141.4,0,0,0,0,0,77,889,3,2],
-[140,"C.J. Stroud","HOU","QB",216.7,3041,19,8,209,1,0,0,0,0],
-[141,"Tyjae Spears","TEN","RB",89.2,0,0,0,283,2,45,264,0,0],
-[142,"Dylan Sampson","CLE","RB",71.1,0,0,0,175,0,33,271,2,1],
-[143,"Matthew Golden","GB","WR",55.5,0,0,0,49,0,29,361,0,0],
-[144,"Sam Darnold","SEA","QB",249.4,4048,25,14,95,0,0,0,0,6],
-[145,"Brenton Strange","JAC","TE",95.0,0,0,0,0,0,46,540,3,0],
-[146,"Alvin Kamara","NO","RB",84.2,0,0,0,471,1,33,186,0,2],
-[147,"Rashid Shaheed","SEA","WR",127.1,0,0,0,69,0,59,687,2,1],
-[148,"Hunter Henry","NE","TE",148.8,0,0,0,0,0,60,768,7,0],
-[149,"Keaton Mitchell","LAC","RB",50.9,0,0,0,341,1,9,63,0,0],
-[150,"Cam Ward","TEN","QB",193.7,3169,15,7,159,2,0,0,0,7],
-[151,"Brian Robinson Jr.","ATL","RB",58.5,0,0,0,400,2,8,25,0,0],
-[152,"Jerry Jeudy","CLE","WR",95.7,0,0,0,5,0,50,602,2,1],
-[153,"Jauan Jennings","MIN","WR",145.8,0,0,0,0,0,55,643,9,1],
-[154,"James Conner","ARI","RB",29.3,0,0,0,95,1,8,38,1,0],
-[155,"Denzel Boston","CLE","WR","-","-","-","-","-","-","-","-","-","-"],
-[156,"Tank Bigsby","PHI","RB",52.3,0,0,0,356,2,3,32,0,0],
-[157,"Braelon Allen","NYJ","RB",14.3,0,0,0,76,1,2,17,0,1],
-[158,"Jonah Coleman","DEN","RB","-","-","-","-","-","-","-","-","-","-"],
-[159,"Bryce Young","CAR","QB",229.0,3011,23,11,216,2,0,0,0,4],
-[160,"Omar Cooper Jr.","NYJ","WR","-","-","-","-","-","-","-","-","-","-"],
-[161,"Travis Hunter","JAC","WR",49.8,0,0,0,0,0,28,298,1,0],
-[162,"Emanuel Wilson","SEA","RB",87.0,0,0,0,496,3,15,99,0,0],
-[163,"Dalton Schultz","HOU","TE",136.7,0,0,0,0,0,82,777,3,0],
-[164,"Chig Okonkwo","WAS","TE",96.0,0,0,0,0,0,56,560,2,0],
-[165,"Daniel Jones","IND","QB",234.4,3101,19,8,164,5,0,0,0,3],
-[166,"Texans DEF","HOU","DEF",164.0,0,0,0,0,0,0,0,0,0],
-[167,"Jalen McMillan","TB","WR",23.9,0,0,0,1,0,12,178,0,0],
-[168,"Adonai Mitchell","NYJ","WR",71.4,0,0,0,-4,0,33,453,2,1],
-[169,"Kayshon Boutte","NE","WR",107.6,0,0,0,0,0,33,551,6,0],
-[170,"Stefon Diggs","FA","WR",167.8,0,0,0,0,0,85,1013,4,0],
-[171,"Emmett Johnson","KC","RB","-","-","-","-","-","-","-","-","-","-"],
-[172,"Kimani Vidal","LAC","RB",109.9,0,0,0,643,3,16,136,1,0],
-[173,"Tre' Harris","LAC","WR",54.4,0,0,0,10,0,30,324,1,0],
-[174,"Broncos DEF","DEN","DEF",143.0,0,0,0,0,0,0,0,0,0],
-[175,"Deebo Samuel Sr.","FA","WR",152.2,0,0,0,75,1,72,727,5,0],
-[176,"Tre Tucker","LV","WR",133.2,0,0,0,51,0,57,696,5,0],
-[177,"Seahawks DEF","SEA","DEF",179.0,0,0,0,0,0,0,0,0,0],
-[178,"Troy Franklin","DEN","WR",144.6,0,0,0,12,0,65,709,6,1],
-[179,"Rams DEF","LAR","DEF",136.0,0,0,0,0,0,0,0,0,0],
-[180,"Kenyon Sadiq","NYJ","TE","-","-","-","-","-","-","-","-","-","-"],
-[181,"AJ Barner","SEA","TE",121.3,0,0,0,14,1,52,519,6,0],
-[182,"Eagles DEF","PHI","DEF",135.0,0,0,0,0,0,0,0,0,0],
-[183,"Brandon Aiyuk","SF","WR","-","-","-","-","-","-","-","-","-","-"],
-[184,"Sean Tucker","TB","RB",87.4,0,0,0,320,7,8,34,1,0],
-[185,"T.J. Hockenson","MIN","TE",87.3,0,0,0,0,0,51,438,3,0],
-[186,"Ryan Flournoy","DAL","WR",94.0,0,0,0,25,0,40,475,4,0],
-[187,"Calvin Ridley","TEN","WR",38.8,0,0,0,0,0,17,303,0,0],
-[188,"Steelers DEF","PIT","DEF",130.0,0,0,0,0,0,0,0,0,0],
-[189,"Isaac TeSlaa","DET","WR",67.9,0,0,0,0,0,16,239,6,0],
-[190,"Jaguars DEF","JAC","DEF",144.0,0,0,0,0,0,0,0,0,0],
-[191,"Jaylin Noel","HOU","WR",55.4,0,0,0,12,0,26,292,2,0],
-[192,"Brandon Aubrey","DAL","K",187.6,0,0,0,0,0,0,0,0,0],
-[193,"Patriots DEF","NE","DEF",127.0,0,0,0,0,0,0,0,0,0],
-[194,"Mike Washington Jr.","LV","RB","-","-","-","-","-","-","-","-","-","-"],
-[195,"Vikings DEF","MIN","DEF",136.0,0,0,0,0,0,0,0,0,0],
-[196,"Ray Davis","BUF","RB",59.1,0,0,0,275,0,10,86,2,0],
-[197,"Chargers DEF","LAC","DEF",111.0,0,0,0,0,0,0,0,0,0],
-[198,"Cameron Dicker","LAC","K",170.0,0,0,0,0,0,0,0,0,0],
-[199,"Ka'imi Fairbairn","HOU","K",194.0,0,0,0,0,0,0,0,0,0],
-[200,"Jacoby Brissett","ARI","QB",235.4,3366,23,8,168,1,0,0,0,4],
-[201,"Jason Myers","SEA","K",202.0,0,0,0,0,0,0,0,0,0],
-[202,"Pat Bryant","DEN","WR",59.3,0,0,0,0,0,31,378,1,0],
-[203,"Nicholas Singleton","TEN","RB","-","-","-","-","-","-","-","-","-","-"],
-[204,"Darnell Mooney","NYG","WR",66.3,0,0,0,0,0,32,443,1,0],
-[205,"Cam Little","JAC","K",164.0,0,0,0,0,0,0,0,0,0],
-[206,"Kaytron Allen","WAS","RB","-","-","-","-","-","-","-","-","-","-"],
-[207,"Chimere Dike","TEN","WR",102.1,0,0,0,18,0,48,423,4,1],
-[208,"Packers DEF","GB","DEF",79.0,0,0,0,0,0,0,0,0,0],
-[209,"Antonio Williams","WAS","WR","-","-","-","-","-","-","-","-","-","-"],
-[210,"Eddy Pineiro","SF","K",140.0,0,0,0,0,0,0,0,0,0],
-[211,"Gunnar Helm","TEN","TE",69.7,0,0,0,0,0,44,357,2,0],
-[212,"Jaylen Wright","MIA","RB",45.7,0,0,0,288,2,5,44,0,1],
-[213,"Chiefs DEF","KC","DEF",92.0,0,0,0,0,0,0,0,0,0],
-[214,"Tyler Loop","BAL","K",144.0,0,0,0,0,0,0,0,0,0],
-[215,"Jalen Nailor","LV","WR",86.2,0,0,0,13,0,29,444,4,0],
-[216,"Browns DEF","CLE","DEF",133.0,0,0,0,0,0,0,0,0,0],
-[217,"Ravens DEF","BAL","DEF",97.0,0,0,0,0,0,0,0,0,0],
-[218,"Tyreek Hill","FA","WR",43.0,0,0,0,0,0,21,265,1,0],
-[219,"Evan McPherson","CIN","K",136.0,0,0,0,0,0,0,0,0,0],
-[220,"De'Zhaun Stribling","SF","WR","-","-","-","-","-","-","-","-","-","-"],
-[221,"David Njoku","LAC","TE",69.8,0,0,0,0,0,33,293,4,0],
-[222,"Terrance Ferguson","LAR","TE",46.6,0,0,0,0,0,11,231,3,0],
-[223,"Andy Borregales","NE","K",149.0,0,0,0,0,0,0,0,0,0],
-[224,"Cairo Santos","CHI","K",132.0,0,0,0,0,0,0,0,0,0],
-[225,"Dontayvion Wicks","PHI","WR",60.8,0,0,0,6,0,30,332,2,0],
-[226,"Ollie Gordon II","MIA","RB",50.6,0,0,0,199,3,7,32,1,0],
-[227,"Lions DEF","DET","DEF",97.0,0,0,0,0,0,0,0,0,0],
-[228,"Elic Ayomanor","TEN","WR",96.0,0,0,0,0,0,41,515,4,0],
-[229,"Malik Washington","MIA","WR",93.7,0,0,0,110,1,46,317,3,1],
-[230,"Rashod Bateman","BAL","WR",45.9,0,0,0,0,0,19,224,2,0],
-[231,"Tank Dell","HOU","WR","-","-","-","-","-","-","-","-","-","-"],
-[232,"Bills DEF","BUF","DEF",110.0,0,0,0,0,0,0,0,0,0],
-[233,"Pat Freiermuth","PIT","TE",93.1,0,0,0,0,0,41,486,4,0],
-[234,"Jake Bates","DET","K",152.0,0,0,0,0,0,0,0,0,0],
-[235,"Chase McLaughlin","TB","K",156.0,0,0,0,0,0,0,0,0,0],
-[236,"Devin Neal","NO","RB",51.5,0,0,0,206,2,17,104,0,0],
-[237,"Ted Hurst III","TB","WR","-","-","-","-","-","-","-","-","-","-"],
-[238,"Cade Otton","TB","TE",92.7,0,0,0,0,0,59,572,1,0],
-[239,"Trey Benson","ARI","RB",28.9,0,0,0,160,0,13,64,0,0],
-[240,"Kaleb Johnson","PIT","RB",8.3,0,0,0,69,0,1,9,0,0],
-[241,"Germie Bernard","PIT","WR","-","-","-","-","-","-","-","-","-","-"],
-[242,"MarShawn Lloyd","GB","RB","-","-","-","-","-","-","-","-","-","-"],
-[243,"Cooper Kupp","SEA","WR",93.8,0,0,0,0,0,47,593,2,1],
-[244,"Harrison Butker","KC","K",149.0,0,0,0,0,0,0,0,0,0],
-[245,"Colby Parkinson","LAR","TE",108.3,0,0,0,0,0,43,408,8,1],
-[246,"Zachariah Branch","ATL","WR","-","-","-","-","-","-","-","-","-","-"],
-[247,"Geno Smith","NYJ","QB",190.9,3025,19,17,109,0,0,0,0,1],
-[248,"Fernando Mendoza","LV","QB","-","-","-","-","-","-","-","-","-","-"],
-[249,"Chris Boswell","PIT","K",151.0,0,0,0,0,0,0,0,0,0],
-[250,"Harrison Mevis","LAR","K",82.0,0,0,0,0,0,0,0,0,0],
-[251,"Aaron Rodgers","PIT","QB",233.2,3322,24,7,61,1,0,0,0,1],
-[252,"Chris Bell","MIA","WR","-","-","-","-","-","-","-","-","-","-"],
-[253,"Kendre Miller","NO","RB",30.8,0,0,0,193,1,5,30,0,0],
-[254,"Keon Coleman","BUF","WR",83.4,0,0,0,0,0,38,404,4,1],
-[255,"Jack Bech","LV","WR",32.4,0,0,0,0,0,20,224,0,0],
-[256,"Demond Claiborne","MIN","RB","-","-","-","-","-","-","-","-","-","-"],
-[257,"Christian Kirk","SF","WR",43.9,0,0,0,0,0,28,239,1,0],
-[258,"Eli Stowers","PHI","TE","-","-","-","-","-","-","-","-","-","-"],
-[259,"Justice Hill","BAL","RB",54.7,0,0,0,93,2,21,169,1,0],
-[260,"Chris Brooks","GB","RB",26.2,0,0,0,106,0,13,91,0,0],
-[261,"Malik Davis","DAL","RB",39.6,0,0,0,250,2,2,16,0,0],
-[262,"Evan Engram","DEN","TE",77.8,0,0,0,7,0,50,461,1,0],
-[263,"Tory Horton","SEA","WR",58.6,0,0,0,0,0,13,161,5,0],
-[264,"Jaydon Blue","DAL","RB",19.9,0,0,0,129,1,1,5,0,0],
-[265,"Mason Taylor","NYJ","TE",66.9,0,0,0,0,0,44,369,1,0],
-[266,"Elijah Sarratt","BAL","WR","-","-","-","-","-","-","-","-","-","-"],
-[267,"Ty Johnson","BUF","RB",88.3,0,0,0,200,3,24,263,2,0],
-[268,"Isaiah Davis","NYJ","RB",60.7,0,0,0,236,1,21,186,0,0],
-[269,"Theo Johnson","NYG","TE",105.3,0,0,0,0,0,45,528,5,0],
-[270,"DJ Giddens","IND","RB",9.6,0,0,0,96,0,0,0,0,0],
-[271,"Malachi Fields","NYG","WR","-","-","-","-","-","-","-","-","-","-"],
-[272,"Marvin Mims Jr.","DEN","WR",74.5,0,0,0,78,1,37,322,1,1],
-[273,"Jordan James","SF","RB",0.0,0,0,0,0,0,0,0,0,0],
-[274,"Najee Harris","LAC","RB",10.1,0,0,0,61,0,3,25,0,0],
-[275,"Mack Hollins","NE","WR",90.4,0,0,0,4,0,46,550,2,0],
-[276,"Seth McGowan","IND","RB","-","-","-","-","-","-","-","-","-","-"],
-[277,"Falcons DEF","ATL","DEF",122.0,0,0,0,0,0,0,0,0,0],
-[278,"Kyle Williams","NE","WR",44.2,0,0,0,3,0,10,209,3,0],
-[279,"Michael Penix Jr.","ATL","QB",123.2,1982,9,3,70,1,0,0,0,2],
-[280,"Samaje Perine","CIN","RB",69.4,0,0,0,382,3,17,87,0,2],
-[281,"Wil Lutz","DEN","K",134.0,0,0,0,0,0,0,0,0,0],
-[282,"Will Reichard","MIN","K",159.0,0,0,0,0,0,0,0,0,0],
-[283,"Brashard Smith","KC","RB",50.8,0,0,0,151,0,25,172,1,0],
-[284,"George Holani","SEA","RB",19.8,0,0,0,73,1,2,15,0,1],
-[285,"Chris Brazzell II","CAR","WR","-","-","-","-","-","-","-","-","-","-"],
-[286,"Jerome Ford","WAS","RB",30.6,0,0,0,73,0,26,103,0,0],
-[287,"Tyquan Thornton","KC","WR",71.3,0,0,0,0,0,19,438,3,0],
-[288,"Darius Slayton","NYG","WR",80.3,0,0,0,0,0,37,538,1,1],
-[289,"Tua Tagovailoa","ATL","QB",175.6,2660,20,15,43,0,0,0,0,1],
-[290,"Xavier Legette","CAR","WR",71.8,0,0,0,0,0,35,363,3,0],
-[291,"Devin Singletary","NYG","RB",99.8,0,0,0,437,5,18,151,0,0],
-[292,"49ers DEF","SF","DEF",78.0,0,0,0,0,0,0,0,0,0],
-[293,"LeQuint Allen Jr.","JAC","RB",19.8,0,0,0,94,0,10,54,0,0],
-[294,"Greg Dulcich","MIA","TE",49.8,0,0,0,-7,0,26,335,1,1],
-[295,"Keenan Allen","LAC","WR",142.2,0,0,0,0,0,81,777,4,0],
-[296,"Emari Demercado","KC","RB",51.8,0,0,0,312,0,13,101,1,1],
-[297,"Oscar Delp","NO","TE","-","-","-","-","-","-","-","-","-","-"],
-[298,"Kaelon Black","SF","RB","-","-","-","-","-","-","-","-","-","-"],
-[299,"Devaughn Vele","NO","WR",53.8,0,0,0,0,0,25,293,2,0],
-[300,"Joe Mixon","FA","RB","-","-","-","-","-","-","-","-","-","-"],
-[303,"Charlie Smyth","NO","K",60.0,0,0,0,0,0,0,0,0,0],
-[304,"Colts DEF","IND","DEF",99.0,0,0,0,0,0,0,0,0,0],
-[320,"Bears DEF","CHI","DEF",115.0,0,0,0,0,0,0,0,0,0],
-[323,"Saints DEF","NO","DEF",118.0,0,0,0,0,0,0,0,0,0],
-[342,"Panthers DEF","CAR","DEF",103.0,0,0,0,0,0,0,0,0,0],
-[353,"Cowboys DEF","DAL","DEF",59.0,0,0,0,0,0,0,0,0,0],
-[365,"Tyler Bass","BUF","K","-","-","-","-","-","-","-","-","-","-"],
-[369,"Zane Gonzalez","MIA","K",96.0,0,0,0,0,0,0,0,0,0],
-[375,"Blake Grupe","IND","K",129.0,0,0,0,0,0,0,0,0,0],
-[376,"Bengals DEF","CIN","DEF",79.0,0,0,0,0,0,0,0,0,0],
-[377,"Jake Elliott","PHI","K",116.0,0,0,0,0,0,0,0,0,0],
-[379,"Giants DEF","NYG","DEF",77.0,0,0,0,0,0,0,0,0,0],
-[388,"Titans DEF","TEN","DEF",87.0,0,0,0,0,0,0,0,0,0],
-[393,"Buccaneers DEF","TB","DEF",99.0,0,0,0,0,0,0,0,0,0],
-[399,"Commanders DEF","WAS","DEF",76.0,0,0,0,0,0,0,0,0,0],
-[401,"Chad Ryland","ARI","K",130.0,0,0,0,0,0,0,0,0,0],
-[402,"Dolphins DEF","MIA","DEF",95.0,0,0,0,0,0,0,0,0,0],
-[403,"Cardinals DEF","ARI","DEF",77.0,0,0,0,0,0,0,0,0,0],
-[404,"Jets DEF","NYJ","DEF",47.0,0,0,0,0,0,0,0,0,0],
-[405,"Raiders DEF","LV","DEF",75.0,0,0,0,0,0,0,0,0,0],
-[406,"Joey Slye","TEN","K",135.0,0,0,0,0,0,0,0,0,0],
-[407,"Riley Patterson","MIA","K",132.0,0,0,0,0,0,0,0,0,0],
-[408,"Nick Folk","NYJ","K",127.0,0,0,0,0,0,0,0,0,0],
-[409,"Brandon McManus","GB","K",113.0,0,0,0,0,0,0,0,0,0],
-[410,"Andre Szmyt","CLE","K",112.0,0,0,0,0,0,0,0,0,0],
-[411,"Ryan Fitzgerald","CAR","K",111.0,0,0,0,0,0,0,0,0,0],
-[412,"Matt Prater","BUF","K",108.0,0,0,0,0,0,0,0,0,0],
-];var STAT_HEADERS=["Rank","Player","Team","Pos","Pts","Pass Yds","Pass TD","INT","Rush Yds","Rush TD","Rec","Rec Yds","Rec TD","FumL"];
-var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='';
-var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
-var ROW_COLORS={QB:'row-qb',RB:'row-rb',WR:'row-wr',TE:'row-te',K:'row-k',DEF:'row-def'};
-
-function abbrevName(n){if(!n)return'';var p=n.replace(/ DEF$/,' D/ST').split(' ');if(p.length<2)return n;return p[0][0]+'. '+p.slice(1).join(' ')}
-
-function initDraftRoom(){
-  var sel=document.getElementById('dr-team-select');
-  TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
-  for(var tn in savedKeepers){(savedKeepers[tn]||[]).forEach(function(k){drDrafted.add(k.name)})}
-  fetchSheet('Draft Order',function(err,table){if(!err&&table)buildDraftOrder(table)});
-  renderLocalPlayers('ALL');
-}
-
-function buildDraftOrder(table){
-  var rows=table.rows||[],cols=table.cols||[];var rawOrder=[];
-  var colLabels=cols.map(function(c){return(c.label||'').trim()});var doCol=-1,plCol=-1;
-  colLabels.forEach(function(l,i){if(/draft.?order/i.test(l))doCol=i;if(l.toLowerCase()==='player')plCol=i});
-  if(doCol<0&&rows[0]){(rows[0].c||[]).forEach(function(c,i){var v=cellVal(c).trim();if(/draft.?order/i.test(v))doCol=i;if(v.toLowerCase()==='player')plCol=i})}
-  if(doCol<0)doCol=0;if(plCol<0)plCol=1;
-  for(var i=0;i<rows.length;i++){var r=rows[i].c||[];var pos=cellVal(r[doCol]).trim();var name=cellVal(r[plCol]).trim();if(pos&&name&&/^\d+$/.test(pos))rawOrder.push({pos:parseInt(pos),name:name})}
-  rawOrder.sort(function(a,b){return a.pos-b.pos});
-  drOrder=[];
-  for(var rd=0;rd<14;rd++){var order=rd%2===0?rawOrder.slice():rawOrder.slice().reverse();order.forEach(function(o,i){drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:o.name})})}
-  for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
-    var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-    keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-      for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===kr&&drOrder[p].name===team.o){drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break}}
-    });
-  }
-  renderDraftOrderPanel();
-}
-
-function updateClock(){
-  var nextIdx=-1;
-  for(var i=0;i<drOrder.length;i++){if(!drPicks[i]){nextIdx=i;break}}
-  var cn=document.getElementById('dr-clock-name'),cp=document.getElementById('dr-clock-pick');
-  if(nextIdx>=0){var o=drOrder[nextIdx];cn.textContent=o.name;cp.textContent='Pick '+(nextIdx+1)+' \u00b7 Round '+o.round+', Pick '+o.pickInRound}
-  else{cn.textContent='Draft Complete';cp.textContent='All picks are in!'}
-}
-
-function renderDraftOrderPanel(){
-  updateClock();var html='',nextIdx=-1;
-  for(var i=0;i<drOrder.length;i++){if(!drPicks[i]){nextIdx=i;break}}
-  drOrder.forEach(function(o,idx){
-    var picked=drPicks[idx];var isNext=idx===nextIdx;var isKeeper=picked&&picked.keeper;
-    var cls='dr-order-item';if(picked)cls+=' drafted';
-    var draggable=picked?'':'draggable="true"';var style='';
-    if(isNext)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1)"';
-    if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
-    html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
-    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name+'</span>';
-    if(picked){var pos=guessPosition(picked.player);var pcls=POS_COLORS[pos]||'';var lbl=isKeeper?'K: ':'';
-      html+='<span class="dr-picked-player '+pcls+'">'+lbl+abbrevName(picked.player)+'</span>'}
-    html+='</div>';
-  });
-  document.getElementById('dr-order-list').innerHTML=html;
-  var total=drPicks.filter(function(p){return p}).length;
-  document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
-  document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
-  document.querySelectorAll('.dr-order-item:not(.drafted)').forEach(function(el){
-    el.addEventListener('dragstart',function(e){
-      e.dataTransfer.setData('text/plain',JSON.stringify({pick:parseInt(el.dataset.pick),name:el.dataset.name}));
-      el.classList.add('dragging');setTimeout(function(){el.classList.remove('dragging')},200);
-    });
-  });
-  if(drActiveRosterTeam)renderTeamRoster(drActiveRosterTeam);
-}
-
-function renderLocalPlayers(posFilter){
-  drCurrentSub=posFilter;
-  document.querySelectorAll('.dr-sub').forEach(function(b){b.classList.remove('active')});
-  document.querySelectorAll('.dr-sub').forEach(function(b){
-    var map={'All Players':'ALL','QB':'QB','RB':'RB','WR':'WR','TE':'TE','K':'K','DEF':'DEF'};
-    for(var k in map){if(map[k]===posFilter&&b.textContent.trim()===k)b.classList.add('active')}
-  });
-  var filtered=DRAFT_DB;
-  if(posFilter!=='ALL')filtered=DRAFT_DB.filter(function(p){return p[3]===posFilter});
-
-  var html='<table class="dr-ptbl"><thead><tr>';
-  STAT_HEADERS.forEach(function(h){html+='<th>'+h+'</th>'});
-  html+='</tr></thead><tbody>';
-  filtered.forEach(function(p){
-    var name=p[1],pos=p[3];
-    var rowCls=ROW_COLORS[pos]||'';
-    var isDraftedPlayer=drDrafted.has(name);
-    var draftedBy='',isKeeper=false;
-    if(isDraftedPlayer){for(var i=0;i<drPicks.length;i++){if(drPicks[i]&&drPicks[i].player===name){draftedBy=drPicks[i].owner;isKeeper=drPicks[i].keeper||false;break}}}
-    html+='<tr class="'+rowCls+(isDraftedPlayer?' dr-drafted':'')+'" data-player="'+name.replace(/"/g,'&quot;')+'">';
-    // Rank
-    html+='<td>'+p[0]+'</td>';
-    // Player name
-    var pcls=POS_COLORS[pos]||'';
-    html+='<td><span class="dr-pname '+pcls+'">'+name+'</span>';
-    if(draftedBy)html+='<span class="dr-drafted-by '+pcls+'">'+(isKeeper?'K:':'')+draftedBy+'</span>';
-    html+='</td>';
-    // Team, Pos
-    html+='<td>'+p[2]+'</td><td class="'+pcls+'">'+pos+'</td>';
-    // Stats (indices 4-12)
-    for(var s=4;s<=13;s++){var v=p[s];if(v==='"−"'||v==='-')html+='<td>-</td>';else if(s>=5&&s<=7&&pos!=='QB'&&v===0)html+='<td>-</td>';else html+='<td>'+v+'</td>'}
-    html+='</tr>';
-  });
-  html+='</tbody></table>';
-  document.getElementById('dr-player-table').innerHTML=html;
-  // Attach drop events
-  document.querySelectorAll('.dr-ptbl tbody tr:not(.dr-drafted)').forEach(function(tr){
-    tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('dr-dragover')});
-    tr.addEventListener('dragleave',function(){tr.classList.remove('dr-dragover')});
-    tr.addEventListener('drop',function(e){
-      e.preventDefault();tr.classList.remove('dr-dragover');
-      try{var data=JSON.parse(e.dataTransfer.getData('text/plain'));var pn=tr.dataset.player;
-      if(!pn||drDrafted.has(pn))return;draftPick(parseInt(data.pick),data.name,pn)}catch(ex){}
-    });
-  });
-}
-
-function switchDraftSub(name){
-  var map={'All Players':'ALL','QB':'QB','RB':'RB','WR':'WR','TE':'TE','K':'K','DEF':'DEF'};
-  renderLocalPlayers(map[name]||'ALL');
-}
-
-function draftPick(pickNum,ownerName,playerName){
-  drPicks[pickNum-1]={pick:pickNum,owner:ownerName,player:playerName};
-  drDrafted.add(playerName);renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
-}
-function draftUndo(){
-  for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
-  while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
-  renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
-}
-
-function openTeamRoster(val){
-  if(!val){closeTeamRoster();return}
-  drActiveRosterTeam=val;document.getElementById('dr-roster-team-name').textContent=val;
-  document.getElementById('dr-roster-panel').classList.add('open');renderTeamRoster(val);
-}
-function closeTeamRoster(){
-  drActiveRosterTeam='';document.getElementById('dr-roster-panel').classList.remove('open');document.getElementById('dr-team-select').value='';
-}
-function renderTeamRoster(teamName){
-  var team=TM.find(function(t){return t.n===teamName});var ownerName=team?team.o:'';
-  var teamPlayers=[];
-  drPicks.forEach(function(p){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,keeper:p.keeper||false})});
-  teamPlayers.forEach(function(tp){tp.pos=guessPosition(tp.player)});
-  var slots=[{label:'QB',pos:'QB'},{label:'WR',pos:'WR'},{label:'WR',pos:'WR'},{label:'RB',pos:'RB'},{label:'RB',pos:'RB'},{label:'TE',pos:'TE'},{label:'FLEX',pos:'FLEX'},{label:'K',pos:'K'},{label:'DEF',pos:'DEF'}];
-  var assigned=[],html='<div class="dr-slot-sep">Starters</div>';
-  slots.forEach(function(slot){
-    var match=teamPlayers.filter(function(tp){if(assigned.indexOf(tp.player)>=0)return false;if(slot.pos==='FLEX')return tp.pos==='WR'||tp.pos==='RB'||tp.pos==='TE';return tp.pos===slot.pos});
-    var filled=match.length?match[0]:null;if(filled)assigned.push(filled.player);
-    var cls='dr-slot'+(filled?' filled':'')+(filled&&filled.keeper?' keeper':'');
-    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player">'+(filled?filled.player:'\u2014')+'</span></div>';
-  });
-  var bench=teamPlayers.filter(function(tp){return assigned.indexOf(tp.player)<0});
-  html+='<div class="dr-slot-sep">Bench</div>';
-  bench.forEach(function(tp){html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#666">BN</span><span class="dr-slot-player">'+tp.player+'</span></div>'});
-  for(var b=0;b<Math.max(0,6-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#444">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
-  document.getElementById('dr-roster-body').innerHTML=html;
-}
-function guessPosition(name){
-  // Check against DRAFT_DB first
-  for(var i=0;i<DRAFT_DB.length;i++){if(DRAFT_DB[i][1]===name)return DRAFT_DB[i][3]}
-  if(/DEF$/.test(name))return 'DEF';
-  var kickers=['Blake Grupe','Eddy Pineiro','Chase McLaughlin','Evan McPherson','Tyler Loop','Jason Myers','Jake Bates',"Ka'imi Fairbairn",'Cameron Dicker','Chris Boswell','Brandon Aubrey','Jake Elliott'];
-  if(kickers.indexOf(name)>=0)return 'K';
-  var qbs=['Baker Mayfield','Josh Allen','Dak Prescott','Trevor Lawrence','Jared Goff','Brock Purdy','Bo Nix','Justin Herbert','Joe Burrow','Jalen Hurts','Caleb Williams','Matthew Stafford','Patrick Mahomes','Jordan Love','Lamar Jackson','J.J. McCarthy','Drake Maye','Jaxson Dart','Daniel Jones','C.J. Stroud','Jayden Daniels'];
-  if(qbs.indexOf(name)>=0)return 'QB';
-  var tes=['George Kittle','Colston Loveland','Brock Bowers','Tyler Warren','Dalton Schultz','Hunter Henry','Dallas Goedert','Trey McBride','Mark Andrews','Travis Kelce','Dalton Kincaid','Tucker Kraft','Juwan Johnson','Cade Otton','Harold Fannin Jr.','Brenton Strange','Kyle Pitts Sr.','Zach Ertz','Mason Taylor','Oronde Gadsden','Darren Waller'];
-  if(tes.indexOf(name)>=0)return 'TE';
-  var wrs=['Drake London','Christian Watson','Rashee Rice','Michael Wilson','Brian Thomas Jr.','Mike Evans','Jameson Williams','Tetairoa McMillan','Davante Adams','Nico Collins',"Ja'Marr Chase",'DK Metcalf','Darius Slayton','Chris Olave','Courtland Sutton','Xavier Worthy','Tre Tucker','DeVonta Smith','Zay Flowers','CeeDee Lamb','Quentin Johnston','Jaxon Smith-Njigba',"Amon-Ra St. Brown","Wan'Dale Robinson",'Michael Pittman Jr.','Devaughn Vele','Puka Nacua','Stefon Diggs','DJ Moore','Terry McLaurin','Jakobi Meyers','A.J. Brown','Troy Franklin','Elic Ayomanor','Rome Odunze','Jerry Jeudy','Emeka Egbuka','George Pickens','Keenan Allen','Jayden Reed','Ladd McConkey','Justin Jefferson','Khalil Shakir','Marvin Harrison Jr.','Jayden Higgins','Jordan Addison','Jaylen Waddle','Tee Higgins','Luther Burden III','Alec Pierce','Ricky Pearsall','Jauan Jennings'];
-  if(wrs.indexOf(name)>=0)return 'WR';
-  return 'RB';
 }
 
 </script>
