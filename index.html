@@ -1541,15 +1541,28 @@ function initDraftRoom(){
 }
 
 function buildDraftOrder(table){
-  var rows=table.rows||[],cols=table.cols||[];var rawOrder=[];
-  var colLabels=cols.map(function(c){return(c.label||'').trim()});var doCol=-1,plCol=-1;
-  colLabels.forEach(function(l,i){if(/draft.?order/i.test(l))doCol=i;if(l.toLowerCase()==='player')plCol=i});
-  if(doCol<0&&rows[0]){(rows[0].c||[]).forEach(function(c,i){var v=cellVal(c).trim();if(/draft.?order/i.test(v))doCol=i;if(v.toLowerCase()==='player')plCol=i})}
-  if(doCol<0)doCol=0;if(plCol<0)plCol=1;
-  for(var i=0;i<rows.length;i++){var r=rows[i].c||[];var pos=cellVal(r[doCol]).trim();var name=cellVal(r[plCol]).trim();if(pos&&name&&/^\d+$/.test(pos))rawOrder.push({pos:parseInt(pos),name:name})}
+  var rows=table.rows||[];
+  var rawOrder=[];
+  // Read columns A(0) and B(1) only — A=draft position, B=owner name
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i].c||[];
+    var posVal=cellVal(r[0]).trim();
+    var name=cellVal(r[1]).trim();
+    var posNum=parseInt(posVal);
+    if(posNum>=1&&posNum<=12&&name){
+      rawOrder.push({pos:posNum,name:name});
+    }
+  }
   rawOrder.sort(function(a,b){return a.pos-b.pos});
+  if(!rawOrder.length){console.log('No draft order found');return}
+  // Build snake draft: 14 rounds × 12 teams
   drOrder=[];
-  for(var rd=0;rd<14;rd++){var order=rd%2===0?rawOrder.slice():rawOrder.slice().reverse();order.forEach(function(o,i){drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:o.name})})}
+  for(var rd=0;rd<14;rd++){
+    var order=rd%2===0?rawOrder.slice():rawOrder.slice().reverse();
+    order.forEach(function(o,i){
+      drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:o.name});
+    });
+  }
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
     keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
