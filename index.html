@@ -529,4 +529,865 @@ var BL={
 "Bills DEF":"A solid unit that benefits from Josh Allen's offense keeping them off the field and well-rested. Von Miller's return (or absence) swings their pass rush wildly. They're a top-12 D/ST most weeks but don't have the consistent dominance to be a set-and-forget pick.",
 "Titans DEF":"A defense that exists. That's about the nicest thing anyone can say about them. They'll occasionally have a game where they look respectable, but mostly they're the reason streaming defenses was invented. Starting them by choice is a cry for help.",
 "Jaguars DEF":"Won the AFC South and actually have some talent now — Josh Allen (the other one) is a wrecking ball off the edge. They improved dramatically and have real upside in favorable matchups. Still inconsistent enough to burn you though, because it's Jacksonville and disappointment is in their DNA.",
-"Ravens DEF":"One of the most consistently elite defensive units in 
+"Ravens DEF":"One of the most consistently elite defensive units in football year after year with a pass rush that terrorizes QBs and a secondary that creates turnovers out of thin air. They're always a top-5 D/ST option and drafting them actually makes sense. The purple and black are just built different on defense.",
+"Lions DEF":"A defense that went from historically terrible to legitimately competitive — the turnaround has been impressive. They've got athletes at every level and Aidan Hutchinson is a monster. Still give up too many points in shootouts because the offense is so good they're always in track meets.",
+"Patriots DEF":"Mike Vrabel brought his nasty defensive mentality to New England and this unit was a huge part of their Super Bowl run. They play physical, aggressive football that makes offenses uncomfortable. A legitimate top-10 D/ST who could return to their glory days of making Tom Brady's job easy.",
+"Texans DEF":"Will Anderson Jr. and Danielle Hunter form one of the nastiest pass rush duos in the NFL — QBs don't sleep well the night before playing Houston. The secondary has improved and they're a legitimate top-8 D/ST. DeMeco Ryans has built a monster on that side of the ball.",
+"Broncos DEF":"A defense that has been quietly solid and carried the team while Bo Nix figured things out at QB. The pass rush gets home, the secondary makes plays, and they play in Denver where the altitude kills visiting teams. A nice streaming option in favorable matchups.",
+"Chargers DEF":"Jim Harbaugh's defense plays smashmouth, physical football that makes offenses hate their lives. They're built in Harbaugh's old-school image — run the ball, play defense, bore everyone to death while winning. A legit top-10 D/ST with Khalil Mack and company up front.",
+"Eagles DEF":"A dominant unit with one of the best defensive lines in football that makes running against them basically impossible. The secondary has elite talent too, making them a true top-5 D/ST. They'll rack up sacks, turnovers, and defensive scores like it's their job — because it literally is.",
+"Falcons DEF":"A work in progress that shows flashes but ultimately isn't consistent enough to trust on a weekly basis. They've added some talent but the whole unit still hasn't gelled into anything scary. Streaming them requires a favorable matchup and a prayer."
+};
+// ═══ HELPERS ═══
+function lookup(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"])if(DR[n+s]!==undefined)return DR[n+s];return null}
+function nm(n,set){if(set.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(set.has(c))return true;for(var k of set)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim()===c)return true;return false}
+function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(keeperRd<=3){return{status:"ineligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
+if(nm(n,K2))return{status:"ineligible",reason:"3 Years Maxed Out",rd:displayRd,kv:keeperRd,sv:sortVal};
+if(nm(n,K25))return{status:"last-year",reason:"2nd year - final keep",rd:displayRd,kv:keeperRd,sv:sortVal};
+return{status:"eligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
+
+// ═══ RENDER ROSTER CARDS ═══
+var grid=document.getElementById("G");
+TM.forEach(function(team){
+  var card=document.createElement("div");card.className="card";
+  var color=TC[team.n]||"#333";
+  var playerData=[];
+  team.p.forEach(function(n){playerData.push({name:n,s:getStatus(n)})});
+  playerData.sort(function(a,b){return a.s.sv-b.s.sv});
+  var rows="";
+  playerData.forEach(function(pd){
+    var s=pd.s,n=pd.name;
+    var rc=s.status==="ineligible"?"rr":s.status==="last-year"?"rg":"re";
+    var tc=s.status==="ineligible"?"st-r":s.status==="last-year"?"st-g":"st-e";
+    var tt=s.status==="ineligible"?"INELIGIBLE":s.status==="last-year"?"LAST KEEP":"ELIGIBLE";
+    var kd="Rd "+s.kv;
+    var rdBadge=s.rd==="FA"?'<span class="rdb fa-b">FA</span>':'<span class="rdb">'+s.rd+'</span>';
+    var sel=(s.status!=="ineligible")?' selectable" data-player="'+n.replace(/"/g,"&quot;")+'" data-kv="'+s.kv+'"':'"';
+    var sub=s.status==="ineligible"&&s.reason?'<span class="sub">'+s.reason+'</span>':"";
+    rows+='<tr class="'+rc+sel+'><td><span class="pn" data-blurb="'+n.replace(/"/g,"&quot;")+'">'+n+'</span>'+sub+'</td><td>'+rdBadge+'</td><td><span class="kv">'+kd+'</span></td><td><span class="st '+tc+'">'+tt+'</span></td></tr>';
+  });
+  card.innerHTML='<div class="card-head"><div class="card-stripe" style="background:'+color+'"></div><div class="card-info"><div class="card-name">'+team.n+'</div><div class="card-owner">'+team.o+'</div></div><button class="submit-btn" id="btn-'+team.n.replace(/[^a-zA-Z]/g,"")+'" onclick="openModal(\''+team.n.replace(/'/g,"\\'")+'\')">Save Keepers</button></div><table class="rtbl"><thead><tr><th>Player</th><th>Draft Rd</th><th>Keeper Rd</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  grid.appendChild(card);
+});
+
+// ═══ BLURB TOOLTIP ═══
+var tip=document.getElementById("blurb-tip"),tipPhoto=document.getElementById("blurb-photo"),tipName=document.getElementById("blurb-pname"),tipTeam=document.getElementById("blurb-pteam"),tipText=document.getElementById("blurb-text"),tipLogo=document.getElementById("blurb-team-logo");
+var hsCache={},tipTimer=null;
+var TEAM_ABBR={"pit":"Pittsburgh Steelers","cin":"Cincinnati Bengals","no":"New Orleans Saints","sea":"Seattle Seahawks","buf":"Buffalo Bills","ten":"Tennessee Titans","jax":"Jacksonville Jaguars","bal":"Baltimore Ravens","det":"Detroit Lions","ne":"New England Patriots","hou":"Houston Texans","den":"Denver Broncos","lac":"Los Angeles Chargers","phi":"Philadelphia Eagles","atl":"Atlanta Falcons","chi":"Chicago Bears","kc":"Kansas City Chiefs","gb":"Green Bay Packers","sf":"San Francisco 49ers","lar":"Los Angeles Rams","dal":"Dallas Cowboys","nyj":"New York Jets","nyg":"New York Giants","car":"Carolina Panthers","ari":"Arizona Cardinals","ind":"Indianapolis Colts","mia":"Miami Dolphins","tb":"Tampa Bay Buccaneers","min":"Minnesota Vikings","wsh":"Washington Commanders","lv":"Las Vegas Raiders","cle":"Cleveland Browns"};
+var PT={"Baker Mayfield":"tb","Drake London":"atl","Christian Watson":"gb","Derrick Henry":"bal","Jonathan Taylor":"ind","George Kittle":"sf","Tyjae Spears":"ten","Kimani Vidal":"lac","Keaton Mitchell":"bal","Bhayshul Tuten":"jax","Jacory Croskey-Merritt":"wsh","Blake Grupe":"no","Rashee Rice":"kc","Josh Allen":"buf","Michael Wilson":"ari","Brian Thomas Jr.":"jax","Breece Hall":"nyj","Tony Pollard":"ten","Colston Loveland":"chi","Kyle Monangai":"chi","Isiah Pacheco":"kc","Emanuel Wilson":"sea","Ricky Pearsall":"sf","Alec Pierce":"ind","Luther Burden III":"chi","Eddy Pineiro":"car","Brock Bowers":"lv","Dak Prescott":"dal","Mike Evans":"sf","Jameson Williams":"det","Saquon Barkley":"phi","De'Von Achane":"mia","Tyler Warren":"ind","Jaylen Warren":"pit","Tetairoa McMillan":"ari","Davante Adams":"lar","Dalton Schultz":"hou","Chuba Hubbard":"car","Chase McLaughlin":"tb","Cam Skattebo":"nyg","Trevor Lawrence":"jax","Nico Collins":"hou","Ja'Marr Chase":"cin","Aaron Jones Sr.":"min","Kenneth Gainwell":"tb","Hunter Henry":"ne","Jauan Jennings":"min","DK Metcalf":"pit","Drake Maye":"ne","Jake Ferguson":"dal","Alvin Kamara":"no","Darius Slayton":"nyg","Evan McPherson":"cin","Jared Goff":"det","Chris Olave":"no","Courtland Sutton":"den","Bijan Robinson":"atl","Bucky Irving":"tb","Brenton Strange":"jax","Dylan Sampson":"cle","Zach Charbonnet":"sea","Xavier Worthy":"kc","Lamar Jackson":"bal","Tre Tucker":"lv","Kareem Hunt":"kc","Tyler Loop":"tb","J.J. McCarthy":"min","Brock Purdy":"sf","DeVonta Smith":"phi","Zay Flowers":"bal","James Cook III":"buf","TreVeyon Henderson":"ne","Dallas Goedert":"phi","CeeDee Lamb":"dal","Blake Corum":"lar","Jaxson Dart":"nyg","Jordan Love":"gb","J.K. Dobbins":"den","Quentin Johnston":"lac","Jason Myers":"sea","Tucker Kraft":"gb","Bo Nix":"den","Jaxon Smith-Njigba":"sea","Amon-Ra St. Brown":"det","Kyren Williams":"lar","D'Andre Swift":"chi","Trey McBride":"ari","Rhamondre Stevenson":"ne","Wan'Dale Robinson":"nyg","Michael Pittman Jr.":"pit","Tyler Allgeier":"ari","Mark Andrews":"bal","Devaughn Vele":"den","Jake Bates":"det","Justin Herbert":"lac","Puka Nacua":"lar","Stefon Diggs":"ne","Jahmyr Gibbs":"det","Michael Carter":"ari","Travis Kelce":"kc","DJ Moore":"buf","Terry McLaurin":"wsh","Woody Marks":"hou","C.J. Stroud":"hou","Jakobi Meyers":"jax","Dalton Kincaid":"buf","Ka'imi Fairbairn":"hou","Joe Burrow":"cin","A.J. Brown":"ne","Troy Franklin":"den","Ashton Jeanty":"lv","Chase Brown":"cin","Juwan Johnson":"no","Javonte Williams":"dal","Elic Ayomanor":"ten","Rome Odunze":"chi","Cade Otton":"tb","Jerry Jeudy":"cle","Daniel Jones":"ind","Cameron Dicker":"lac","Devin Neal":"no","Jalen Hurts":"phi","Emeka Egbuka":"tb","George Pickens":"dal","Christian McCaffrey":"sf","Rico Dowdle":"pit","Darren Waller":"mia","Keenan Allen":"chi","Oronde Gadsden":"lac","Kenneth Walker III":"kc","Brian Robinson":"wsh","Tank Bigsby":"jax","Jayden Reed":"gb","Chris Boswell":"pit","Jordan Mason":"min","Caleb Williams":"chi","Ladd McConkey":"lac","Justin Jefferson":"min","Quinshon Judkins":"cle","RJ Harvey":"den","Mason Taylor":"nyj","Harold Fannin Jr.":"cle","Khalil Shakir":"buf","Marvin Harrison Jr.":"ari","Trey Benson":"ari","Chris Rodriguez Jr.":"jax","Jayden Higgins":"hou","Brandon Aubrey":"dal","Omarion Hampton":"lac","Matthew Stafford":"lar","Jordan Addison":"min","Jaylen Waddle":"den","Travis Etienne Jr.":"no","Tyrone Tracy Jr.":"nyg","Kyle Pitts Sr.":"atl","David Montgomery":"hou","Tee Higgins":"cin","Patrick Mahomes":"kc","Josh Jacobs":"gb","Zach Ertz":"wsh","Jake Elliott":"phi"};
+var DEF_LOGOS={"Steelers":"pit","Bengals":"cin","Saints":"no","Seahawks":"sea","Bills":"buf","Titans":"ten","Jaguars":"jax","Ravens":"bal","Lions":"det","Patriots":"ne","Texans":"hou","Broncos":"den","Chargers":"lac","Eagles":"phi","Falcons":"atl"};
+var DEF_CITIES={"Steelers":"Pittsburgh Steelers","Bengals":"Cincinnati Bengals","Saints":"New Orleans Saints","Seahawks":"Seattle Seahawks","Bills":"Buffalo Bills","Titans":"Tennessee Titans","Jaguars":"Jacksonville Jaguars","Ravens":"Baltimore Ravens","Lions":"Detroit Lions","Patriots":"New England Patriots","Texans":"Houston Texans","Broncos":"Denver Broncos","Chargers":"Los Angeles Chargers","Eagles":"Philadelphia Eagles","Falcons":"Atlanta Falcons"};
+function showBlurb(el){
+  var n=el.getAttribute("data-blurb");if(!n||!BL[n])return;
+  tipName.textContent=n.replace(/ DEF$/,"");
+  // Team name and logo
+  var teamAbbr='',teamName='';
+  if(n.endsWith(" DEF")){
+    var tn=n.replace(" DEF","");
+    teamAbbr=DEF_LOGOS[tn]||"";teamName=(DEF_CITIES[tn]||"")+" \u00b7 D/ST";
+  } else {
+    teamAbbr=PT[n]||"";teamName=TEAM_ABBR[teamAbbr]||"NFL";
+  }
+  tipTeam.textContent=teamName;
+  if(teamAbbr){tipLogo.src="https://a.espncdn.com/i/teamlogos/nfl/500/"+teamAbbr+".png";tipLogo.style.display="block";}
+  else{tipLogo.style.display="none";}
+  tipText.textContent=BL[n];
+  if(n.endsWith(" DEF")){var ab=DEF_LOGOS[n.replace(" DEF","")]||"nfl";tipPhoto.innerHTML='<img src="https://a.espncdn.com/i/teamlogos/nfl/500/'+ab+'.png" onerror="this.parentNode.innerHTML=\'\\uD83C\\uDFC8\'">';}
+  else if(hsCache[n]){tipPhoto.innerHTML='<img src="'+hsCache[n]+'" onerror="this.parentNode.innerHTML=\'\\uD83C\\uDFC8\'">';}
+  else{tipPhoto.innerHTML="\uD83C\uDFC8";fetch("https://site.web.api.espn.com/apis/common/v3/search?query="+encodeURIComponent(n)+"&limit=1&type=player&sport=football&league=nfl").then(function(r){return r.json()}).then(function(d){var items=d.items||d.results||[];if(items.length>0){var id=items[0].id||(items[0].$ref&&items[0].$ref.match(/athletes\/(\d+)/)&&items[0].$ref.match(/athletes\/(\d+)/)[1]);if(id){var url="https://a.espncdn.com/i/headshots/nfl/players/full/"+id+".png";hsCache[n]=url;if(tip.classList.contains("show"))tipPhoto.innerHTML='<img src="'+url+'" onerror="this.parentNode.innerHTML=\'\\uD83C\\uDFC8\'">';}}}).catch(function(){});}
+  tip.style.visibility="hidden";tip.classList.add("show");
+  var rect=el.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
+  var top=rect.top-th-8;if(top<10)top=rect.bottom+8;if(top+th>window.innerHeight)top=window.innerHeight-th-10;
+  var left=rect.left;if(left+tw>window.innerWidth-10)left=window.innerWidth-tw-10;if(left<10)left=10;
+  tip.style.top=top+"px";tip.style.left=left+"px";tip.style.visibility="visible";
+}
+function hideBlurb(){tip.classList.remove("show")}
+document.querySelectorAll(".pn[data-blurb]").forEach(function(el){
+  el.addEventListener("mouseenter",function(){clearTimeout(tipTimer);showBlurb(el)});
+  el.addEventListener("mouseleave",function(){tipTimer=setTimeout(hideBlurb,80)});
+  var tt;el.addEventListener("touchstart",function(e){tt=setTimeout(function(){e.preventDefault();showBlurb(el);setTimeout(hideBlurb,4000)},500)},{passive:false});
+  el.addEventListener("touchend",function(){clearTimeout(tt)});
+});
+
+// ═══ KEEPER SELECTION ═══
+document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
+  tr.addEventListener("click",function(){
+    if(!activeTeam)return;
+    var card=tr.closest(".card"),teamName=card.querySelector(".card-name").textContent;
+    if(teamName!==activeTeam)return;
+    var pn=tr.getAttribute("data-player"),kv=tr.getAttribute("data-kv");
+    if(!selections[teamName])selections[teamName]=[];
+    var idx=selections[teamName].findIndex(function(s){return s.name===pn});
+    if(idx>=0){selections[teamName].splice(idx,1);tr.classList.remove("selected")}
+    else{if(selections[teamName].length>=2)return;selections[teamName].push({name:pn,kr:kv});tr.classList.add("selected")}
+    updateBtn(teamName);
+  });
+});
+function updateBtn(tn){var id="btn-"+tn.replace(/[^a-zA-Z]/g,""),btn=document.getElementById(id);if(!btn)return;var sel=selections[tn]||[];if(sel.length===0){btn.textContent="Save No Keepers"}else if(sel.length===1){btn.textContent="Save 1 Keeper"}else{btn.textContent="Save "+sel.length+" Keepers"}}
+
+// ═══ SUBMIT MODAL ═══
+var savedKeepers={};
+function openModal(tn){var sel=selections[tn]||[];document.getElementById("modal-team").textContent=tn;var ph=document.getElementById("modal-players");ph.innerHTML="";if(sel.length===0){ph.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers selected</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";ph.appendChild(d)})}document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");window._submitTeam=tn}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function cancelModal(){closeModal();activeTeam=null;document.querySelectorAll('.submit-btn').forEach(function(b){b.classList.remove('visible')});document.querySelectorAll('.card').forEach(function(c){c.style.border='';c.style.boxShadow=''});document.getElementById("picker").classList.remove("hide")}
+function saveKeepers(){var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn)}
+function applyHighlights(tn){var grid=document.getElementById("G");var cards=grid.querySelectorAll(".card");cards.forEach(function(card){var name=card.querySelector(".card-name");if(!name)return;var teamName=name.textContent;var saved=savedKeepers[teamName]||[];var rows=card.querySelectorAll(".rtbl tr.selectable");rows.forEach(function(tr){var pn=tr.getAttribute("data-player");var isSaved=saved.some(function(s){return s.name===pn});if(isSaved){tr.classList.add("selected")}else if(teamName!==activeTeam){tr.classList.remove("selected")}})})}
+
+// ═══ TEAM PICKER (always shows on keepers tab load) ═══
+var pg=document.getElementById("pick-grid");
+TM.forEach(function(t){var b=document.createElement("button");b.className="pick-btn";b.innerHTML='<div style="font-size:.9rem;margin-bottom:2px">'+t.n+'</div><div style="font-size:.65rem;color:#888">'+t.o+'</div>';b.addEventListener("click",function(){activeTeam=t.n;document.getElementById("picker").classList.add("hide");showActiveBtn()});pg.appendChild(b)});
+
+function showActiveBtn(){
+  document.querySelectorAll('.submit-btn').forEach(function(btn){btn.classList.remove('visible')});
+  if(!activeTeam)return;
+  var id="btn-"+activeTeam.replace(/[^a-zA-Z]/g,"");
+  var btn=document.getElementById(id);
+  if(btn){btn.classList.add('visible');updateBtn(activeTeam)}
+  // Move selected team first, randomize the rest
+  var grid=document.getElementById("G");
+  var cards=Array.from(grid.querySelectorAll('.card'));
+  var activeCard=null,otherCards=[];
+  cards.forEach(function(card){
+    var name=card.querySelector('.card-name');
+    if(name&&name.textContent===activeTeam){
+      activeCard=card;
+      card.style.border='1px solid #f39c12';
+      card.style.boxShadow='0 0 16px rgba(243,156,18,.2)';
+    } else {
+      otherCards.push(card);
+      card.style.border='';
+      card.style.boxShadow='';
+    }
+  });
+  // Shuffle other cards
+  for(var i=otherCards.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var temp=otherCards[i];otherCards[i]=otherCards[j];otherCards[j]=temp}
+  // Re-append: active first, then shuffled rest
+  if(activeCard)grid.insertBefore(activeCard,grid.firstChild);
+  otherCards.forEach(function(card){grid.appendChild(card)});
+}
+
+// ═══ PAGE LOAD: restore tab, always show picker for keepers ═══
+(function(){
+  var hash=(location.hash||'').replace('#','');
+  if(hash&&document.getElementById('tab-'+hash)){
+    switchTab(hash);
+    // If keepers tab, show picker
+    if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
+  }
+  // Default is keepers tab with picker showing — already the default state
+})();
+
+// ═══ DRAFT RESULTS (actual snake draft order) ═══
+var DRAFT_ORD=["Cruzin' USA","Team America","Son of Pintang","Days of Thunder","Doom Crew","Sloppy Toppies","Always Open","Fancy Like Applebees","Poutine Powerhouse","Out of Luck Forever","Bramsels in Distress","That's What Cheesehead"];
+
+// Map every drafted player to their current team
+var playerTeamMap={};
+TM.forEach(function(t){t.p.forEach(function(pn){playerTeamMap[pn]=t.n})});
+
+// Build draft board: for each round, find picks in snake order
+var allDrafted={};
+for(var pn in DR){allDrafted[pn]=DR[pn]}
+var ks2=new Set();K25.forEach(function(k){ks2.add(k)});K2.forEach(function(k){ks2.add(k)});
+
+// Group players by round, then by current team
+var roundPlayers={};
+for(var pn in allDrafted){
+  var rd=allDrafted[pn];
+  if(!roundPlayers[rd])roundPlayers[rd]={};
+  var tm=playerTeamMap[pn]||'_unrostered';
+  roundPlayers[rd][tm]=pn;
+}
+
+var dd=document.getElementById("D");
+var pickNum=0;
+var rounds=Object.keys(roundPlayers).map(Number).sort(function(a,b){return a-b});
+rounds.forEach(function(rd){
+  var order=rd%2===1?DRAFT_ORD.slice():DRAFT_ORD.slice().reverse();
+  var teamPick=roundPlayers[rd]||{};
+  // Collect unrostered players for this round
+  var unrostered=teamPick['_unrostered']?[teamPick['_unrostered']]:[];
+  // Some teams may have multiple players from same round (traded for), collect extras
+  var assigned={};var extras=[];
+  for(var tm in teamPick){
+    if(tm==='_unrostered')continue;
+    assigned[tm]=teamPick[tm];
+  }
+  // For multi-player same round on one team, only keep one per slot
+  var allPlayersThisRound=[];
+  for(var pn in allDrafted){if(allDrafted[pn]===rd)allPlayersThisRound.push(pn)}
+
+  var div=document.createElement("div");div.className="drd";
+  var html='<h3>Round '+rd+'</h3>';
+  order.forEach(function(teamName){
+    pickNum++;
+    var player=assigned[teamName]||unrostered.shift()||'';
+    if(!player){
+      // Find any unassigned player from this round
+      for(var i=0;i<allPlayersThisRound.length;i++){
+        var candidate=allPlayersThisRound[i];
+        var candidateTeam=playerTeamMap[candidate]||'';
+        // If this candidate's current team already has a pick assigned, it might be a trade acquisition
+        var alreadyUsed=false;
+        for(var t in assigned){if(assigned[t]===candidate){alreadyUsed=true;break}}
+        if(!alreadyUsed&&!candidateTeam){player=candidate;allPlayersThisRound.splice(i,1);break}
+      }
+    }
+    if(!player)return;
+    var isK=ks2.has(player);
+    var displayTeam=playerTeamMap[player]||teamName;
+    html+='<div class="dp"><span><span style="color:#555;font-family:Oswald,sans-serif;font-size:.7rem;margin-right:6px">'+pickNum+'.</span><span class="dp-p">'+player+'</span>'+(isK?'<span class="dp-k"> K</span>':'')+'</span><span class="dp-t">'+displayTeam+'</span></div>';
+  });
+  div.innerHTML=html;
+  dd.appendChild(div);
+});
+
+// ═══════════════════════════════════════
+// GOOGLE SHEETS LIVE DATA
+// ═══════════════════════════════════════
+
+function fetchSheet(sheetName, callback) {
+  var url = sheetUrl(sheetName);
+  fetch(url).then(function(r){return r.text()}).then(function(text){
+    try {
+      var data = parseGviz(text);
+      callback(null, data.table);
+    } catch(e) { callback(e, null); }
+  }).catch(function(e){ callback(e, null); });
+}
+
+// ─── DRAFT ORDER ───
+function fetchDraftOrder() {
+  fetchSheet('Draft Order', function(err, table) {
+    if (err) {
+      document.getElementById('do-content').innerHTML = '<div class="do-error">Could not load draft order.<br><br>Make sure your Google Sheet is published to the web:<br><b>File &rarr; Share &rarr; Publish to web &rarr; Entire Document &rarr; Publish</b></div>';
+      return;
+    }
+    renderDraftOrder(table, false);
+  });
+}
+
+function renderDraftOrder(table, animate) {
+  var rows = table.rows || [];
+  var cols = table.cols || [];
+  if (!rows.length) {
+    document.getElementById('do-left').innerHTML = '<div class="do-error">No data found.</div>';
+    document.getElementById('do-right').innerHTML = '';
+    return;
+  }
+
+  // Helper: extract a block of columns from the table
+  function extractBlock(startCol, endCol) {
+    var headers = [];
+    var dataRows = [];
+    // Get headers from col labels or first data row
+    for (var c = startCol; c <= endCol && c < cols.length; c++) {
+      headers.push((cols[c] && cols[c].label) ? cols[c].label.trim() : '');
+    }
+    // If headers are empty, try first row
+    var headersEmpty = headers.every(function(h){ return !h; });
+    var dataStart = 0;
+    if (headersEmpty && rows.length > 0) {
+      var r0 = rows[0].c || [];
+      headers = [];
+      for (var c = startCol; c <= endCol; c++) {
+        headers.push(r0[c] ? cellVal(r0[c]).trim() : '');
+      }
+      dataStart = 1;
+    }
+    // Collect data rows (skip blanks)
+    for (var i = dataStart; i < rows.length; i++) {
+      var r = rows[i].c || [];
+      var vals = [];
+      var hasData = false;
+      for (var c = startCol; c <= endCol; c++) {
+        var v = r[c] ? cellVal(r[c]).trim() : '';
+        vals.push(v);
+        if (v) hasData = true;
+      }
+      if (hasData) dataRows.push(vals);
+    }
+    return { headers: headers, rows: dataRows };
+  }
+
+  // Normalize driver name for matching
+  function cleanName(n) {
+    return (n || '').replace(/^\*+\s*/, '').replace(/\s*\#+$/, '').replace(/\(i\)/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function matchKey(n) {
+    return cleanName(n).toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  // Left box: columns A:D (Draft Order, Player, Driver, Place)
+  var left = extractBlock(0, 3);
+  // Right box: columns T:V (Name/Driver, Vehicle Number, Position)
+  var right = extractBlock(19, 21);
+
+  // Build car number map from whichever block has "Vehicle Number"
+  var carMap = {};
+  var carMapByKey = {};
+  [left, right].forEach(function(block) {
+    var numIdx = -1, nameIdx = -1;
+    block.headers.forEach(function(h, i) {
+      if (/vehicle/i.test(h)) numIdx = i;
+      if (/^name$/i.test(h) || /^driver$/i.test(h)) nameIdx = i;
+    });
+    if (numIdx >= 0 && nameIdx >= 0) {
+      block.rows.forEach(function(r) {
+        var dName = cleanName(r[nameIdx]);
+        var dNum = (r[numIdx] || '').trim();
+        if (dName && /^\d+$/.test(dNum)) {
+          carMap[dName] = dNum;
+          carMapByKey[matchKey(dName)] = dNum;
+        }
+      });
+    }
+  });
+
+  function findCarNum(name) {
+    var cn = cleanName(name);
+    if (carMap[cn]) return carMap[cn];
+    var key = matchKey(name);
+    if (carMapByKey[key]) return carMapByKey[key];
+    var stripped = key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim();
+    if (carMapByKey[stripped]) return carMapByKey[stripped];
+    return '';
+  }
+
+  // Build draft order lookup: driver name → {player, draftOrder}
+  var draftMap = {};
+  var doDriverIdx = -1, doPlayerIdx = -1, doOrderIdx = -1;
+  left.headers.forEach(function(h, i) {
+    var hl = h.toLowerCase();
+    if (/draft.?order/i.test(h)) doOrderIdx = i;
+    if (hl === 'player') doPlayerIdx = i;
+    if (hl === 'driver') doDriverIdx = i;
+  });
+  if (doDriverIdx >= 0) {
+    left.rows.forEach(function(r) {
+      var driver = cleanName(r[doDriverIdx]);
+      var player = (doPlayerIdx >= 0 ? r[doPlayerIdx] : '') || '';
+      var order = (doOrderIdx >= 0 ? r[doOrderIdx] : '') || '';
+      if (driver && player) {
+        draftMap[matchKey(driver)] = { player: player, order: order };
+      }
+    });
+  }
+
+  // Build standings list from right box
+  var standings = [];
+  var stDriverIdx = -1, stPosIdx = -1, stNumIdx = -1;
+  right.headers.forEach(function(h, i) {
+    var hl = h.toLowerCase();
+    if (hl === 'name' || hl === 'driver') stDriverIdx = i;
+    if (hl === 'position') stPosIdx = i;
+    if (/vehicle/i.test(h)) stNumIdx = i;
+  });
+  right.rows.forEach(function(r) {
+    var driver = r[stDriverIdx] || '';
+    var pos = stPosIdx >= 0 ? (r[stPosIdx] || '') : '';
+    if (driver) standings.push({ driver: driver, pos: pos });
+  });
+
+  // Track previous row positions for animation
+  var prevRowPositions = {};
+
+  function capturePositions() {
+    var rows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
+    var positions = {};
+    rows.forEach(function(tr) {
+      var key = tr.getAttribute('data-key');
+      var rect = tr.getBoundingClientRect();
+      positions[key] = { top: rect.top, height: rect.height };
+    });
+    return positions;
+  }
+
+  // Render combined table
+  function renderCombined(animate) {
+    if (!standings.length) {
+      document.getElementById('do-content').innerHTML = '<div class="do-error">No data found.</div>';
+      return;
+    }
+
+    // Capture old positions before re-render
+    if (animate) {
+      prevRowPositions = capturePositions();
+    }
+
+    var html = '<div class="do-box"><div class="do-box-head">Live Scoring</div>';
+    html += '<table class="do-table"><thead><tr>';
+    html += '<th style="text-align:center;width:40px;padding-left:8px">Pos</th>';
+    html += '<th style="padding-left:8px">Driver</th>';
+    html += '<th style="padding-left:6px">Player</th>';
+    html += '<th style="text-align:center;width:36px;padding-left:2px;padding-right:8px">Pick</th>';
+    html += '</tr></thead><tbody>';
+
+    standings.forEach(function(s) {
+      var cn = cleanName(s.driver);
+      var key = matchKey(s.driver);
+      var dm = draftMap[key] || draftMap[key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim()] || null;
+      var carNum = findCarNum(s.driver);
+      var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
+      var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' do-picked' : '';
+
+      html += '<tr data-key="' + key + '" class="' + rowClass + '">';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:#888;padding-left:8px">' + s.pos + '</td>';
+      html += '<td style="padding-left:8px"><div class="do-driver">' + badge + cn + '</div></td>';
+      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;font-size:.8rem;color:' + (dm ? '#f5c842' : '#333') + ';padding-left:6px">' + (dm ? dm.player : '') + '</td>';
+      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:' + (dm && dm.order ? '#f39c12' : '#333') + ';padding-left:2px;padding-right:8px">' + (dm ? dm.order : '') + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    document.getElementById('do-content').innerHTML = html;
+    document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+
+    // FLIP animation: animate rows from old positions to new
+    if (animate && Object.keys(prevRowPositions).length) {
+      var newRows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
+      newRows.forEach(function(tr) {
+        var key = tr.getAttribute('data-key');
+        if (!prevRowPositions[key]) return;
+        var oldTop = prevRowPositions[key].top;
+        var newRect = tr.getBoundingClientRect();
+        var delta = oldTop - newRect.top;
+        if (Math.abs(delta) < 2) return; // didn't move
+
+        // Disable transition, jump to old position
+        tr.style.transition = 'none';
+        tr.style.transform = 'translateY(' + delta + 'px)';
+        tr.classList.add(delta > 0 ? 'do-moving-down' : 'do-moving-up');
+
+        // Force reflow
+        tr.offsetHeight;
+
+        // Enable transition and animate to new position
+        tr.style.transition = 'transform 1.2s cubic-bezier(.4,0,.2,1)';
+        tr.style.transform = 'translateY(0)';
+
+        // Cleanup after animation
+        tr.addEventListener('transitionend', function handler() {
+          tr.style.transition = '';
+          tr.style.transform = '';
+          tr.classList.remove('do-moving-up', 'do-moving-down');
+          tr.removeEventListener('transitionend', handler);
+        });
+      });
+    }
+  }
+
+  renderCombined(animate);
+
+  // Fetch live car numbers from NASCAR API to override stale sheet data
+  fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
+    if (Array.isArray(drivers)) {
+      drivers.forEach(function(d) {
+        var name = ((d.First_Name||d.FirstName||'')+ ' '+(d.Last_Name||d.LastName||'')).trim();
+        var badge = d.Badge || d.Car_Number || '';
+        if (name && badge) {
+          carMap[name] = String(badge);
+          carMapByKey[matchKey(name)] = String(badge);
+        }
+      });
+      renderCombined(false); // no animation for badge update
+    }
+  }).catch(function(){});
+}
+
+// Auto-refresh draft order every 60 seconds
+setInterval(function() {
+  if (document.getElementById('tab-draft-order').classList.contains('active')) {
+    fetchSheet('Draft Order', function(err, table) {
+      if (!err && table) renderDraftOrder(table, true);
+    });
+  }
+}, 60000);
+
+// ─── LEAGUE STATS ───
+function fetchLeagueStats() {
+  fetchSheet('League Stats', function(err, table) {
+    var el = document.getElementById('ls-content');
+    if (err) {
+      el.innerHTML = '<div class="do-error">Could not load league stats.<br>Make sure your Google Sheet is published to the web.</div>';
+      return;
+    }
+    renderLeagueStats(table);
+  });
+}
+
+function renderLeagueStats(table) {
+  var rows = table.rows || [];
+  if (!rows.length) { document.getElementById('ls-content').innerHTML = '<div class="do-loading">No data found</div>'; return; }
+
+  // Find how many columns actually have data
+  var headerRow = rows[0].c || [];
+  var maxCol = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    for (var j = r.length - 1; j >= 0; j--) {
+      var v = cellVal(r[j]).trim();
+      if (v && v !== '-' && v !== '\u2014') { if (j + 1 > maxCol) maxCol = j + 1; break; }
+    }
+  }
+  // Also check header row for max columns
+  for (var j = headerRow.length - 1; j >= 0; j--) {
+    var v = cellVal(headerRow[j]).trim();
+    if (v) { if (j + 1 > maxCol) maxCol = j + 1; break; }
+  }
+
+  // Store current champion (whoever has 1 in the most recent year column)
+  window._currentChampion = '';
+  // The last year column is maxCol - 3 (before Champs and Avg cols) — find it
+  // Actually, scan data rows: the 2nd-to-last col is Champs, last is Avg Finish
+  // Year columns are indices 1 through maxCol-3
+  var lastYearCol = maxCol - 3;
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    var name = cellVal(r[0]).trim();
+    var val = cellVal(r[lastYearCol]).trim();
+    if (val === '1' && name) { window._currentChampion = name; break; }
+  }
+
+  var html = '<table class="stbl"><thead><tr>';
+  for (var idx = 0; idx < maxCol; idx++) {
+    var v = cellVal(headerRow[idx]);
+    if (idx === 0) html += '<th>' + v + '</th>';
+    else if (idx === maxCol - 2) html += '<th>Champs</th>';
+    else if (idx === maxCol - 1) html += '<th>Avg Finish</th>';
+    else html += '<th>' + (v.length > 4 ? "'" + v.slice(-2) : v) + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    var c0 = cellVal(r[0]).trim();
+    if (!c0) continue;
+    html += '<tr>';
+    for (var idx = 0; idx < maxCol; idx++) {
+      var v = cellVal(r[idx]);
+      if (idx === 0) {
+        html += '<td>' + v + '</td>';
+      } else if (idx >= maxCol - 2) {
+        // Champs and Avg Finish columns - plain, no color
+        html += '<td>' + (v || '\u2014') + '</td>';
+      } else {
+        var num = parseFloat(v);
+        if (v === '' || v === '-' || v === '\u2014') html += '<td style="color:#444">\u2014</td>';
+        else if (num === 1) html += '<td class="gc">' + v + '</td>';
+        else if (num <= 3 && num > 0) html += '<td class="t3">' + v + '</td>';
+        else html += '<td>' + v + '</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('ls-content').innerHTML = html;
+}
+
+// ─── LEGACY POOL ───
+function fetchLegacyPool() {
+  var el = document.getElementById('lp-content');
+  // First fetch League Stats to get current champion, then fetch Legacy Pool
+  fetchSheet('League Stats', function(err, statsTable) {
+    var champion = '';
+    if (!err && statsTable) {
+      var sRows = statsTable.rows || [];
+      var sCols = (sRows[0] && sRows[0].c) ? sRows[0].c.length : 0;
+      // Find max non-empty column to determine the last year column
+      var sMaxCol = 0;
+      for (var i = 1; i < sRows.length; i++) {
+        var r = sRows[i].c || [];
+        for (var j = r.length - 1; j >= 0; j--) {
+          var v = cellVal(r[j]).trim();
+          if (v && v !== '-') { if (j + 1 > sMaxCol) sMaxCol = j + 1; break; }
+        }
+      }
+      var lastYrCol = sMaxCol - 3; // year columns end before Champs + Avg
+      for (var i = 1; i < sRows.length; i++) {
+        var r = sRows[i].c || [];
+        var name = cellVal(r[0]).trim();
+        var val = cellVal(r[lastYrCol]).trim();
+        if (val === '1' && name) { champion = name; break; }
+      }
+    }
+    // Use stored champion if we already loaded league stats
+    if (!champion && window._currentChampion) champion = window._currentChampion;
+
+    fetchSheet('Legacy Pool', function(err2, table) {
+      if (err2) {
+        el.innerHTML = '<div class="do-error">Could not load legacy pool.<br>Make sure your Google Sheet is published to the web.</div>';
+        return;
+      }
+      renderLegacyPool(table, champion);
+    });
+  });
+}
+
+function renderLegacyPool(table, champion) {
+  var rows = table.rows || [];
+  if (!rows.length) { document.getElementById('lp-content').innerHTML = '<div class="do-loading">No data found</div>'; return; }
+
+  // The sheet may not have a proper header row - row 0 might be data (starts with a year)
+  // Collect ALL rows as data, check if first row is a header or data
+  var allRows = [];
+  var startIdx = 0;
+  var firstCell = cellVal((rows[0].c || [])[0]).trim();
+  if (/^\d{4}$/.test(firstCell)) { startIdx = 0; } // first row is data
+  else { startIdx = 1; } // first row is header, skip it
+
+  var latestTotal = 0, latestYear = '', payouts = {};
+  for (var i = startIdx; i < rows.length; i++) {
+    var r = rows[i].c || [];
+    var year = cellVal(r[0]).trim();
+    if (!year || !/\d/.test(year)) continue;
+    // Check if row has any data beyond year
+    var hasData = false;
+    for (var j = 1; j < 4 && j < r.length; j++) {
+      if (cellVal(r[j]).trim()) { hasData = true; break; }
+    }
+    if (!hasData) continue;
+    allRows.push(r);
+    var total = parseFloat(cellVal(r[3])) || 0;
+    if (total >= latestTotal) { latestTotal = total; latestYear = year; }
+    var p1 = parseFloat(cellVal(r[4])) || 0;
+    if (p1 > 0) payouts = { first: cellVal(r[4]), second: cellVal(r[5]), third: cellVal(r[6]), consolation: r.length > 7 ? cellVal(r[7]) : '' };
+  }
+
+  var html = '';
+
+  // Current Legacy Champion - at the very top
+  if (champion) {
+    html += '<div style="text-align:center;margin:0 0 24px;padding:20px;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #333;border-radius:8px">';
+    html += '<div style="font-family:Oswald,sans-serif;font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px">Current Legacy Champion</div>';
+    html += '<div style="font-family:Anton,sans-serif;font-size:1.8rem;background:linear-gradient(180deg,#f1c40f,#e67e22);-webkit-background-clip:text;-webkit-text-fill-color:transparent">&#127942; ' + champion + ' &#127942;</div>';
+    html += '</div>';
+  }
+
+  // Pool amount + Payouts in one row
+  html += '<div class="lp-grid">';
+  html += '<div class="lp-card"><h4>Current Legacy Pool</h4><div class="lp-val gold">$' + latestTotal + '</div><div class="lp-sub">Through ' + latestYear + '</div></div>';
+  if (payouts.first) {
+    html += '<div class="lp-card"><h4>1st Place Payout</h4><div class="lp-val" style="color:#27ae60">$' + payouts.first + '</div></div>';
+    html += '<div class="lp-card"><h4>2nd Place</h4><div class="lp-val" style="color:#27ae60">$' + payouts.second + '</div></div>';
+    html += '<div class="lp-card"><h4>3rd Place</h4><div class="lp-val" style="color:#27ae60">$' + payouts.third + '</div></div>';
+    if (payouts.consolation) html += '<div class="lp-card"><h4>Consolation</h4><div class="lp-val" style="color:#27ae60">$' + payouts.consolation + '</div></div>';
+  }
+  html += '</div>';
+
+  // Table with hardcoded headers (4 columns only: Year, Dues, Added, Total)
+  var tableHeaders = ['Year', 'League Dues', 'Added to Pool', 'Legacy Total'];
+  html += '<div style="overflow-x:auto;margin-top:24px"><table class="stbl"><thead><tr>';
+  tableHeaders.forEach(function(h){ html += '<th>' + h + '</th>'; });
+  html += '</tr></thead><tbody>';
+  allRows.forEach(function(r) {
+    html += '<tr>';
+    for (var idx = 0; idx < 4; idx++) {
+      var v = cellVal(r[idx]);
+      if (!v && idx > 0) html += '<td style="color:#444">\u2014</td>';
+      else if (idx === 3 && parseFloat(v) > 0) html += '<td class="t3">$' + v + '</td>';
+      else html += '<td>' + (idx >= 1 && parseFloat(v) > 0 ? '$' + v : v) + '</td>';
+    }
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+
+  document.getElementById('lp-content').innerHTML = html;
+}
+// ═══════════════════════════════════════
+// DRAFT ROOM
+// ═══════════════════════════════════════
+var DR_SHEET='1V6ahsV88ZIAmkP3CTZHK9vlMjdVOeNh550XcVT9bQ4Y';
+var drOrder=[],drPicks=[],drCurrentSub='DRAFT SHEET',drDrafted=new Set(),drActiveRosterTeam='';
+var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
+var ROW_COLORS={QB:'row-qb',RB:'row-rb',WR:'row-wr',TE:'row-te',K:'row-k',DEF:'row-def'};
+
+function drSheetUrl(name){return 'https://docs.google.com/spreadsheets/d/'+DR_SHEET+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)}
+function abbrevName(n){if(!n)return'';var p=n.replace(/ DEF$/,' D/ST').split(' ');if(p.length<2)return n;return p[0][0]+'. '+p.slice(1).join(' ')}
+
+function initDraftRoom(){
+  var sel=document.getElementById('dr-team-select');
+  TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
+  for(var tn in savedKeepers){(savedKeepers[tn]||[]).forEach(function(k){drDrafted.add(k.name)})}
+  fetchSheet('Draft Order',function(err,table){if(!err&&table)buildDraftOrder(table)});
+  fetchDraftPlayers('DRAFT SHEET');
+}
+
+function buildDraftOrder(table){
+  var rows=table.rows||[],cols=table.cols||[];var rawOrder=[];
+  var colLabels=cols.map(function(c){return(c.label||'').trim()});var doCol=-1,plCol=-1;
+  colLabels.forEach(function(l,i){if(/draft.?order/i.test(l))doCol=i;if(l.toLowerCase()==='player')plCol=i});
+  if(doCol<0&&rows[0]){(rows[0].c||[]).forEach(function(c,i){var v=cellVal(c).trim();if(/draft.?order/i.test(v))doCol=i;if(v.toLowerCase()==='player')plCol=i})}
+  if(doCol<0)doCol=0;if(plCol<0)plCol=1;
+  for(var i=0;i<rows.length;i++){var r=rows[i].c||[];var pos=cellVal(r[doCol]).trim();var name=cellVal(r[plCol]).trim();if(pos&&name&&/^\d+$/.test(pos))rawOrder.push({pos:parseInt(pos),name:name})}
+  rawOrder.sort(function(a,b){return a.pos-b.pos});
+  drOrder=[];
+  for(var rd=0;rd<14;rd++){var order=rd%2===0?rawOrder.slice():rawOrder.slice().reverse();order.forEach(function(o,i){drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:o.name})})}
+  // Integrate keepers
+  for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
+    var team=TM.find(function(t){return t.n===tn});if(!team)continue;
+    keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+      for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===kr&&drOrder[p].name===team.o){drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break}}
+    });
+  }
+  renderDraftOrderPanel();
+}
+
+function updateClock(){
+  var nextIdx=-1;
+  for(var i=0;i<drOrder.length;i++){if(!drPicks[i]){nextIdx=i;break}}
+  var cn=document.getElementById('dr-clock-name'),cp=document.getElementById('dr-clock-pick');
+  if(nextIdx>=0){
+    var o=drOrder[nextIdx];
+    cn.textContent=o.name;
+    cp.textContent='Pick '+(nextIdx+1)+' \u00b7 Round '+o.round+', Pick '+o.pickInRound;
+  } else {cn.textContent='Draft Complete';cp.textContent='All picks are in!'}
+}
+
+function renderDraftOrderPanel(){
+  updateClock();
+  var html='',nextIdx=-1;
+  for(var i=0;i<drOrder.length;i++){if(!drPicks[i]){nextIdx=i;break}}
+  drOrder.forEach(function(o,idx){
+    var picked=drPicks[idx];var isNext=idx===nextIdx;var isKeeper=picked&&picked.keeper;
+    var cls='dr-order-item';if(picked)cls+=' drafted';
+    var draggable=picked?'':'draggable="true"';
+    var style='';
+    if(isNext)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1)"';
+    if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
+    html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
+    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name+'</span>';
+    if(picked){
+      var pos=guessPosition(picked.player);var pcls=POS_COLORS[pos]||'';
+      var lbl=isKeeper?'K: ':'';
+      html+='<span class="dr-picked-player '+pcls+'">'+lbl+abbrevName(picked.player)+'</span>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('dr-order-list').innerHTML=html;
+  var total=drPicks.filter(function(p){return p}).length;
+  document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
+  document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
+  document.querySelectorAll('.dr-order-item:not(.drafted)').forEach(function(el){
+    el.addEventListener('dragstart',function(e){
+      e.dataTransfer.setData('text/plain',JSON.stringify({pick:parseInt(el.dataset.pick),name:el.dataset.name}));
+      el.classList.add('dragging');setTimeout(function(){el.classList.remove('dragging')},200);
+    });
+  });
+  if(drActiveRosterTeam)renderTeamRoster(drActiveRosterTeam);
+}
+
+function fetchDraftPlayers(sheetName){
+  drCurrentSub=sheetName;
+  document.querySelectorAll('.dr-sub').forEach(function(b){b.classList.remove('active')});
+  document.querySelectorAll('.dr-sub').forEach(function(b){
+    var map={'All Players':'DRAFT SHEET','QB':'QB','RB':'RB','WR':'WR','TE':'TE','K':'Kickers','DEF':'Def'};
+    for(var k in map){if(map[k]===sheetName&&b.textContent.trim()===k)b.classList.add('active')}
+  });
+  document.getElementById('dr-player-table').innerHTML='<div class="do-loading">Loading players...</div>';
+  fetch(drSheetUrl(sheetName)).then(function(r){return r.text()}).then(function(text){
+    try{var data=parseGviz(text);renderDraftPlayers(data.table,sheetName)}
+    catch(e){document.getElementById('dr-player-table').innerHTML='<div class="do-error">Error loading. Publish the draft sheet to web.</div>'}
+  }).catch(function(){document.getElementById('dr-player-table').innerHTML='<div class="do-error">Could not load player data.</div>'});
+}
+function switchDraftSub(name){fetchDraftPlayers(name)}
+
+function renderDraftPlayers(table,sheetName){
+  var rows=table.rows||[],cols=table.cols||[];if(!rows.length)return;
+  var isMain=sheetName==='DRAFT SHEET';
+  var colHeaders=cols.map(function(c){return(c.label||'').trim()});
+  if(colHeaders.every(function(h){return!h})){colHeaders=(rows[0]?rows[0].c:[]).map(function(c){return cellVal(c).trim()})}
+  var startCol=isMain?3:1,nameCol=isMain?4:2,posCol=isMain?6:4,maxCol=isMain?19:17;
+  var html='<table class="dr-ptbl"><thead><tr>';
+  for(var c=startCol;c<colHeaders.length&&c<maxCol;c++){
+    var h=colHeaders[c]||'';if(/PLAYER NAME/i.test(h))h='Player';if(/Fant Pts/i.test(h))h='Pts';
+    html+='<th>'+h+'</th>';
+  }
+  html+='</tr></thead><tbody>';
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i].c||[];var playerName=cellVal(r[nameCol]).trim();
+    if(!playerName||/player|name/i.test(playerName))continue;
+    var playerPos=cellVal(r[posCol]).trim().toUpperCase();
+    var pos=playerPos||guessPosition(playerName);
+    var rowCls=ROW_COLORS[pos]||'';
+    var isDraftedPlayer=drDrafted.has(playerName);
+    var draftedBy='',isKeeper=false;
+    if(isDraftedPlayer){for(var p=0;p<drPicks.length;p++){if(drPicks[p]&&drPicks[p].player===playerName){draftedBy=drPicks[p].owner;isKeeper=drPicks[p].keeper||false;break}}}
+    html+='<tr class="'+rowCls+(isDraftedPlayer?' dr-drafted':'')+'" data-player="'+playerName.replace(/"/g,'&quot;')+'">';
+    for(var c=startCol;c<colHeaders.length&&c<maxCol;c++){
+      var v=cellVal(r[c]);
+      if(c===nameCol){
+        var pcls=POS_COLORS[pos]||'';
+        html+='<td><span class="dr-pname '+pcls+'">'+playerName+'</span>';
+        if(draftedBy)html+='<span class="dr-drafted-by '+pcls+'">'+(isKeeper?'K:':'')+draftedBy+'</span>';
+        html+='</td>';
+      }else{html+='<td>'+v+'</td>'}
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  document.getElementById('dr-player-table').innerHTML=html;
+  document.querySelectorAll('.dr-ptbl tbody tr:not(.dr-drafted)').forEach(function(tr){
+    tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('dr-dragover')});
+    tr.addEventListener('dragleave',function(){tr.classList.remove('dr-dragover')});
+    tr.addEventListener('drop',function(e){
+      e.preventDefault();tr.classList.remove('dr-dragover');
+      try{var data=JSON.parse(e.dataTransfer.getData('text/plain'));var pn=tr.dataset.player;
+      if(!pn||drDrafted.has(pn))return;draftPick(parseInt(data.pick),data.name,pn)}catch(ex){}
+    });
+  });
+}
+
+function draftPick(pickNum,ownerName,playerName){
+  drPicks[pickNum-1]={pick:pickNum,owner:ownerName,player:playerName};
+  drDrafted.add(playerName);renderDraftOrderPanel();fetchDraftPlayers(drCurrentSub);
+}
+function draftUndo(){
+  for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
+  while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
+  renderDraftOrderPanel();fetchDraftPlayers(drCurrentSub);
+}
+
+// ─── TEAM ROSTER PANEL ───
+function openTeamRoster(val){
+  if(!val){closeTeamRoster();return}
+  drActiveRosterTeam=val;document.getElementById('dr-roster-team-name').textContent=val;
+  document.getElementById('dr-roster-panel').classList.add('open');renderTeamRoster(val);
+}
+function closeTeamRoster(){
+  drActiveRosterTeam='';document.getElementById('dr-roster-panel').classList.remove('open');document.getElementById('dr-team-select').value='';
+}
+function renderTeamRoster(teamName){
+  var team=TM.find(function(t){return t.n===teamName});var ownerName=team?team.o:'';
+  var teamPlayers=[];
+  drPicks.forEach(function(p){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,keeper:p.keeper||false})});
+  teamPlayers.forEach(function(tp){tp.pos=guessPosition(tp.player)});
+  var slots=[{label:'QB',pos:'QB'},{label:'WR',pos:'WR'},{label:'WR',pos:'WR'},{label:'RB',pos:'RB'},{label:'RB',pos:'RB'},{label:'TE',pos:'TE'},{label:'FLEX',pos:'FLEX'},{label:'K',pos:'K'},{label:'DEF',pos:'DEF'}];
+  var assigned=[],html='<div class="dr-slot-sep">Starters</div>';
+  slots.forEach(function(slot){
+    var match=teamPlayers.filter(function(tp){if(assigned.indexOf(tp.player)>=0)return false;if(slot.pos==='FLEX')return tp.pos==='WR'||tp.pos==='RB'||tp.pos==='TE';return tp.pos===slot.pos});
+    var filled=match.length?match[0]:null;if(filled)assigned.push(filled.player);
+    var cls='dr-slot'+(filled?' filled':'')+(filled&&filled.keeper?' keeper':'');
+    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player">'+(filled?filled.player:'\u2014')+'</span></div>';
+  });
+  var bench=teamPlayers.filter(function(tp){return assigned.indexOf(tp.player)<0});
+  html+='<div class="dr-slot-sep">Bench</div>';
+  bench.forEach(function(tp){html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#666">BN</span><span class="dr-slot-player">'+tp.player+'</span></div>'});
+  for(var b=0;b<Math.max(0,6-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#444">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
+  document.getElementById('dr-roster-body').innerHTML=html;
+}
+function guessPosition(name){
+  if(/DEF$/.test(name))return 'DEF';
+  var kickers=['Blake Grupe','Eddy Pineiro','Chase McLaughlin','Evan McPherson','Tyler Loop','Jason Myers','Jake Bates',"Ka'imi Fairbairn",'Cameron Dicker','Chris Boswell','Brandon Aubrey','Jake Elliott'];
+  if(kickers.indexOf(name)>=0)return 'K';
+  var qbs=['Baker Mayfield','Josh Allen','Dak Prescott','Trevor Lawrence','Jared Goff','Brock Purdy','Bo Nix','Justin Herbert','Joe Burrow','Jalen Hurts','Caleb Williams','Matthew Stafford','Patrick Mahomes','Jordan Love','Lamar Jackson','J.J. McCarthy','Drake Maye','Jaxson Dart','Daniel Jones','C.J. Stroud'];
+  if(qbs.indexOf(name)>=0)return 'QB';
+  var tes=['George Kittle','Colston Loveland','Brock Bowers','Tyler Warren','Dalton Schultz','Hunter Henry','Dallas Goedert','Trey McBride','Mark Andrews','Travis Kelce','Dalton Kincaid','Tucker Kraft','Juwan Johnson','Cade Otton','Harold Fannin Jr.','Brenton Strange','Kyle Pitts Sr.','Zach Ertz','Mason Taylor','Oronde Gadsden','Darren Waller'];
+  if(tes.indexOf(name)>=0)return 'TE';
+  var wrs=['Drake London','Christian Watson','Rashee Rice','Michael Wilson','Brian Thomas Jr.','Mike Evans','Jameson Williams','Tetairoa McMillan','Davante Adams','Nico Collins',"Ja'Marr Chase",'DK Metcalf','Darius Slayton','Chris Olave','Courtland Sutton','Xavier Worthy','Tre Tucker','DeVonta Smith','Zay Flowers','CeeDee Lamb','Quentin Johnston','Jaxon Smith-Njigba',"Amon-Ra St. Brown","Wan'Dale Robinson",'Michael Pittman Jr.','Devaughn Vele','Puka Nacua','Stefon Diggs','DJ Moore','Terry McLaurin','Jakobi Meyers','A.J. Brown','Troy Franklin','Elic Ayomanor','Rome Odunze','Jerry Jeudy','Emeka Egbuka','George Pickens','Keenan Allen','Jayden Reed','Ladd McConkey','Justin Jefferson','Khalil Shakir','Marvin Harrison Jr.','Jayden Higgins','Jordan Addison','Jaylen Waddle','Tee Higgins','Luther Burden III','Alec Pierce','Ricky Pearsall','Jauan Jennings'];
+  if(wrs.indexOf(name)>=0)return 'WR';
+  return 'RB';
+}
+
+</script>
+</body>
+</html>
