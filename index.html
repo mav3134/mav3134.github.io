@@ -275,6 +275,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
     <button class="dr-undo" id="dr-undo" onclick="draftUndo()" disabled>↩ Undo</button>
+    <button class="dr-undo" id="dr-live-btn" onclick="toggleLiveDraft()" style="border-color:#27ae60;color:#27ae60">⚡ Live Draft: OFF</button>
     <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
       <option value="">View Team Roster...</option>
     </select>
@@ -1537,69 +1538,78 @@ var DRAFT_DB=[
 var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='';
 var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
 var ROW_COLORS={QB:'row-qb',RB:'row-rb',WR:'row-wr',TE:'row-te',K:'row-k',DEF:'row-def'};
-// *** PASTE YOUR DEPLOYED APPS SCRIPT URL HERE ***
-var DRAFT_SCRIPT_URL='';
+var DRAFT_API='https://api.npoint.io/9643622df799b5dd5e7f';
+var drPollInterval=null,drLiveMode=false;
+
+function toggleLiveDraft(){
+  drLiveMode=!drLiveMode;
+  updateLiveBtn();
+  saveDraftToServer();
+  startPolling();
+}
+
+function updateLiveBtn(){
+  var btn=document.getElementById('dr-live-btn');
+  if(drLiveMode){
+    btn.textContent='\u26A1 Live Draft: ON';
+    btn.style.borderColor='#f39c12';btn.style.color='#f5c842';btn.style.background='rgba(243,156,18,.15)';
+  } else {
+    btn.textContent='\u26A1 Live Draft: OFF';
+    btn.style.borderColor='#27ae60';btn.style.color='#27ae60';btn.style.background='';
+  }
+}
+
+function startPolling(){
+  if(drPollInterval)clearInterval(drPollInterval);
+  drPollInterval=setInterval(function(){
+    if(document.getElementById('tab-draft-room').classList.contains('active')){
+      loadDraftFromServer();
+    }
+  },drLiveMode?1500:5000);
+}
 
 function abbrevName(n){if(!n)return'';var p=n.replace(/ DEF$/,' D/ST').split(' ');if(p.length<2)return n;return p[0][0]+'. '+p.slice(1).join(' ')}
 
 function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
-  // Load from localStorage as fast cache
-  loadDraftLocal();
   fetchSheet('Draft Order',function(err,table){
     if(!err&&table){
       buildDraftOrder(table);
-      // Then load shared state from the server (overrides local)
       loadDraftFromServer();
     }
   });
   renderLocalPlayers('ALL');
-  // Poll for updates every 20 seconds
-  setInterval(function(){
-    if(document.getElementById('tab-draft-room').classList.contains('active')){
-      loadDraftFromServer();
-    }
-  },20000);
+  startPolling();
 }
 
-function saveDraftLocal(){
-  try{localStorage.setItem('ff-draft-state',JSON.stringify({picks:drPicks,drafted:Array.from(drDrafted)}))}catch(e){}
-}
-function loadDraftLocal(){
-  try{var s=localStorage.getItem('ff-draft-state');if(s){var d=JSON.parse(s);if(d.picks)drPicks=d.picks;if(d.drafted)d.drafted.forEach(function(n){drDrafted.add(n)})}}catch(e){}
+function saveDraftToServer(){
+  var picksToSave=[];
+  drPicks.forEach(function(p){if(p)picksToSave.push({pick:p.pick,owner:p.owner,player:p.player,keeper:p.keeper||false})});
+  fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({picks:picksToSave,liveMode:drLiveMode})}).catch(function(){});
 }
 
 function loadDraftFromServer(){
-  if(!DRAFT_SCRIPT_URL)return;
-  fetch(DRAFT_SCRIPT_URL).then(function(r){return r.json()}).then(function(data){
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     if(!data||!data.picks)return;
-    // Rebuild state from server data
-    var serverPicks=data.picks;
-    // Clear current non-keeper state
+    // Check if live mode changed from server
+    var serverLive=data.liveMode||false;
+    if(serverLive!==drLiveMode){
+      drLiveMode=serverLive;
+      updateLiveBtn();
+      startPolling();
+    }
     drPicks=[];drDrafted=new Set();
-    // Re-add keepers from savedKeepers first
-    refreshKeepers();
-    // Apply server picks
-    serverPicks.forEach(function(sp){
-      var pickIdx=sp.pick-1;
-      if(pickIdx>=0&&pickIdx<drOrder.length){
-        drPicks[pickIdx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
+    data.picks.forEach(function(sp){
+      var idx=sp.pick-1;
+      if(idx>=0&&idx<drOrder.length){
+        drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
         drDrafted.add(sp.player);
       }
     });
-    saveDraftLocal();
+    refreshKeepers();
     renderDraftOrderPanel();
     renderLocalPlayers(drCurrentSub);
-  }).catch(function(){});
-}
-
-function saveDraftToServer(action,pickData){
-  if(!DRAFT_SCRIPT_URL)return;
-  fetch(DRAFT_SCRIPT_URL,{
-    method:'POST',
-    body:JSON.stringify(Object.assign({action:action},pickData||{})),
-    headers:{'Content-Type':'text/plain'}
   }).catch(function(){});
 }
 
@@ -1628,8 +1638,7 @@ function refreshKeepers(){
       });
     }
     if(newKeepers.length){
-      saveDraftLocal();
-      saveDraftToServer('save_keepers',{keepers:newKeepers});
+      saveDraftToServer();
     }
     renderDraftOrderPanel();
     renderLocalPlayers(drCurrentSub);
@@ -1771,15 +1780,13 @@ function filterDraftPlayers(){
 function draftPick(pickNum,ownerName,playerName){
   drPicks[pickNum-1]={pick:pickNum,owner:ownerName,player:playerName};
   drDrafted.add(playerName);
-  saveDraftLocal();
-  saveDraftToServer('pick',{pick:pickNum,owner:ownerName,player:playerName});
+  saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
 }
 function draftUndo(){
   for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
-  saveDraftLocal();
-  saveDraftToServer('undo');
+  saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
 }
 
