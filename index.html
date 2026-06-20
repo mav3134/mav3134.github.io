@@ -293,7 +293,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
       <div id="dr-order-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
     </div>
     <div class="dr-player-panel">
-      <div class="dr-panel-head">Available Players</div>
+      <div class="dr-panel-head" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Available Players</span>
+        <input type="text" id="dr-search" placeholder="Search player..." oninput="filterDraftPlayers()" style="font-family:'Roboto Condensed',sans-serif;font-size:.75rem;padding:3px 8px;border-radius:4px;border:1px solid #444;background:#1a1f2e;color:#ccc;width:140px;outline:none">
+      </div>
       <div id="dr-player-table" class="dr-player-table"><div class="do-loading">Loading players...</div></div>
     </div>
     <div class="dr-roster-panel" id="dr-roster-panel">
@@ -324,7 +327,10 @@ function switchTab(id){
   if(id==='draft-order'&&!draftOrderLoaded){fetchDraftOrder();draftOrderLoaded=true}
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
   if(id==='legacy-pool'&&!legacyPoolLoaded){fetchLegacyPool();legacyPoolLoaded=true}
-  if(id==='draft-room'&&!draftRoomLoaded){initDraftRoom();draftRoomLoaded=true}
+  if(id==='draft-room'){
+    if(!draftRoomLoaded){initDraftRoom();draftRoomLoaded=true}
+    else{refreshKeepers()}
+  }
 }
 var draftOrderLoaded=false,leagueStatsLoaded=false,legacyPoolLoaded=false,draftRoomLoaded=false;
 
@@ -1535,9 +1541,38 @@ function abbrevName(n){if(!n)return'';var p=n.replace(/ DEF$/,' D/ST').split(' '
 function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
-  for(var tn in savedKeepers){(savedKeepers[tn]||[]).forEach(function(k){drDrafted.add(k.name)})}
+  refreshKeepers();
   fetchSheet('Draft Order',function(err,table){if(!err&&table)buildDraftOrder(table)});
   renderLocalPlayers('ALL');
+}
+
+function refreshKeepers(){
+  // Sync savedKeepers into draft state
+  for(var tn in savedKeepers){
+    var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
+    keepers.forEach(function(k){drDrafted.add(k.name)});
+  }
+  // If drOrder is already built, integrate keeper picks
+  if(drOrder.length){
+    for(var tn in savedKeepers){
+      var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
+      var team=TM.find(function(t){return t.n===tn});if(!team)continue;
+      keepers.forEach(function(k){
+        var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+        // Check if already in drPicks
+        var alreadyIn=false;
+        for(var p=0;p<drPicks.length;p++){if(drPicks[p]&&drPicks[p].player===k.name&&drPicks[p].keeper){alreadyIn=true;break}}
+        if(alreadyIn)return;
+        for(var p=0;p<drOrder.length;p++){
+          if(drOrder[p].round===kr&&drOrder[p].name===team.o){
+            drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break;
+          }
+        }
+      });
+    }
+    renderDraftOrderPanel();
+    renderLocalPlayers(drCurrentSub);
+  }
 }
 
 function buildDraftOrder(table){
@@ -1588,8 +1623,9 @@ function renderDraftOrderPanel(){
     if(o.round!==lastRound){html+='<div class="dr-round-sep">Round '+o.round+'</div>';lastRound=o.round}
     var picked=drPicks[idx];var isNext=idx===nextIdx;var isKeeper=picked&&picked.keeper;
     var cls='dr-order-item';if(picked)cls+=' drafted';
-    var draggable=picked?'':'draggable="true"';var style='';
-    if(isNext)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1)"';
+    var isOnClock=idx===nextIdx;
+    var draggable=isOnClock?'draggable="true"':'';var style='';
+    if(isOnClock)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1);cursor:grab"';
     if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
     html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
     html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name+'</span>';
@@ -1601,7 +1637,7 @@ function renderDraftOrderPanel(){
   var total=drPicks.filter(function(p){return p}).length;
   document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
   document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
-  document.querySelectorAll('.dr-order-item:not(.drafted)').forEach(function(el){
+  document.querySelectorAll('.dr-order-item[draggable="true"]').forEach(function(el){
     el.addEventListener('dragstart',function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({pick:parseInt(el.dataset.pick),name:el.dataset.name}));
       el.classList.add('dragging');setTimeout(function(){el.classList.remove('dragging')},200);
@@ -1662,9 +1698,20 @@ function switchDraftSub(name){
   renderLocalPlayers(map[name]||'ALL');
 }
 
+function filterDraftPlayers(){
+  var q=(document.getElementById('dr-search').value||'').toLowerCase();
+  var rows=document.querySelectorAll('.dr-ptbl tbody tr');
+  rows.forEach(function(tr){
+    var name=(tr.dataset.player||'').toLowerCase();
+    tr.style.display=(!q||name.indexOf(q)>=0)?'':'none';
+  });
+}
+
 function draftPick(pickNum,ownerName,playerName){
   drPicks[pickNum-1]={pick:pickNum,owner:ownerName,player:playerName};
-  drDrafted.add(playerName);renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+  drDrafted.add(playerName);
+  // Auto-advance past any keeper picks that follow
+  renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
 }
 function draftUndo(){
   for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
@@ -1683,7 +1730,7 @@ function closeTeamRoster(){
 function renderTeamRoster(teamName){
   var team=TM.find(function(t){return t.n===teamName});var ownerName=team?team.o:'';
   var teamPlayers=[];
-  drPicks.forEach(function(p){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,keeper:p.keeper||false})});
+  drPicks.forEach(function(p,idx){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,round:drOrder[idx]?drOrder[idx].round:0,keeper:p.keeper||false})});
   teamPlayers.forEach(function(tp){tp.pos=guessPosition(tp.player)});
   var slots=[{label:'QB',pos:'QB'},{label:'WR',pos:'WR'},{label:'WR',pos:'WR'},{label:'RB',pos:'RB'},{label:'RB',pos:'RB'},{label:'TE',pos:'TE'},{label:'FLEX',pos:'FLEX'},{label:'K',pos:'K'},{label:'DEF',pos:'DEF'}];
   var assigned=[],html='<div class="dr-slot-sep">Starters</div>';
@@ -1692,11 +1739,16 @@ function renderTeamRoster(teamName){
     var filled=match.length?match[0]:null;if(filled)assigned.push(filled.player);
     var cls='dr-slot'+(filled?' filled':'')+(filled&&filled.keeper?' keeper':'');
     var pcls=filled?POS_COLORS[filled.pos]||'':'';
-    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player '+pcls+'">'+(filled?filled.player:'\u2014')+'</span></div>';
+    var rdLabel=filled?'<span style="margin-left:auto;font-size:.6rem;color:#666;font-family:Oswald,sans-serif">Rd '+filled.round+(filled.keeper?' K':'')+'</span>':'';
+    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player '+pcls+'">'+(filled?filled.player:'\u2014')+'</span>'+rdLabel+'</div>';
   });
   var bench=teamPlayers.filter(function(tp){return assigned.indexOf(tp.player)<0});
   html+='<div class="dr-slot-sep">Bench</div>';
-  bench.forEach(function(tp){var pcls=POS_COLORS[tp.pos]||'';html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#666">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span></div>'});
+  bench.forEach(function(tp){
+    var pcls=POS_COLORS[tp.pos]||'';
+    var rdLabel='<span style="margin-left:auto;font-size:.6rem;color:#666;font-family:Oswald,sans-serif">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
+    html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#666">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+rdLabel+'</div>';
+  });
   for(var b=0;b<Math.max(0,4-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#444">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
   document.getElementById('dr-roster-body').innerHTML=html;
 }
