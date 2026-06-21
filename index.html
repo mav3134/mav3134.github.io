@@ -684,8 +684,13 @@ function showActiveBtn(){
 (function(){
   fetch('https://api.npoint.io/9643622df799b5dd5e7f').then(function(r){return r.json()}).then(function(data){
     if(data&&data.keepers){
-      for(var tn in data.keepers){savedKeepers[tn]=data.keepers[tn]}
+      for(var tn in data.keepers){
+        savedKeepers[tn]=data.keepers[tn];
+        selections[tn]=data.keepers[tn].slice();
+      }
       for(var tn in savedKeepers){applyHighlights(tn)}
+      // Update button if a team is already selected
+      if(activeTeam)updateBtn(activeTeam);
     }
   }).catch(function(){});
   var hash=(location.hash||'').replace('#','');
