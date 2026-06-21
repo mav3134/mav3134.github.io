@@ -325,7 +325,11 @@ function switchTab(id){
   btns.forEach(function(b){if(b.getAttribute('onclick')==="switchTab('"+id+"')")b.classList.add('active')});
   location.hash=id;
   // Show picker on keepers tab if no team selected, hide on other tabs
-  if(id==='keepers'&&!activeTeam){document.getElementById('picker').classList.remove('hide')}
+  if(id==='keepers'){
+    if(!activeTeam){document.getElementById('picker').classList.remove('hide')}
+    // Re-apply keeper highlights
+    for(var tn in savedKeepers){applyHighlights(tn)}
+  }
   else if(id!=='keepers'){document.getElementById('picker').classList.add('hide')}
   if(id==='draft-order'&&!draftOrderLoaded){fetchDraftOrder();draftOrderLoaded=true}
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
@@ -640,7 +644,7 @@ var savedKeepers={};
 function openModal(tn){var sel=selections[tn]||[];document.getElementById("modal-team").textContent=tn;var ph=document.getElementById("modal-players");ph.innerHTML="";if(sel.length===0){ph.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers selected</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";ph.appendChild(d)})}document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");window._submitTeam=tn}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function cancelModal(){closeModal();activeTeam=null;document.querySelectorAll('.submit-btn').forEach(function(b){b.classList.remove('visible')});document.querySelectorAll('.card').forEach(function(c){c.style.border='';c.style.boxShadow=''});document.getElementById("picker").classList.remove("hide")}
-function saveKeepers(){var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn)}
+function saveKeepers(){var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn);saveKeepersToServer()}
 function applyHighlights(tn){var grid=document.getElementById("G");var cards=grid.querySelectorAll(".card");cards.forEach(function(card){var name=card.querySelector(".card-name");if(!name)return;var teamName=name.textContent;var saved=savedKeepers[teamName]||[];var rows=card.querySelectorAll(".rtbl tr.selectable");rows.forEach(function(tr){var pn=tr.getAttribute("data-player");var isSaved=saved.some(function(s){return s.name===pn});if(isSaved){tr.classList.add("selected")}else if(teamName!==activeTeam){tr.classList.remove("selected")}})})}
 
 // ═══ TEAM PICKER (always shows on keepers tab load) ═══
@@ -676,15 +680,19 @@ function showActiveBtn(){
   otherCards.forEach(function(card){grid.appendChild(card)});
 }
 
-// ═══ PAGE LOAD: restore tab, always show picker for keepers ═══
+// ═══ PAGE LOAD: restore tab, load keepers from server ═══
 (function(){
+  fetch('https://api.npoint.io/9643622df799b5dd5e7f').then(function(r){return r.json()}).then(function(data){
+    if(data&&data.keepers){
+      for(var tn in data.keepers){savedKeepers[tn]=data.keepers[tn]}
+      for(var tn in savedKeepers){applyHighlights(tn)}
+    }
+  }).catch(function(){});
   var hash=(location.hash||'').replace('#','');
   if(hash&&document.getElementById('tab-'+hash)){
     switchTab(hash);
-    // If keepers tab, show picker
     if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
   }
-  // Default is keepers tab with picker showing — already the default state
 })();
 
 // ═══ DRAFT RESULTS (actual snake draft order) ═══
@@ -1586,13 +1594,29 @@ function initDraftRoom(){
 function saveDraftToServer(){
   var picksToSave=[];
   drPicks.forEach(function(p){if(p)picksToSave.push({pick:p.pick,owner:p.owner,player:p.player,keeper:p.keeper||false})});
-  fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({picks:picksToSave,liveMode:drLiveMode})}).catch(function(){});
+  fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({picks:picksToSave,liveMode:drLiveMode,keepers:savedKeepers})}).catch(function(){});
+}
+
+function saveKeepersToServer(){
+  // Quick save just the keepers without needing draft order loaded
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    data=data||{};data.keepers=savedKeepers;
+    fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).catch(function(){});
+  }).catch(function(){});
 }
 
 function loadDraftFromServer(){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
-    if(!data||!data.picks)return;
-    // Check if live mode changed from server
+    if(!data)return;
+    // Load shared keepers
+    if(data.keepers){
+      for(var tn in data.keepers){
+        if(!savedKeepers[tn]||!savedKeepers[tn].length){
+          savedKeepers[tn]=data.keepers[tn];
+        }
+      }
+    }
+    if(!data.picks)return;
     var serverLive=data.liveMode||false;
     if(serverLive!==drLiveMode){
       drLiveMode=serverLive;
