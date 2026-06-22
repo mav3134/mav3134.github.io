@@ -1549,6 +1549,7 @@ var DRAFT_DB=[
 [412,"Matt Prater","BUF","K",108.0,0,0,0,0,0,0,0,0,0],
 ];var STAT_HEADERS=["Rank","Player","Team","Pos","Pts","Pass Yds","Pass TD","INT","Rush Yds","Rush TD","Rec","Rec Yds","Rec TD","FumL"];
 var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='';
+var drLoading=false;
 var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
 var ROW_COLORS={QB:'row-qb',RB:'row-rb',WR:'row-wr',TE:'row-te',K:'row-k',DEF:'row-def'};
 var DRAFT_API='https://api.npoint.io/9643622df799b5dd5e7f';
@@ -1603,60 +1604,94 @@ function saveDraftToServer(){
 }
 
 function saveKeepersToServer(){
-  // Quick save just the keepers without needing draft order loaded
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
-    data=data||{};data.keepers=savedKeepers;
+    data=data||{};
+    // Remove ALL old keeper picks from the picks array
+    var cleanPicks=(data.picks||[]).filter(function(p){return !p.keeper});
+    data.picks=cleanPicks;
+    data.keepers=savedKeepers;
     fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).catch(function(){});
   }).catch(function(){});
 }
 
 function loadDraftFromServer(){
+  if(drLoading)return;
+  drLoading=true;
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
-    if(!data)return;
-    // Load shared keepers
+    if(!data){drLoading=false;return}
     if(data.keepers){
       for(var tn in data.keepers){
-        if(!savedKeepers[tn]||!savedKeepers[tn].length){
-          savedKeepers[tn]=data.keepers[tn];
-        }
+        savedKeepers[tn]=data.keepers[tn];
+        selections[tn]=data.keepers[tn].slice();
       }
     }
-    if(!data.picks)return;
     var serverLive=data.liveMode||false;
     if(serverLive!==drLiveMode){
       drLiveMode=serverLive;
       updateLiveBtn();
       startPolling();
     }
-    drPicks=[];drDrafted=new Set();
-    data.picks.forEach(function(sp){
-      var idx=sp.pick-1;
-      if(idx>=0&&idx<drOrder.length){
-        drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
-        drDrafted.add(sp.player);
-      }
-    });
-    refreshKeepers();
+    if(data.picks){
+      drPicks=[];drDrafted=new Set();
+      data.picks.forEach(function(sp){
+        var idx=sp.pick-1;
+        if(idx>=0&&idx<drOrder.length){
+          drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
+          drDrafted.add(sp.player);
+        }
+      });
+    }
+    // Add keepers without saving back to server
+    refreshKeepersLocal();
     renderDraftOrderPanel();
     renderLocalPlayers(drCurrentSub);
-  }).catch(function(){});
+    drLoading=false;
+  }).catch(function(){drLoading=false});
+}
+
+function refreshKeepersLocal(){
+  // Same as refreshKeepers but doesn't save to server (used during load)
+  if(!drOrder.length)return;
+  for(var i=0;i<drPicks.length;i++){
+    if(drPicks[i]&&drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined}
+  }
+  for(var tn in savedKeepers){
+    var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
+    var team=TM.find(function(t){return t.n===tn});if(!team)continue;
+    keepers.forEach(function(k){
+      var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+      drDrafted.add(k.name);
+      for(var p=0;p<drOrder.length;p++){
+        if(drOrder[p].round===kr&&drOrder[p].name===team.o){
+          drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break;
+        }
+      }
+    });
+  }
+  while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
 }
 
 function refreshKeepers(){
   for(var tn in savedKeepers){
-    var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
+    var keepers=savedKeepers[tn];if(!keepers)continue;
     keepers.forEach(function(k){drDrafted.add(k.name)});
   }
   if(drOrder.length){
+    // First REMOVE all existing keeper picks (clean slate for keepers)
+    for(var i=0;i<drPicks.length;i++){
+      if(drPicks[i]&&drPicks[i].keeper){
+        drDrafted.delete(drPicks[i].player);
+        drPicks[i]=undefined;
+      }
+    }
+    // Now add current keepers from savedKeepers
     var newKeepers=[];
     for(var tn in savedKeepers){
       var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
       var team=TM.find(function(t){return t.n===tn});if(!team)continue;
       keepers.forEach(function(k){
         var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-        var alreadyIn=false;
-        for(var p=0;p<drPicks.length;p++){if(drPicks[p]&&drPicks[p].player===k.name&&drPicks[p].keeper){alreadyIn=true;break}}
-        if(alreadyIn)return;
+        drDrafted.add(k.name);
         for(var p=0;p<drOrder.length;p++){
           if(drOrder[p].round===kr&&drOrder[p].name===team.o){
             drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};
@@ -1669,8 +1704,8 @@ function refreshKeepers(){
     if(newKeepers.length){
       saveDraftToServer();
     }
-    renderDraftOrderPanel();
-    renderLocalPlayers(drCurrentSub);
+    // Clean trailing undefineds
+    while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
   }
 }
 
