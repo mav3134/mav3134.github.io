@@ -1734,6 +1734,9 @@ function buildDraftOrder(table){
       drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:o.name});
     });
   }
+  // Traded picks: override owner name for specific rounds
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
     keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
