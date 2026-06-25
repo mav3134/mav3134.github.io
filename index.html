@@ -1816,11 +1816,13 @@ function updateClockPlayers(ownerName){
     if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
   }
   ownerPicks.sort(function(a,b){
-    var ra=drOrder[a.pick-1]?drOrder[a.pick-1].round:999;
-    var rb=drOrder[b.pick-1]?drOrder[b.pick-1].round:999;
+    var slotA=a.pick-1, slotB=b.pick-1;
+    var ra=(drOrder[slotA]&&drOrder[slotA].round)?drOrder[slotA].round:Math.ceil(a.pick/12);
+    var rb=(drOrder[slotB]&&drOrder[slotB].round)?drOrder[slotB].round:Math.ceil(b.pick/12);
     if(ra!==rb)return ra-rb;
     return a.pick-b.pick;
   });
+  // Build sig after sort so order is baked in — prevents stale early-return
   var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
   if(sig===_cpLastSig)return;
   _cpLastSig=sig;
