@@ -1767,7 +1767,7 @@ var PICK_TRADES=[
     {round:3,from:'Chuck Bush',to:'Brandon Cepelnik'},
     {round:10,from:'Brandon Cepelnik',to:'Chuck Bush'}
   ];
-  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
+  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].originalName=t.from;drOrder[p].name=t.to;break}}});
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
     placeTeamKeepers(team,keepers);
@@ -1810,7 +1810,9 @@ function renderDraftOrderPanel(){
     if(isOnClock)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1);cursor:grab"';
     if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
     html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
-    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name+'</span>';
+    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name;
+    if(o.originalName){html+='<span style="font-size:.6rem;color:#f39c12;font-weight:400;margin-left:4px;letter-spacing:.5px">(via '+o.originalName.split(' ').pop()+')</span>'}
+    html+='</span>';
     if(picked){var pos=guessPosition(picked.player);var pcls=POS_COLORS[pos]||'';var lbl=isKeeper?'K: ':'';
       html+='<span class="dr-picked-player '+pcls+'">'+lbl+abbrevName(picked.player)+'</span>'}
     html+='</div>';
