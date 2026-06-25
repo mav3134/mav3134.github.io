@@ -1815,7 +1815,12 @@ function updateClockPlayers(ownerName){
   for(var i=0;i<drPicks.length;i++){
     if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
   }
-  ownerPicks.sort(function(a,b){return a.pick-b.pick});
+  ownerPicks.sort(function(a,b){
+    var ra=drOrder[a.pick-1]?drOrder[a.pick-1].round:999;
+    var rb=drOrder[b.pick-1]?drOrder[b.pick-1].round:999;
+    if(ra!==rb)return ra-rb;
+    return a.pick-b.pick;
+  });
   var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
   if(sig===_cpLastSig)return;
   _cpLastSig=sig;
