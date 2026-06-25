@@ -1811,7 +1811,7 @@ function renderDraftOrderPanel(){
     if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
     html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
     html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name;
-    if(o.originalName){html+='<span style="font-size:.6rem;color:#f39c12;font-weight:400;margin-left:4px;letter-spacing:.5px">(via '+o.originalName.split(' ').pop()+')</span>'}
+    if(o.originalName){html+='<span style="font-size:.6rem;color:#ccc;font-weight:400;margin-left:4px;letter-spacing:.5px">(via '+o.originalName+')</span>'}
     html+='</span>';
     if(picked){var pos=guessPosition(picked.player);var pcls=POS_COLORS[pos]||'';var lbl=isKeeper?'K: ':'';
       html+='<span class="dr-picked-player '+pcls+'">'+lbl+abbrevName(picked.player)+'</span>'}
