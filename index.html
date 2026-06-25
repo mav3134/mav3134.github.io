@@ -705,11 +705,15 @@ function showActiveBtn(){
       if(activeTeam)updateBtn(activeTeam);
     }
   }).catch(function(){});
-  var hash=(location.hash||'').replace('#','');
-  if(hash&&document.getElementById('tab-'+hash)){
-    switchTab(hash);
-    if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
-  }
+  // Defer to next tick so the full script (DRAFT_DB, STAT_HEADERS, draft-room fns) is defined
+  // before restoring the draft-room tab, which otherwise throws and gets stuck on "Loading...".
+  setTimeout(function(){
+    var hash=(location.hash||'').replace('#','');
+    if(hash&&document.getElementById('tab-'+hash)){
+      switchTab(hash);
+      if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
+    }
+  },0);
 })();
 
 // ═══ DRAFT RESULTS (actual snake draft order) ═══
@@ -1670,15 +1674,7 @@ function refreshKeepersLocal(){
   for(var tn in savedKeepers){
     var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-    keepers.forEach(function(k){
-      var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-      drDrafted.add(k.name);
-      for(var p=0;p<drOrder.length;p++){
-        if(drOrder[p].round===kr&&drOrder[p].name===team.o){
-          drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break;
-        }
-      }
-    });
+    placeTeamKeepers(team,keepers);
   }
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
 }
@@ -1701,16 +1697,8 @@ function refreshKeepers(){
     for(var tn in savedKeepers){
       var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
       var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-      keepers.forEach(function(k){
-        var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-        drDrafted.add(k.name);
-        for(var p=0;p<drOrder.length;p++){
-          if(drOrder[p].round===kr&&drOrder[p].name===team.o){
-            drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};
-            newKeepers.push({pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name});
-            break;
-          }
-        }
+      placeTeamKeepers(team,keepers,function(slot,k){
+        newKeepers.push({pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name});
       });
     }
     if(newKeepers.length){
@@ -1721,6 +1709,36 @@ function refreshKeepers(){
   }
 }
 
+// Place a keeper in its keeper-round slot. When two keepers share a round, the duplicate
+// moves to the round AFTER (5+5 -> 5 & 6). At the last round it can't go to 15, so it
+// moves up instead (14+14 -> 13 & 14). Only slots the team still owns count (handles trades).
+function teamSlotInRound(ownerName,rd){
+  for(var p=0;p<drOrder.length;p++){
+    if(drOrder[p].round===rd&&drOrder[p].name===ownerName&&!drPicks[p])return p;
+  }
+  return -1;
+}
+function keeperExactSlot(ownerName,kr){return teamSlotInRound(ownerName,kr)}
+function keeperBumpSlot(ownerName,kr){
+  for(var rd=kr+1;rd<=14;rd++){var p=teamSlotInRound(ownerName,rd);if(p>=0)return p}
+  for(var rd=kr-1;rd>=1;rd--){var p=teamSlotInRound(ownerName,rd);if(p>=0)return p}
+  return -1;
+}
+function placeTeamKeepers(team,keepers,onPlace){
+  var pending=[];
+  keepers.forEach(function(k){
+    var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+    drDrafted.add(k.name);
+    var slot=keeperExactSlot(team.o,kr);
+    if(slot>=0){drPicks[slot]={pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name,keeper:true};if(onPlace)onPlace(slot,k)}
+    else pending.push(k);
+  });
+  pending.forEach(function(k){
+    var kr=parseInt(k.kr);
+    var slot=keeperBumpSlot(team.o,kr);
+    if(slot>=0){drPicks[slot]={pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name,keeper:true};if(onPlace)onPlace(slot,k)}
+  });
+}
 function buildDraftOrder(table){
   var rows=table.rows||[];
   var rawOrder=[];
@@ -1752,9 +1770,7 @@ var PICK_TRADES=[
   PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-    keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-      for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===kr&&drOrder[p].name===team.o){drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break}}
-    });
+    placeTeamKeepers(team,keepers);
   }
   renderDraftOrderPanel();
   renderLocalPlayers(drCurrentSub);
