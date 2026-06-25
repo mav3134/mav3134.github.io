@@ -1785,88 +1785,81 @@ var PICK_TRADES=[
   renderLocalPlayers(drCurrentSub);
 }
 
-// ── Local player image manifest (populated after script runs) ────────────────
-var _playerManifest=null;
-function loadPlayerManifest(cb){
-  if(_playerManifest!==null){cb(_playerManifest);return}
-  fetch('./players/manifest.json').then(function(r){return r.json()})
-    .then(function(d){_playerManifest=d;cb(d)})
-    .catch(function(){_playerManifest={};cb({})});
-}
-function slugifyPlayer(name){
-  return name.toLowerCase().replace(/[''`]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-}
-
-// ── Headshot fetcher: local players/ folder → Sleeper → ESPN bust ─────────────
+// ── Headshot fetcher: Sleeper (wider crop) → ESPN bust ───────────────────────
 function getHeadshot(playerName,cb){
   if(hsCache[playerName]){cb(hsCache[playerName]);return}
-  loadPlayerManifest(function(manifest){
-    var slug=slugifyPlayer(playerName);
-    if(manifest[slug]){
-      var url='./players/'+manifest[slug];
-      hsCache[playerName]=url;cb(url);return;
-    }
-    // No local file — fall back to Sleeper (wider crop) then ESPN bust
-    fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
-      .then(function(r){return r.json()})
-      .then(function(d){
-        var items=d.items||d.results||[];
-        if(!items.length){cb(null);return}
-        var item=items[0];
-        var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
-        if(!id){cb(null);return}
-        var sleeperUrl='https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
-        var espnUrl='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
-        var probe=new Image();
-        probe.onload=function(){hsCache[playerName]=sleeperUrl;cb(sleeperUrl)};
-        probe.onerror=function(){hsCache[playerName]=espnUrl;cb(espnUrl)};
-        probe.src=sleeperUrl;
-      }).catch(function(){cb(null)});
-  });
+  fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var items=d.items||d.results||[];
+      if(!items.length){cb(null);return}
+      var item=items[0];
+      var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
+      if(!id){cb(null);return}
+      var sleeperUrl='https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
+      var espnUrl='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
+      var probe=new Image();
+      probe.onload=function(){hsCache[playerName]=sleeperUrl;cb(sleeperUrl)};
+      probe.onerror=function(){hsCache[playerName]=espnUrl;cb(espnUrl)};
+      probe.src=sleeperUrl;
+    }).catch(function(){cb(null)});
 }
 
 // ── Clock player strip ────────────────────────────────────────────────────────
-var _cpLastSig='';  // tracks last rendered pick signature to prevent flash-rebuild on polling
+var _cpLastSig='';
 function updateClockPlayers(ownerName){
   var leftEl=document.getElementById('dr-cp-left');
   var rightEl=document.getElementById('dr-cp-right');
   if(!leftEl||!rightEl)return;
-  // Collect all picks for this owner in pick order
+  // Collect ALL picks for this owner (drafted + keepers), sorted by pick slot number
   var ownerPicks=[];
   for(var i=0;i<drPicks.length;i++){
     if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
   }
-  // Build a signature of current state — only rebuild DOM if something actually changed
-  var sig=ownerName+'|'+ownerPicks.map(function(p){return p.player}).join(',');
+  ownerPicks.sort(function(a,b){return a.pick-b.pick});
+  // No-flash guard — only rebuild if picks actually changed
+  var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
   if(sig===_cpLastSig)return;
   _cpLastSig=sig;
   leftEl.innerHTML='';rightEl.innerHTML='';
   if(!ownerPicks.length)return;
-  ownerPicks.forEach(function(pick,i){
-    var isLeft=(i%2===0);
-    var slot=document.createElement('div');
-    slot.className='dr-cp-slot';
-    var img=document.createElement('img');
-    img.alt=pick.player;
-    var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
-    var nameDiv=document.createElement('div');
-    nameDiv.className='dr-cp-name';
-    nameDiv.textContent=lastName;
-    slot.appendChild(img);
-    slot.appendChild(nameDiv);
-    (isLeft?leftEl:rightEl).appendChild(slot);
-    getHeadshot(pick.player,function(capturedImg){
-      return function(url){
-        if(url){
-          capturedImg.src=url;
-          capturedImg.onload=function(){capturedImg.classList.add('loaded')};
-          capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
-        } else {
-          capturedImg.closest('.dr-cp-slot').style.display='none';
-        }
-      };
-    }(img));
+  // Split at midpoint: first half on left (reversed so pick 1 is closest to name),
+  // second half on right (pick order left to right, closest to name first)
+  var mid=Math.ceil(ownerPicks.length/2);
+  var leftPicks=ownerPicks.slice(0,mid);   // picks 1..mid → left side
+  var rightPicks=ownerPicks.slice(mid);    // picks mid+1.. → right side
+  // Left side: rendered in reverse so the earliest pick ends up closest to the name
+  leftPicks.slice().reverse().forEach(function(pick){
+    appendPlayerSlot(leftEl, pick);
   });
+  // Right side: rendered in order, earliest pick closest to the name
+  rightPicks.forEach(function(pick){
+    appendPlayerSlot(rightEl, pick);
+  });
+}
+function appendPlayerSlot(container, pick){
+  var slot=document.createElement('div');
+  slot.className='dr-cp-slot';
+  var img=document.createElement('img');
+  img.alt=pick.player;
+  var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
+  var nameDiv=document.createElement('div');
+  nameDiv.className='dr-cp-name';
+  nameDiv.textContent=lastName;
+  slot.appendChild(img);
+  slot.appendChild(nameDiv);
+  container.appendChild(slot);
+  getHeadshot(pick.player,function(capturedImg){
+    return function(url){
+      if(url){
+        capturedImg.src=url;
+        capturedImg.onload=function(){capturedImg.classList.add('loaded')};
+        capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
+      } else {
+        capturedImg.closest('.dr-cp-slot').style.display='none';
+      }
+    };
+  }(img));
 }
 
 function updateClock(){
