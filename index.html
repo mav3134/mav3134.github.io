@@ -1822,6 +1822,11 @@ function updateClockPlayers(ownerName){
     if(ra!==rb)return ra-rb;
     return a.pick-b.pick;
   });
+  console.log('CLOCK PICKS for',ownerName,ownerPicks.map(function(p){
+    var slot=p.pick-1;
+    var rd=drOrder[slot]?drOrder[slot].round:'?';
+    return p.player+'(pick='+p.pick+' rd='+rd+')';
+  }));
   // Build sig after sort so order is baked in — prevents stale early-return
   var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
   if(sig===_cpLastSig)return;
