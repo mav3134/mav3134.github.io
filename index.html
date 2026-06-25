@@ -277,6 +277,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
     <button class="dr-undo" id="dr-undo" onclick="draftUndo()" disabled>↩ Undo</button>
+    <button class="dr-undo" id="dr-reset-btn" onclick="resetDraft()" style="border-color:#c8102e;color:#e05555">⟳ Reset Draft</button>
     <button class="dr-undo" id="dr-live-btn" onclick="toggleLiveDraft()" style="border-color:#27ae60;color:#27ae60">⚡ Live Draft: OFF</button>
     <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
       <option value="">View Team Roster...</option>
@@ -635,7 +636,16 @@ document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
     if(!selections[teamName])selections[teamName]=[];
     var idx=selections[teamName].findIndex(function(s){return s.name===pn});
     if(idx>=0){selections[teamName].splice(idx,1);tr.classList.remove("selected")}
-    else{if(selections[teamName].length>=2)return;selections[teamName].push({name:pn,kr:kv});tr.classList.add("selected")}
+    else{
+      if(selections[teamName].length>=2){
+        var oldest=selections[teamName].shift();
+        card.querySelectorAll('.rtbl tr.selectable').forEach(function(r){
+          if(r.getAttribute("data-player")===oldest.name)r.classList.remove("selected");
+        });
+      }
+      selections[teamName].push({name:pn,kr:kv});
+      tr.classList.add("selected");
+    }
     updateBtn(teamName);
   });
 });
@@ -1793,6 +1803,7 @@ function renderDraftOrderPanel(){
   var total=drPicks.filter(function(p){return p}).length;
   document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
   document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
+  var drBtn=document.getElementById('dr-reset-btn');if(drBtn)drBtn.disabled=!drPicks.some(function(p){return p&&!p.keeper});
   document.querySelectorAll('.dr-order-item[draggable="true"]').forEach(function(el){
     el.addEventListener('dragstart',function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({pick:parseInt(el.dataset.pick),name:el.dataset.name}));
@@ -1874,6 +1885,19 @@ function draftUndo(){
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
   saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+}
+function resetDraft(){
+  if(!confirm('Reset the draft? This undoes ALL manually drafted picks. Keepers are kept.'))return;
+  for(var i=0;i<drPicks.length;i++){
+    if(drPicks[i]&&!drPicks[i].keeper){
+      drDrafted.delete(drPicks[i].player);
+      drPicks[i]=undefined;
+    }
+  }
+  while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
+  saveDraftToServer();
+  renderDraftOrderPanel();
+  renderLocalPlayers(drCurrentSub);
 }
 
 function openTeamRoster(val){
