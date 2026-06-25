@@ -156,24 +156,20 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
 /* ═══ DRAFT ROOM ═══ */
 .dr-wrap{padding:12px 16px;max-width:1400px;margin:0 auto}
-.dr-clock{text-align:center;padding:12px 16px;margin-bottom:10px;background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:6px;position:relative;overflow:hidden}
-.dr-clock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e)}
+.dr-clock{padding:0;margin-bottom:10px;background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:stretch;min-height:130px}
+.dr-clock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e);z-index:2}
+.dr-clock-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;z-index:1;min-width:0}
 .dr-clock-label{font-family:'Oswald',sans-serif;font-size:.65rem;color:#888;text-transform:uppercase;letter-spacing:2px}
 .dr-clock-name{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;letter-spacing:1px;color:#f5c842;margin-top:2px;display:inline-block;cursor:grab;padding:4px 20px;border:2px solid #f39c12;border-radius:6px;background:rgba(243,156,18,.1);transition:all .15s}
 .dr-clock-name:hover{background:rgba(243,156,18,.2);transform:scale(1.02)}
 .dr-clock-name:active{cursor:grabbing}
-.dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
-.dr-clock-players{display:flex;align-items:flex-end;justify-content:center;gap:0;margin-top:8px;min-height:100px;position:relative}
-.dr-clock-players .dr-cp-left,.dr-clock-players .dr-cp-right{display:flex;align-items:flex-end;gap:2px}
-.dr-clock-players .dr-cp-left{flex-direction:row-reverse;margin-right:8px}
-.dr-clock-players .dr-cp-right{margin-left:8px}
-.dr-cp-img{width:64px;height:96px;object-fit:cover;object-position:top center;border-radius:4px 4px 0 0;background:rgba(255,255,255,.04);border:1px solid #2a2d3a;border-bottom:none;transition:opacity .3s;opacity:0}
-.dr-cp-img.loaded{opacity:1}
-.dr-cp-img.flip{transform:scaleX(-1)}
-.dr-cp-label{font-family:'Oswald',sans-serif;font-size:.55rem;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;text-align:center}
-.dr-cp-slot{display:flex;flex-direction:column;align-items:center}
-.dr-cp-slot.keeper .dr-cp-img{border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.06)}
-.dr-cp-slot.keeper .dr-cp-label{color:#e05555}
+.dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:4px}
+.dr-cp-side{display:flex;align-items:stretch;gap:2px;overflow:hidden;max-width:45%}
+.dr-cp-side.left{flex-direction:row-reverse}
+.dr-cp-slot{position:relative;flex-shrink:0;width:90px;overflow:hidden;background:rgba(255,255,255,.02)}
+.dr-cp-slot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;opacity:0;transition:opacity .4s}
+.dr-cp-slot img.loaded{opacity:1}
+.dr-cp-slot .dr-cp-name{position:absolute;bottom:0;left:0;right:0;font-family:'Anton',sans-serif;font-size:1rem;text-transform:uppercase;letter-spacing:1px;color:#fff;text-align:center;padding:18px 4px 5px;background:linear-gradient(transparent,rgba(8,12,20,.85));pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dr-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:10px}
 .dr-title{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .dr-undo{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;cursor:pointer;transition:all .15s}
@@ -280,13 +276,13 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="tab-panel" id="tab-draft-room">
 <div class="dr-wrap">
   <div class="dr-clock" id="dr-clock">
-    <div class="dr-clock-label">On the Clock</div>
-    <div class="dr-clock-name" id="dr-clock-name">—</div>
-    <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
-    <div class="dr-clock-players" id="dr-clock-players">
-      <div class="dr-cp-left" id="dr-cp-left"></div>
-      <div class="dr-cp-right" id="dr-cp-right"></div>
+    <div class="dr-cp-side left" id="dr-cp-left"></div>
+    <div class="dr-clock-center">
+      <div class="dr-clock-label">On the Clock</div>
+      <div class="dr-clock-name" id="dr-clock-name">—</div>
+      <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
     </div>
+    <div class="dr-cp-side right" id="dr-cp-right"></div>
   </div>
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
@@ -1815,6 +1811,7 @@ function getHeadshot(playerName,cb){
 }
 
 // ── Clock player strip ────────────────────────────────────────────────────────
+var _cpLastSig='';  // tracks last rendered pick signature to prevent flash-rebuild on polling
 function updateClockPlayers(ownerName){
   var leftEl=document.getElementById('dr-cp-left');
   var rightEl=document.getElementById('dr-cp-right');
@@ -1822,28 +1819,38 @@ function updateClockPlayers(ownerName){
   // Collect all picks for this owner in pick order
   var ownerPicks=[];
   for(var i=0;i<drPicks.length;i++){
-    if(drPicks[i]&&drPicks[i].owner===ownerName){ownerPicks.push(drPicks[i])}
+    if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
   }
+  // Build a signature of current state — only rebuild DOM if something actually changed
+  var sig=ownerName+'|'+ownerPicks.map(function(p){return p.player}).join(',');
+  if(sig===_cpLastSig)return;
+  _cpLastSig=sig;
   leftEl.innerHTML='';rightEl.innerHTML='';
   if(!ownerPicks.length)return;
   ownerPicks.forEach(function(pick,i){
-    var isLeft=(i%2===0); // 1st pick left, 2nd right, 3rd left...
+    var isLeft=(i%2===0);
     var slot=document.createElement('div');
-    slot.className='dr-cp-slot'+(pick.keeper?' keeper':'');
+    slot.className='dr-cp-slot';
     var img=document.createElement('img');
-    img.className='dr-cp-img'+(isLeft?' flip':''); // left-side images face right (inward)
     img.alt=pick.player;
-    img.title=pick.player+(pick.keeper?' (K)':'');
-    var lbl=document.createElement('div');
-    lbl.className='dr-cp-label';
-    lbl.textContent=pick.player.split(' ').pop(); // last name only
+    var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
+    var nameDiv=document.createElement('div');
+    nameDiv.className='dr-cp-name';
+    nameDiv.textContent=lastName;
     slot.appendChild(img);
-    slot.appendChild(lbl);
+    slot.appendChild(nameDiv);
     (isLeft?leftEl:rightEl).appendChild(slot);
-    getHeadshot(pick.player,function(url){
-      if(url){img.src=url;img.onload=function(){img.classList.add('loaded')};img.onerror=function(){img.style.display='none';lbl.style.display='none'}}
-      else{img.style.display='none';lbl.style.display='none'}
-    });
+    getHeadshot(pick.player,function(capturedImg){
+      return function(url){
+        if(url){
+          capturedImg.src=url;
+          capturedImg.onload=function(){capturedImg.classList.add('loaded')};
+          capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
+        } else {
+          capturedImg.closest('.dr-cp-slot').style.display='none';
+        }
+      };
+    }(img));
   });
 }
 
@@ -1853,6 +1860,8 @@ function updateClock(){
   var cn=document.getElementById('dr-clock-name'),cp=document.getElementById('dr-clock-pick');
   if(nextIdx>=0){
     var o=drOrder[nextIdx];
+    // If owner changed, clear the signature so photos rebuild for the new owner
+    if(cn.textContent!==o.name)_cpLastSig='';
     cn.textContent=o.name;
     cn.draggable=true;
     cn.setAttribute('data-pick',String(nextIdx+1));
