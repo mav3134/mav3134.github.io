@@ -163,12 +163,22 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dr-clock-name:hover{background:rgba(243,156,18,.2);transform:scale(1.02)}
 .dr-clock-name:active{cursor:grabbing}
 .dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
+.dr-clock-players{display:flex;align-items:flex-end;justify-content:center;gap:0;margin-top:8px;min-height:72px;position:relative}
+.dr-clock-players .dr-cp-left,.dr-clock-players .dr-cp-right{display:flex;align-items:flex-end;gap:2px}
+.dr-clock-players .dr-cp-left{flex-direction:row-reverse;margin-right:8px}
+.dr-clock-players .dr-cp-right{margin-left:8px}
+.dr-cp-img{width:56px;height:68px;object-fit:cover;object-position:top center;border-radius:4px 4px 0 0;background:rgba(255,255,255,.04);border:1px solid #2a2d3a;border-bottom:none;transition:opacity .3s;opacity:0}
+.dr-cp-img.loaded{opacity:1}
+.dr-cp-img.flip{transform:scaleX(-1)}
+.dr-cp-label{font-family:'Oswald',sans-serif;font-size:.55rem;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:56px;text-align:center}
+.dr-cp-slot{display:flex;flex-direction:column;align-items:center}
+.dr-cp-slot.keeper .dr-cp-img{border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.06)}
+.dr-cp-slot.keeper .dr-cp-label{color:#e05555}
 .dr-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:10px}
 .dr-title{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .dr-undo{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;cursor:pointer;transition:all .15s}
 .dr-undo:not(:disabled):hover{border-color:#f39c12;color:#f5c842}
 .dr-undo:disabled{opacity:.3;cursor:default}
-.dr-pick-count{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-left:auto}
 .dr-subtabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
 .dr-sub{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #333;background:linear-gradient(180deg,#1e2333,#141822);color:#888;cursor:pointer;transition:all .15s}
 .dr-sub:hover{border-color:#555;color:#ccc}
@@ -273,6 +283,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <div class="dr-clock-label">On the Clock</div>
     <div class="dr-clock-name" id="dr-clock-name">—</div>
     <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
+    <div class="dr-clock-players" id="dr-clock-players">
+      <div class="dr-cp-left" id="dr-cp-left"></div>
+      <div class="dr-cp-right" id="dr-cp-right"></div>
+    </div>
   </div>
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
@@ -282,7 +296,6 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
       <option value="">View Team Roster...</option>
     </select>
-    <span class="dr-pick-count" id="dr-pick-count">Pick 0 / 0</span>
   </div>
   <div class="dr-subtabs" id="dr-subtabs">
     <button class="dr-sub active" onclick="switchDraftSub('All Players')">All Players</button>
@@ -1776,6 +1789,55 @@ var PICK_TRADES=[
   renderLocalPlayers(drCurrentSub);
 }
 
+// ── Headshot fetcher (reuses blurb hsCache) ──────────────────────────────────
+function getHeadshot(playerName,cb){
+  if(hsCache[playerName]){cb(hsCache[playerName]);return}
+  fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
+    .then(function(r){return r.json()})
+    .then(function(d){
+      var items=d.items||d.results||[];
+      if(items.length>0){
+        var item=items[0];
+        var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
+        if(id){var url='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';hsCache[playerName]=url;cb(url);return}
+      }
+      cb(null);
+    }).catch(function(){cb(null)});
+}
+
+// ── Clock player strip ────────────────────────────────────────────────────────
+function updateClockPlayers(ownerName){
+  var leftEl=document.getElementById('dr-cp-left');
+  var rightEl=document.getElementById('dr-cp-right');
+  if(!leftEl||!rightEl)return;
+  // Collect all picks for this owner in pick order
+  var ownerPicks=[];
+  for(var i=0;i<drPicks.length;i++){
+    if(drPicks[i]&&drPicks[i].owner===ownerName){ownerPicks.push(drPicks[i])}
+  }
+  leftEl.innerHTML='';rightEl.innerHTML='';
+  if(!ownerPicks.length)return;
+  ownerPicks.forEach(function(pick,i){
+    var isLeft=(i%2===0); // 1st pick left, 2nd right, 3rd left...
+    var slot=document.createElement('div');
+    slot.className='dr-cp-slot'+(pick.keeper?' keeper':'');
+    var img=document.createElement('img');
+    img.className='dr-cp-img'+(isLeft?' flip':''); // left-side images face right (inward)
+    img.alt=pick.player;
+    img.title=pick.player+(pick.keeper?' (K)':'');
+    var lbl=document.createElement('div');
+    lbl.className='dr-cp-label';
+    lbl.textContent=pick.player.split(' ').pop(); // last name only
+    slot.appendChild(img);
+    slot.appendChild(lbl);
+    (isLeft?leftEl:rightEl).appendChild(slot);
+    getHeadshot(pick.player,function(url){
+      if(url){img.src=url;img.onload=function(){img.classList.add('loaded')};img.onerror=function(){img.style.display='none';lbl.style.display='none'}}
+      else{img.style.display='none';lbl.style.display='none'}
+    });
+  });
+}
+
 function updateClock(){
   var nextIdx=-1;
   for(var i=0;i<drOrder.length;i++){if(!drPicks[i]){nextIdx=i;break}}
@@ -1791,10 +1853,12 @@ function updateClock(){
     cn.ondragstart=function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({pick:nextIdx+1,name:o.name}));
     };
+    updateClockPlayers(o.name);
   } else {
     cn.textContent='Draft Complete';cn.draggable=false;cn.ondragstart=null;
     cn.style.border='2px solid #27ae60';cn.style.cursor='default';
     cp.textContent='All picks are in!';
+    updateClockPlayers('');
   }
 }
 
@@ -1818,8 +1882,6 @@ function renderDraftOrderPanel(){
     html+='</div>';
   });
   document.getElementById('dr-order-list').innerHTML=html;
-  var total=drPicks.filter(function(p){return p}).length;
-  document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
   document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
   var drBtn=document.getElementById('dr-reset-btn');if(drBtn)drBtn.disabled=!drPicks.some(function(p){return p&&!p.keeper});
   document.querySelectorAll('.dr-order-item[draggable="true"]').forEach(function(el){
@@ -1948,7 +2010,7 @@ function renderTeamRoster(teamName){
     var rdLabel='<span style="margin-left:auto;font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
     html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+rdLabel+'</div>';
   });
-  for(var b=0;b<Math.max(0,4-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
+  for(var b=0;b<Math.max(0,5-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
   document.getElementById('dr-roster-body').innerHTML=html;
 }
 function guessPosition(name){
