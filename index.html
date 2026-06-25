@@ -1811,55 +1811,53 @@ function updateClockPlayers(ownerName){
   var leftEl=document.getElementById('dr-cp-left');
   var rightEl=document.getElementById('dr-cp-right');
   if(!leftEl||!rightEl)return;
-  // Collect ALL picks for this owner (drafted + keepers), sorted by pick slot number
   var ownerPicks=[];
   for(var i=0;i<drPicks.length;i++){
     if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
   }
   ownerPicks.sort(function(a,b){return a.pick-b.pick});
-  // No-flash guard — only rebuild if picks actually changed
   var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
   if(sig===_cpLastSig)return;
   _cpLastSig=sig;
   leftEl.innerHTML='';rightEl.innerHTML='';
-  if(!ownerPicks.length)return;
-  // Split at midpoint: first half on left (reversed so pick 1 is closest to name),
-  // second half on right (pick order left to right, closest to name first)
-  var mid=Math.ceil(ownerPicks.length/2);
-  var leftPicks=ownerPicks.slice(0,mid);   // picks 1..mid → left side
-  var rightPicks=ownerPicks.slice(mid);    // picks mid+1.. → right side
-  // Left side: rendered in reverse so the earliest pick ends up closest to the name
-  leftPicks.slice().reverse().forEach(function(pick){
-    appendPlayerSlot(leftEl, pick);
-  });
-  // Right side: rendered in order, earliest pick closest to the name
-  rightPicks.forEach(function(pick){
-    appendPlayerSlot(rightEl, pick);
-  });
+  ownerPicks.forEach(function(pick){appendPlayerSlot(leftEl,pick)});
 }
-function appendPlayerSlot(container, pick){
+function appendPlayerSlot(container,pick){
   var slot=document.createElement('div');
   slot.className='dr-cp-slot';
   var img=document.createElement('img');
   img.alt=pick.player;
-  var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
   var nameDiv=document.createElement('div');
   nameDiv.className='dr-cp-name';
-  nameDiv.textContent=lastName;
+  // DEF entries: use ESPN team logo, show city name
+  var defMatch=pick.player.match(/^(\w+)\s+DEF$/);
+  if(defMatch){
+    var teamKey=defMatch[1]; // e.g. "Steelers"
+    var abbr=(DEF_LOGOS[teamKey]||teamKey).toLowerCase();
+    img.src='https://a.espncdn.com/i/teamlogos/nfl/500/'+abbr+'.png';
+    img.onload=function(){img.classList.add('loaded')};
+    img.onerror=function(){slot.style.display='none'};
+    img.style.objectFit='contain';
+    img.style.padding='6px';
+    nameDiv.textContent=teamKey;
+  } else {
+    var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
+    nameDiv.textContent=lastName;
+    getHeadshot(pick.player,function(capturedImg){
+      return function(url){
+        if(url){
+          capturedImg.src=url;
+          capturedImg.onload=function(){capturedImg.classList.add('loaded')};
+          capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
+        } else {
+          capturedImg.closest('.dr-cp-slot').style.display='none';
+        }
+      };
+    }(img));
+  }
   slot.appendChild(img);
   slot.appendChild(nameDiv);
   container.appendChild(slot);
-  getHeadshot(pick.player,function(capturedImg){
-    return function(url){
-      if(url){
-        capturedImg.src=url;
-        capturedImg.onload=function(){capturedImg.classList.add('loaded')};
-        capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
-      } else {
-        capturedImg.closest('.dr-cp-slot').style.display='none';
-      }
-    };
-  }(img));
 }
 
 function updateClock(){
