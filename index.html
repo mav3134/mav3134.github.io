@@ -1785,29 +1785,44 @@ var PICK_TRADES=[
   renderLocalPlayers(drCurrentSub);
 }
 
-// ── Headshot fetcher: tries Sleeper (wider upper-body crop) then ESPN bust ────
+// ── Local player image manifest (populated after script runs) ────────────────
+var _playerManifest=null;
+function loadPlayerManifest(cb){
+  if(_playerManifest!==null){cb(_playerManifest);return}
+  fetch('./players/manifest.json').then(function(r){return r.json()})
+    .then(function(d){_playerManifest=d;cb(d)})
+    .catch(function(){_playerManifest={};cb({})});
+}
+function slugifyPlayer(name){
+  return name.toLowerCase().replace(/[''`]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+// ── Headshot fetcher: local players/ folder → Sleeper → ESPN bust ─────────────
 function getHeadshot(playerName,cb){
   if(hsCache[playerName]){cb(hsCache[playerName]);return}
-  // Resolve ESPN player ID via search, then try Sleeper CDN first (wider upper-body shot)
-  fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
-    .then(function(r){return r.json()})
-    .then(function(d){
-      var items=d.items||d.results||[];
-      if(!items.length){cb(null);return}
-      var item=items[0];
-      var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
-      if(!id){cb(null);return}
-      // Try Sleeper CDN first — uses ESPN IDs, serves wider upper-body crop
-      var sleeperUrl='https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
-      var espnUrl='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
-      var probe=new Image();
-      probe.onload=function(){hsCache[playerName]=sleeperUrl;cb(sleeperUrl)};
-      probe.onerror=function(){
-        // Sleeper 404 — fall back to ESPN bust
-        hsCache[playerName]=espnUrl;cb(espnUrl);
-      };
-      probe.src=sleeperUrl;
-    }).catch(function(){cb(null)});
+  loadPlayerManifest(function(manifest){
+    var slug=slugifyPlayer(playerName);
+    if(manifest[slug]){
+      var url='./players/'+manifest[slug];
+      hsCache[playerName]=url;cb(url);return;
+    }
+    // No local file — fall back to Sleeper (wider crop) then ESPN bust
+    fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
+      .then(function(r){return r.json()})
+      .then(function(d){
+        var items=d.items||d.results||[];
+        if(!items.length){cb(null);return}
+        var item=items[0];
+        var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
+        if(!id){cb(null);return}
+        var sleeperUrl='https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
+        var espnUrl='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
+        var probe=new Image();
+        probe.onload=function(){hsCache[playerName]=sleeperUrl;cb(sleeperUrl)};
+        probe.onerror=function(){hsCache[playerName]=espnUrl;cb(espnUrl)};
+        probe.src=sleeperUrl;
+      }).catch(function(){cb(null)});
+  });
 }
 
 // ── Clock player strip ────────────────────────────────────────────────────────
