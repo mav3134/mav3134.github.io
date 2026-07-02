@@ -867,6 +867,13 @@ function buildDriverList(){
     try{
       var data=parseGviz(text);
       var rows=data.table.rows||[];
+      // Check if the first data row (A2) has a driver name — if blank, fall back
+      var firstCell='';
+      if(rows.length>0){firstCell=cellVal((rows[0].c||[])[0]).trim()}
+      if(!firstCell||firstCell==='Name'||firstCell==='Driver'){
+        loadNascarStandings();
+        return;
+      }
       var drivers=[];
       for(var i=0;i<rows.length;i++){
         var r=rows[i].c||[];
