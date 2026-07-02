@@ -821,11 +821,51 @@ var doLocked=false;
 var DO_NPOINT='https://api.npoint.io/9643622df799b5dd5e7f';
 var SLOTS_BY_FINISH={12:5,11:4,10:3,9:2,8:2,7:2,6:1,5:1,4:1,3:1,2:1,1:1};
 
+function fetchDraftOrder(){
+  fetchSheet('League Stats',function(err,table){
+    if(!err&&table)buildOwnerSlots(table);
+    buildDriverList();
+    setTimeout(loadDOFromServer,2000);
+  });
+}
+
+function buildOwnerSlots(table){
+  var rows=table.rows||[];if(!rows.length)return;
+  var maxCol=0;
+  for(var i=1;i<rows.length;i++){var r=rows[i].c||[];for(var j=r.length-1;j>=0;j--){var v=cellVal(r[j]).trim();if(v&&v!=='-'){if(j+1>maxCol)maxCol=j+1;break}}}
+  var lastYrCol=maxCol-3;
+  var finishes=[];
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i].c||[];var owner=cellVal(r[0]).trim();var fin=parseInt(cellVal(r[lastYrCol]));
+    if(owner&&fin>=1&&fin<=12)finishes.push({owner:owner,finish:fin});
+  }
+  finishes.sort(function(a,b){return b.finish-a.finish});
+  doOwners=finishes.map(function(f){return{owner:f.owner,finish:f.finish,totalSlots:SLOTS_BY_FINISH[f.finish]||1,picks:[]}});
+  buildPickOrder();
+  renderOwnerSlots();
+}
+
+function buildPickOrder(){
+  doPickOrder=[];
+  var maxSlots=5;
+  for(var pass=0;pass<maxSlots;pass++){
+    for(var i=0;i<doOwners.length;i++){
+      if(doOwners[i].totalSlots>pass){
+        doPickOrder.push({ownerIdx:i,owner:doOwners[i].owner,pickNum:doPickOrder.length+1});
+      }
+    }
+  }
+}
+
 function computeOwnerOrder(){
-  // Reading down the live scoring order, first appearance of each owner = their draft slot
+  // Reading down the live scoring order: first appearance of each owner = their draft slot
   var seen=[],order=[];
   doDrivers.forEach(function(d){
     if(d.owner&&seen.indexOf(d.owner)<0){seen.push(d.owner);order.push(d.owner)}
+  });
+  // Append any owners who haven't picked yet (worst-finish-first order) so we always have all 12
+  doOwners.forEach(function(o){
+    if(order.indexOf(o.owner)<0)order.push(o.owner);
   });
   return order;
 }
@@ -842,67 +882,25 @@ function updateLockBtn(){
   var btn=document.getElementById('do-lock-btn');
   if(!btn)return;
   if(doLocked){
-    btn.innerHTML='🔒 Draft Order LOCKED';
+    btn.innerHTML='\ud83d\udd12 Draft Order LOCKED';
     btn.style.borderColor='#27ae60';btn.style.color='#5dde8e';btn.style.background='rgba(39,174,96,.1)';
   }else{
-    btn.innerHTML='🔒 Lock Draft Order';
+    btn.innerHTML='\ud83d\udd12 Lock Draft Order';
     btn.style.borderColor='#c8102e';btn.style.color='#e05555';btn.style.background='';
-  }
-}
-
-function fetchDraftOrder(){
-  fetchSheet('League Stats',function(err,table){
-    if(!err&&table)buildOwnerSlots(table);
-    buildDriverList();
-    // Load saved picks after a short delay to let drivers load
-    setTimeout(loadDOFromServer,2000);
-  });
-}
-
-function buildOwnerSlots(table){
-  var rows=table.rows||[];if(!rows.length)return;
-  // Find the last year column (before Champs/Avg)
-  var maxCol=0;
-  for(var i=1;i<rows.length;i++){var r=rows[i].c||[];for(var j=r.length-1;j>=0;j--){var v=cellVal(r[j]).trim();if(v&&v!=='-'){if(j+1>maxCol)maxCol=j+1;break}}}
-  var lastYrCol=maxCol-3;
-  // Get each owner's finish
-  var finishes=[];
-  for(var i=1;i<rows.length;i++){
-    var r=rows[i].c||[];var owner=cellVal(r[0]).trim();var fin=parseInt(cellVal(r[lastYrCol]));
-    if(owner&&fin>=1&&fin<=12)finishes.push({owner:owner,finish:fin});
-  }
-  finishes.sort(function(a,b){return b.finish-a.finish}); // worst first (12th, 11th...)
-  doOwners=finishes.map(function(f){return{owner:f.owner,finish:f.finish,totalSlots:SLOTS_BY_FINISH[f.finish]||1,picks:[]}});
-  buildPickOrder();
-  renderOwnerSlots();
-}
-
-function buildPickOrder(){
-  doPickOrder=[];
-  // Multiple passes: each pass, everyone with remaining slots picks once, worst-to-best
-  var maxSlots=5;
-  for(var pass=0;pass<maxSlots;pass++){
-    for(var i=0;i<doOwners.length;i++){
-      if(doOwners[i].totalSlots>pass){
-        doPickOrder.push({ownerIdx:i,owner:doOwners[i].owner,pickNum:doPickOrder.length+1});
-      }
-    }
   }
 }
 
 var LIVE_RACE_SHEET='1NwK1C-Mvv1iVcvS6uw30EiqtHKsLtDMDgQ9YrmdNIm8';
 function buildDriverList(){
-  // First try live race sheet
   var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results';
   fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
     try{
       var data=parseGviz(text);
       var rows=data.table.rows||[];
-      // Check if the first data row (A2) has a driver name — if blank, fall back
       var firstCell='';
       if(rows.length>0){firstCell=cellVal((rows[0].c||[])[0]).trim()}
       if(!firstCell||firstCell==='Name'||firstCell==='Driver'){
-        loadNascarStandings();
+        loadDriverGroups();
         return;
       }
       var drivers=[];
@@ -911,40 +909,38 @@ function buildDriverList(){
         var name=cellVal(r[0]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
         var num=cellVal(r[1]).trim();
         if(name&&name!=='Name'&&name!=='Driver'){
-          drivers.push({name:name,num:num,pos:i+1,owner:''});
+          drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
         }
       }
       if(drivers.length>0){
         doDrivers=drivers;
-        addAustinHill();
-        fetchBadgeNumbers();
+        applyPicksToDrivers();
+        renderOwnerSlots();renderDriverTable();
         return;
       }
-    }catch(e){}
-    // Live sheet empty or failed — fall back to NASCAR standings
-    loadNascarStandings();
-  }).catch(function(){loadNascarStandings()});
+      loadDriverGroups();
+    }catch(e){loadDriverGroups()}
+  }).catch(function(){loadDriverGroups()});
 }
 
-function loadNascarStandings(){
-  // Fallback: read DriverGroups tab columns B/C from the fantasy NASCAR sheet
+function loadDriverGroups(){
   var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups';
   fetch(url).then(function(r){return r.text()}).then(function(text){
     try{
       var data=parseGviz(text);
       var rows=data.table.rows||[];
-      doDrivers=[];
+      var drivers=[];
       for(var i=0;i<rows.length;i++){
         var r=rows[i].c||[];
-        var num=cellVal(r[1]).trim();   // Column B = car number
-        var name=cellVal(r[2]).trim();  // Column C = driver name
-        // Strip "## - " prefix from the name (e.g. "5 - Kyle Larson" -> "Kyle Larson")
-        name=name.replace(/^\d+\s*-\s*/,'').trim();
+        var num=cellVal(r[1]).trim();
+        var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
         if(name&&name!=='Name'&&name!=='Driver'){
-          doDrivers.push({name:name,num:num,pos:doDrivers.length+1,owner:''});
+          drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
         }
       }
-      renderDriverTable();
+      doDrivers=drivers;
+      applyPicksToDrivers();
+      renderOwnerSlots();renderDriverTable();
     }catch(e){
       document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
     }
@@ -953,29 +949,24 @@ function loadNascarStandings(){
   });
 }
 
-function addAustinHill(){
-  // Always add Austin Hill #33 at the bottom if not already present
-  var found=doDrivers.some(function(d){return d.name.toLowerCase()==='austin hill'});
-  if(!found){
-    doDrivers.push({name:'Austin Hill',num:'33',pos:doDrivers.length+1,owner:''});
-  }
-}
-
-function fetchBadgeNumbers(){
-  fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
-    if(Array.isArray(drivers)){
-      var numMap={};
-      drivers.forEach(function(d){
-        var nm=((d.First_Name||'')+ ' '+(d.Last_Name||'')).trim().toLowerCase();
-        numMap[nm]=String(d.Badge||d.Car_Number||'');
-      });
-      doDrivers.forEach(function(d){
-        var k=d.name.toLowerCase();
-        if(numMap[k])d.num=numMap[k];
-      });
+// Re-apply saved picks onto the (possibly re-ordered) driver list by NAME
+function applyPicksToDrivers(){
+  doDrivers.forEach(function(d){d.owner=''});
+  doOwners.forEach(function(o){o.picks=[]});
+  var valid=[];
+  doPicks.forEach(function(p){
+    // Match by name (indices shift when running order changes)
+    var idx=-1;
+    for(var i=0;i<doDrivers.length;i++){
+      if(doDrivers[i].name.toLowerCase()===p.driverName.toLowerCase()){idx=i;break}
     }
-    renderDriverTable();
-  }).catch(function(){renderDriverTable()});
+    if(idx>=0&&p.ownerIdx<doOwners.length){
+      doDrivers[idx].owner=p.owner;
+      doOwners[p.ownerIdx].picks.push({name:p.driverName,num:doDrivers[idx].num||''});
+      valid.push({ownerIdx:p.ownerIdx,driverIdx:idx,driverName:p.driverName,owner:p.owner});
+    }
+  });
+  doPicks=valid;
 }
 
 function getNextPick(){
@@ -985,6 +976,7 @@ function getNextPick(){
 }
 
 function renderOwnerSlots(){
+  if(!doOwners.length)return;
   var html='';var next=getNextPick();
   doOwners.forEach(function(o,idx){
     html+='<div class="do-owner-row">';
@@ -997,7 +989,7 @@ function renderOwnerSlots(){
     html+='<div class="do-slots">';
     for(var s=0;s<o.totalSlots;s++){
       var filled=o.picks[s]||null;
-      var slotContent='—';
+      var slotContent='\u2014';
       if(filled){
         var fname=typeof filled==='string'?filled:filled.name;
         var fnum=typeof filled==='string'?'':(filled.num||'');
@@ -1008,7 +1000,6 @@ function renderOwnerSlots(){
     html+='</div></div>';
   });
   document.getElementById('do-owners-list').innerHTML=html;
-  // Update clock
   var cn=document.getElementById('do-clock-name'),ci=document.getElementById('do-clock-info');
   if(next){
     cn.textContent=next.owner;cn.draggable=true;
@@ -1020,7 +1011,6 @@ function renderOwnerSlots(){
     cn.style.borderColor='#27ae60';ci.textContent='All drivers selected!';
   }
   document.getElementById('do-undo-btn').disabled=doPicks.length===0;
-  // Attach drag to on-clock owner
   document.querySelectorAll('.do-owner-name.do-on-clock').forEach(function(el){
     el.addEventListener('dragstart',function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({owner:el.dataset.owner,ownerIdx:parseInt(el.dataset.idx)}));
@@ -1029,16 +1019,22 @@ function renderOwnerSlots(){
 }
 
 function renderDriverTable(){
-  // Build driver -> pick number map
-  var pickMap={};
-  doPicks.forEach(function(p,i){pickMap[p.driverIdx]=i+1});
+  if(!doDrivers.length)return;
+  // Pick column = draft slot based on live running order (first appearance of each owner reading down)
+  var seenOwners=[];var pickByRow={};
+  doDrivers.forEach(function(d,i){
+    if(d.owner&&seenOwners.indexOf(d.owner)<0){
+      seenOwners.push(d.owner);
+      pickByRow[i]=seenOwners.length;
+    }
+  });
   var html='<table class="do-dtbl"><thead><tr>';
   html+='<th style="text-align:center;width:36px;padding-left:8px">Pos</th><th style="padding-left:6px">Driver</th><th style="padding-left:6px">Player</th><th style="text-align:center;width:40px;padding-left:2px;padding-right:8px">Pick</th>';
   html+='</tr></thead><tbody>';
   doDrivers.forEach(function(d,i){
     var picked=d.owner?true:false;
     var cls=picked?'do-driver-picked':'';
-    var pickNum=pickMap[i]||'';
+    var pickNum=pickByRow[i]||'';
     html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888;padding-left:8px">'+d.pos+'</td>';
     var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.style.display=\'none\'"> ':'';
@@ -1049,7 +1045,6 @@ function renderDriverTable(){
   });
   html+='</tbody></table>';
   document.getElementById('do-drivers-table').innerHTML=html;
-  // Attach drop events
   document.querySelectorAll('.do-dtbl tbody tr:not(.do-driver-picked)').forEach(function(tr){
     tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('do-driver-dragover')});
     tr.addEventListener('dragleave',function(){tr.classList.remove('do-driver-dragover')});
@@ -1077,8 +1072,11 @@ function doMakePick(ownerIdx,driverIdx,driverName){
 function doUndo(){
   if(!doPicks.length)return;
   var last=doPicks.pop();
-  doOwners[last.ownerIdx].picks.pop();
-  doDrivers[last.driverIdx].owner='';
+  if(doOwners[last.ownerIdx])doOwners[last.ownerIdx].picks.pop();
+  // Find driver by name to clear
+  for(var i=0;i<doDrivers.length;i++){
+    if(doDrivers[i].name.toLowerCase()===last.driverName.toLowerCase()){doDrivers[i].owner='';break}
+  }
   saveDOToServer();
   renderOwnerSlots();renderDriverTable();
 }
@@ -1093,39 +1091,32 @@ function saveDOToServer(){
   }).catch(function(){});
 }
 
+var doLoadBusy=false;
 function loadDOFromServer(){
+  if(doLoadBusy)return;
+  doLoadBusy=true;
   fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
+    doLoadBusy=false;
     if(!data)return;
-    // Sync lock state
     var serverLocked=data.draftOrderLocked||false;
     if(serverLocked!==doLocked){doLocked=serverLocked;updateLockBtn()}
-    if(!data.draftOrderPicks||!data.draftOrderPicks.length){renderOwnerSlots();return}
     if(!doOwners.length||!doDrivers.length)return;
-    doPicks=[];
-    doOwners.forEach(function(o){o.picks=[]});
-    doDrivers.forEach(function(d){d.owner=''});
-    data.draftOrderPicks.forEach(function(p){
-      if(p.ownerIdx<doOwners.length&&p.driverIdx<doDrivers.length){
-        doOwners[p.ownerIdx].picks.push({name:p.driverName,num:(doDrivers[p.driverIdx]?doDrivers[p.driverIdx].num:'')||''});
-        doDrivers[p.driverIdx].owner=p.owner;
-        doPicks.push(p);
-      }
-    });
+    doPicks=(data.draftOrderPicks||[]).slice();
+    applyPicksToDrivers();
     renderOwnerSlots();renderDriverTable();
-  }).catch(function(){});
+  }).catch(function(){doLoadBusy=false});
 }
-
-// Live refresh: re-fetch driver running order every 30s unless locked
-setInterval(function(){
-  if(document.getElementById('tab-draft-order').classList.contains('active')&&!doLocked&&doDrivers.length){
-    buildDriverList();
-    setTimeout(loadDOFromServer,1500);
-  }
-},30000);
 
 function ordinal(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
 
-// Poll for draft order updates every 10 seconds
+// Live refresh of driver running order every 30s (only when unlocked)
+setInterval(function(){
+  if(document.getElementById('tab-draft-order').classList.contains('active')&&!doLocked&&doDrivers.length){
+    buildDriverList();
+  }
+},30000);
+
+// Poll for pick/lock updates every 10 seconds
 setInterval(function(){
   if(document.getElementById('tab-draft-order').classList.contains('active')){
     loadDOFromServer();
