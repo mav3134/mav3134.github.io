@@ -90,7 +90,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .modal-sent .check{font-size:3rem;margin-bottom:8px;color:#27ae60}
 .modal-sent p{font-family:'Oswald',sans-serif;color:#27ae60;font-size:1.1rem;text-transform:uppercase;letter-spacing:1px}
 /* ═══ DRAFT ORDER TAB ═══ */
-.do-wrap{max-width:680px;margin:0 auto;padding:20px 16px}
+.do-wrap{max-width:1100px;margin:0 auto;padding:20px 16px}
 .do-header{text-align:center;margin-bottom:16px}
 .do-header h2{font-family:'Anton',sans-serif;font-size:1.8rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .do-live{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
@@ -113,6 +113,23 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .car-num{display:inline-block;width:32px;height:22px;object-fit:contain;flex-shrink:0;vertical-align:middle}
 .do-place{font-family:'Oswald',sans-serif;font-weight:600;color:#888;text-align:center}
 .do-place.top3{color:#f1c40f}
+.do-owner-row{padding:4px 8px;margin:3px 0;display:flex;align-items:center;gap:6px;font-family:'Oswald',sans-serif;font-size:.75rem}
+.do-owner-name{font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:#ccc;min-width:110px;cursor:grab;padding:4px 8px;border:1px solid #2a2d3a;border-radius:4px;background:rgba(255,255,255,.03);user-select:none;transition:all .15s}
+.do-owner-name:hover{border-color:#555;background:rgba(255,255,255,.06)}
+.do-owner-name.do-on-clock{border-color:#f39c12;background:rgba(243,156,18,.1);color:#f5c842;cursor:grab}
+.do-owner-name.do-done{opacity:.4;cursor:default;border-color:#333}
+.do-slots{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+.do-slot{min-width:50px;flex:1;padding:3px 5px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.do-slot.filled{border-style:solid;border-color:#27ae60;color:#5dde8e;background:rgba(39,174,96,.08)}
+.do-finish-badge{font-size:.6rem;color:#888;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;white-space:nowrap}
+.do-dtbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.do-dtbl th{padding:6px 8px;text-align:left;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#555;background:#12161f;border-bottom:1px solid #1a1f2e;position:sticky;top:0;z-index:2}
+.do-dtbl td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
+.do-dtbl tr{transition:background .15s}
+.do-dtbl tr:hover td{background:rgba(255,255,255,.04)}
+.do-dtbl tr.do-driver-picked td{opacity:.4;text-decoration:line-through}
+.do-dtbl tr.do-driver-picked .do-driver-owner{text-decoration:none;opacity:1}
+.do-dtbl tr.do-driver-dragover td{background:rgba(243,156,18,.15)!important;outline:1px solid rgba(243,156,18,.4)}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
 .do-error{text-align:center;padding:40px 20px;color:#e05555;font-size:.9rem;line-height:1.6}
 /* ═══ LEAGUE STATS / LEGACY POOL ═══ */
@@ -156,25 +173,19 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
 /* ═══ DRAFT ROOM ═══ */
 .dr-wrap{padding:12px 16px;max-width:1400px;margin:0 auto}
-.dr-clock{padding:0;margin-bottom:10px;background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:stretch;min-height:130px}
-.dr-clock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e);z-index:2}
-.dr-clock-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 12px;z-index:1;min-width:0}
+.dr-clock{text-align:center;padding:12px 16px;margin-bottom:10px;background:linear-gradient(180deg,#1a1f2e,#0d1019);border:1px solid #333;border-radius:6px;position:relative;overflow:hidden}
+.dr-clock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#c8102e,#f39c12,#c8102e)}
 .dr-clock-label{font-family:'Oswald',sans-serif;font-size:.65rem;color:#888;text-transform:uppercase;letter-spacing:2px}
 .dr-clock-name{font-family:'Anton',sans-serif;font-size:1.6rem;text-transform:uppercase;letter-spacing:1px;color:#f5c842;margin-top:2px;display:inline-block;cursor:grab;padding:4px 20px;border:2px solid #f39c12;border-radius:6px;background:rgba(243,156,18,.1);transition:all .15s}
 .dr-clock-name:hover{background:rgba(243,156,18,.2);transform:scale(1.02)}
 .dr-clock-name:active{cursor:grabbing}
-.dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:4px}
-.dr-cp-side{display:flex;align-items:stretch;gap:2px;overflow:hidden;max-width:45%}
-.dr-cp-side.left{flex-direction:row}
-.dr-cp-slot{position:relative;flex-shrink:0;width:90px;overflow:hidden;background:rgba(255,255,255,.02)}
-.dr-cp-slot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;opacity:0;transition:opacity .4s}
-.dr-cp-slot img.loaded{opacity:1}
-.dr-cp-slot .dr-cp-name{position:absolute;bottom:0;left:0;right:0;font-family:'Anton',sans-serif;font-size:1rem;text-transform:uppercase;letter-spacing:1px;color:#fff;text-align:center;padding:18px 4px 5px;background:linear-gradient(transparent,rgba(8,12,20,.85));pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
 .dr-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:10px}
 .dr-title{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .dr-undo{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;cursor:pointer;transition:all .15s}
 .dr-undo:not(:disabled):hover{border-color:#f39c12;color:#f5c842}
 .dr-undo:disabled{opacity:.3;cursor:default}
+.dr-pick-count{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-left:auto}
 .dr-subtabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
 .dr-sub{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #333;background:linear-gradient(180deg,#1e2333,#141822);color:#888;cursor:pointer;transition:all .15s}
 .dr-sub:hover{border-color:#555;color:#ccc}
@@ -249,10 +260,26 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="do-wrap">
   <div class="do-header">
     <h2>2026 Draft Order</h2>
-    <div class="do-live">Auto-updates every 60s</div>
+    <div class="do-live">NASCAR Driver Selection</div>
   </div>
-  <div id="do-content"><div class="do-loading">Loading...</div></div>
-  <div id="do-timestamp" style="text-align:center;margin-top:12px;font-family:Oswald,sans-serif;font-size:.7rem;color:#444;text-transform:uppercase;letter-spacing:1.5px"></div>
+  <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+    <div class="dr-clock" id="do-clock" style="flex:1;margin:0;padding:10px 16px">
+      <div class="dr-clock-label">On the Clock</div>
+      <div class="dr-clock-name" id="do-clock-name" style="font-size:1.3rem;padding:3px 16px">—</div>
+      <div class="dr-clock-pick" id="do-clock-info">Loading...</div>
+    </div>
+    <button class="dr-undo" id="do-undo-btn" onclick="doUndo()" disabled>↩ Undo</button>
+  </div>
+  <div style="display:flex;gap:12px;min-height:500px">
+    <div class="dr-order-panel" style="width:340px" id="do-owners-panel">
+      <div class="dr-panel-head">Team Owners</div>
+      <div id="do-owners-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
+    </div>
+    <div class="dr-player-panel" style="flex:1">
+      <div class="dr-panel-head">Live Scoring</div>
+      <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -276,22 +303,18 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="tab-panel" id="tab-draft-room">
 <div class="dr-wrap">
   <div class="dr-clock" id="dr-clock">
-    <div class="dr-cp-side left" id="dr-cp-left"></div>
-    <div class="dr-clock-center">
-      <div class="dr-clock-label">On the Clock</div>
-      <div class="dr-clock-name" id="dr-clock-name">—</div>
-      <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
-    </div>
-    <div class="dr-cp-side right" id="dr-cp-right"></div>
+    <div class="dr-clock-label">On the Clock</div>
+    <div class="dr-clock-name" id="dr-clock-name">—</div>
+    <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
   </div>
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
     <button class="dr-undo" id="dr-undo" onclick="draftUndo()" disabled>↩ Undo</button>
-    <button class="dr-undo" id="dr-reset-btn" onclick="resetDraft()" style="border-color:#c8102e;color:#e05555">⟳ Reset Draft</button>
     <button class="dr-undo" id="dr-live-btn" onclick="toggleLiveDraft()" style="border-color:#27ae60;color:#27ae60">⚡ Live Draft: OFF</button>
     <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
       <option value="">View Team Roster...</option>
     </select>
+    <span class="dr-pick-count" id="dr-pick-count">Pick 0 / 0</span>
   </div>
   <div class="dr-subtabs" id="dr-subtabs">
     <button class="dr-sub active" onclick="switchDraftSub('All Players')">All Players</button>
@@ -645,16 +668,7 @@ document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
     if(!selections[teamName])selections[teamName]=[];
     var idx=selections[teamName].findIndex(function(s){return s.name===pn});
     if(idx>=0){selections[teamName].splice(idx,1);tr.classList.remove("selected")}
-    else{
-      if(selections[teamName].length>=2){
-        var oldest=selections[teamName].shift();
-        card.querySelectorAll('.rtbl tr.selectable').forEach(function(r){
-          if(r.getAttribute("data-player")===oldest.name)r.classList.remove("selected");
-        });
-      }
-      selections[teamName].push({name:pn,kr:kv});
-      tr.classList.add("selected");
-    }
+    else{if(selections[teamName].length>=2)return;selections[teamName].push({name:pn,kr:kv});tr.classList.add("selected")}
     updateBtn(teamName);
   });
 });
@@ -714,15 +728,11 @@ function showActiveBtn(){
       if(activeTeam)updateBtn(activeTeam);
     }
   }).catch(function(){});
-  // Defer to next tick so the full script (DRAFT_DB, STAT_HEADERS, draft-room fns) is defined
-  // before restoring the draft-room tab, which otherwise throws and gets stuck on "Loading...".
-  setTimeout(function(){
-    var hash=(location.hash||'').replace('#','');
-    if(hash&&document.getElementById('tab-'+hash)){
-      switchTab(hash);
-      if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
-    }
-  },0);
+  var hash=(location.hash||'').replace('#','');
+  if(hash&&document.getElementById('tab-'+hash)){
+    switchTab(hash);
+    if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
+  }
 })();
 
 // ═══ DRAFT RESULTS (actual snake draft order) ═══
@@ -803,253 +813,216 @@ function fetchSheet(sheetName, callback) {
   }).catch(function(e){ callback(e, null); });
 }
 
-// ─── DRAFT ORDER ───
-function fetchDraftOrder() {
-  fetchSheet('Draft Order', function(err, table) {
-    if (err) {
-      document.getElementById('do-content').innerHTML = '<div class="do-error">Could not load draft order.<br><br>Make sure your Google Sheet is published to the web:<br><b>File &rarr; Share &rarr; Publish to web &rarr; Entire Document &rarr; Publish</b></div>';
-      return;
-    }
-    renderDraftOrder(table, false);
+// ─── DRAFT ORDER (NASCAR Selection System) ───
+var doOwners=[],doDrivers=[],doPicks=[],doPickOrder=[];
+var DO_NPOINT='https://api.npoint.io/9643622df799b5dd5e7f';
+var SLOTS_BY_FINISH={12:5,11:4,10:3,9:2,8:2,7:2,6:1,5:1,4:1,3:1,2:1,1:1};
+
+function fetchDraftOrder(){
+  // Fetch League Stats to get 2025 finishes, then fetch drivers
+  fetchSheet('League Stats',function(err,table){
+    if(!err&&table)buildOwnerSlots(table);
+    fetchSheet('Draft Order',function(err2,table2){
+      if(!err2&&table2)buildDriverList(table2);
+      loadDOFromServer();
+    });
   });
 }
 
-function renderDraftOrder(table, animate) {
-  var rows = table.rows || [];
-  var cols = table.cols || [];
-  if (!rows.length) {
-    document.getElementById('do-left').innerHTML = '<div class="do-error">No data found.</div>';
-    document.getElementById('do-right').innerHTML = '';
-    return;
+function buildOwnerSlots(table){
+  var rows=table.rows||[];if(!rows.length)return;
+  // Find the last year column (before Champs/Avg)
+  var maxCol=0;
+  for(var i=1;i<rows.length;i++){var r=rows[i].c||[];for(var j=r.length-1;j>=0;j--){var v=cellVal(r[j]).trim();if(v&&v!=='-'){if(j+1>maxCol)maxCol=j+1;break}}}
+  var lastYrCol=maxCol-3;
+  // Get each owner's finish
+  var finishes=[];
+  for(var i=1;i<rows.length;i++){
+    var r=rows[i].c||[];var owner=cellVal(r[0]).trim();var fin=parseInt(cellVal(r[lastYrCol]));
+    if(owner&&fin>=1&&fin<=12)finishes.push({owner:owner,finish:fin});
   }
+  finishes.sort(function(a,b){return b.finish-a.finish}); // worst first (12th, 11th...)
+  doOwners=finishes.map(function(f){return{owner:f.owner,finish:f.finish,totalSlots:SLOTS_BY_FINISH[f.finish]||1,picks:[]}});
+  buildPickOrder();
+  renderOwnerSlots();
+}
 
-  // Helper: extract a block of columns from the table
-  function extractBlock(startCol, endCol) {
-    var headers = [];
-    var dataRows = [];
-    // Get headers from col labels or first data row
-    for (var c = startCol; c <= endCol && c < cols.length; c++) {
-      headers.push((cols[c] && cols[c].label) ? cols[c].label.trim() : '');
-    }
-    // If headers are empty, try first row
-    var headersEmpty = headers.every(function(h){ return !h; });
-    var dataStart = 0;
-    if (headersEmpty && rows.length > 0) {
-      var r0 = rows[0].c || [];
-      headers = [];
-      for (var c = startCol; c <= endCol; c++) {
-        headers.push(r0[c] ? cellVal(r0[c]).trim() : '');
+function buildPickOrder(){
+  doPickOrder=[];
+  // Multiple passes: each pass, everyone with remaining slots picks once, worst-to-best
+  var maxSlots=5;
+  for(var pass=0;pass<maxSlots;pass++){
+    for(var i=0;i<doOwners.length;i++){
+      if(doOwners[i].totalSlots>pass){
+        doPickOrder.push({ownerIdx:i,owner:doOwners[i].owner,pickNum:doPickOrder.length+1});
       }
-      dataStart = 1;
-    }
-    // Collect data rows (skip blanks)
-    for (var i = dataStart; i < rows.length; i++) {
-      var r = rows[i].c || [];
-      var vals = [];
-      var hasData = false;
-      for (var c = startCol; c <= endCol; c++) {
-        var v = r[c] ? cellVal(r[c]).trim() : '';
-        vals.push(v);
-        if (v) hasData = true;
-      }
-      if (hasData) dataRows.push(vals);
-    }
-    return { headers: headers, rows: dataRows };
-  }
-
-  // Normalize driver name for matching
-  function cleanName(n) {
-    return (n || '').replace(/^\*+\s*/, '').replace(/\s*\#+$/, '').replace(/\(i\)/g, '').replace(/\s+/g, ' ').trim();
-  }
-  function matchKey(n) {
-    return cleanName(n).toLowerCase().replace(/[^a-z ]/g, '').replace(/\s+/g, ' ').trim();
-  }
-
-  // Left box: columns A:D (Draft Order, Player, Driver, Place)
-  var left = extractBlock(0, 3);
-  // Right box: columns T:V (Name/Driver, Vehicle Number, Position)
-  var right = extractBlock(19, 21);
-
-  // Build car number map from whichever block has "Vehicle Number"
-  var carMap = {};
-  var carMapByKey = {};
-  [left, right].forEach(function(block) {
-    var numIdx = -1, nameIdx = -1;
-    block.headers.forEach(function(h, i) {
-      if (/vehicle/i.test(h)) numIdx = i;
-      if (/^name$/i.test(h) || /^driver$/i.test(h)) nameIdx = i;
-    });
-    if (numIdx >= 0 && nameIdx >= 0) {
-      block.rows.forEach(function(r) {
-        var dName = cleanName(r[nameIdx]);
-        var dNum = (r[numIdx] || '').trim();
-        if (dName && /^\d+$/.test(dNum)) {
-          carMap[dName] = dNum;
-          carMapByKey[matchKey(dName)] = dNum;
-        }
-      });
-    }
-  });
-
-  function findCarNum(name) {
-    var cn = cleanName(name);
-    if (carMap[cn]) return carMap[cn];
-    var key = matchKey(name);
-    if (carMapByKey[key]) return carMapByKey[key];
-    var stripped = key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim();
-    if (carMapByKey[stripped]) return carMapByKey[stripped];
-    return '';
-  }
-
-  // Build draft order lookup: driver name → {player, draftOrder}
-  var draftMap = {};
-  var doDriverIdx = -1, doPlayerIdx = -1, doOrderIdx = -1;
-  left.headers.forEach(function(h, i) {
-    var hl = h.toLowerCase();
-    if (/draft.?order/i.test(h)) doOrderIdx = i;
-    if (hl === 'player') doPlayerIdx = i;
-    if (hl === 'driver') doDriverIdx = i;
-  });
-  if (doDriverIdx >= 0) {
-    left.rows.forEach(function(r) {
-      var driver = cleanName(r[doDriverIdx]);
-      var player = (doPlayerIdx >= 0 ? r[doPlayerIdx] : '') || '';
-      var order = (doOrderIdx >= 0 ? r[doOrderIdx] : '') || '';
-      if (driver && player) {
-        draftMap[matchKey(driver)] = { player: player, order: order };
-      }
-    });
-  }
-
-  // Build standings list from right box
-  var standings = [];
-  var stDriverIdx = -1, stPosIdx = -1, stNumIdx = -1;
-  right.headers.forEach(function(h, i) {
-    var hl = h.toLowerCase();
-    if (hl === 'name' || hl === 'driver') stDriverIdx = i;
-    if (hl === 'position') stPosIdx = i;
-    if (/vehicle/i.test(h)) stNumIdx = i;
-  });
-  right.rows.forEach(function(r) {
-    var driver = r[stDriverIdx] || '';
-    var pos = stPosIdx >= 0 ? (r[stPosIdx] || '') : '';
-    if (driver) standings.push({ driver: driver, pos: pos });
-  });
-
-  // Track previous row positions for animation
-  var prevRowPositions = {};
-
-  function capturePositions() {
-    var rows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
-    var positions = {};
-    rows.forEach(function(tr) {
-      var key = tr.getAttribute('data-key');
-      var rect = tr.getBoundingClientRect();
-      positions[key] = { top: rect.top, height: rect.height };
-    });
-    return positions;
-  }
-
-  // Render combined table
-  function renderCombined(animate) {
-    if (!standings.length) {
-      document.getElementById('do-content').innerHTML = '<div class="do-error">No data found.</div>';
-      return;
-    }
-
-    // Capture old positions before re-render
-    if (animate) {
-      prevRowPositions = capturePositions();
-    }
-
-    var html = '<div class="do-box"><div class="do-box-head">Live Scoring</div>';
-    html += '<table class="do-table"><thead><tr>';
-    html += '<th style="text-align:center;width:40px;padding-left:8px">Pos</th>';
-    html += '<th style="padding-left:8px">Driver</th>';
-    html += '<th style="padding-left:6px">Player</th>';
-    html += '<th style="text-align:center;width:36px;padding-left:2px;padding-right:8px">Pick</th>';
-    html += '</tr></thead><tbody>';
-
-    standings.forEach(function(s) {
-      var cn = cleanName(s.driver);
-      var key = matchKey(s.driver);
-      var dm = draftMap[key] || draftMap[key.replace(/\s*jr\s*$/, '').replace(/\s*sr\s*$/, '').trim()] || null;
-      var carNum = findCarNum(s.driver);
-      var badge = carNum ? '<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/' + carNum + '.png" alt="#' + carNum + '" onerror="this.style.display=\'none\'"> ' : '';
-      var rowClass = (dm && dm.order && /^\d+$/.test(dm.order)) ? ' do-picked' : '';
-
-      html += '<tr data-key="' + key + '" class="' + rowClass + '">';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:#888;padding-left:8px">' + s.pos + '</td>';
-      html += '<td style="padding-left:8px"><div class="do-driver">' + badge + cn + '</div></td>';
-      html += '<td style="font-family:Oswald,sans-serif;font-weight:600;font-size:.8rem;color:' + (dm ? '#f5c842' : '#333') + ';padding-left:6px">' + (dm ? dm.player : '') + '</td>';
-      html += '<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;font-size:.9rem;color:' + (dm && dm.order ? '#f39c12' : '#333') + ';padding-left:2px;padding-right:8px">' + (dm ? dm.order : '') + '</td>';
-      html += '</tr>';
-    });
-
-    html += '</tbody></table></div>';
-    document.getElementById('do-content').innerHTML = html;
-    document.getElementById('do-timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
-
-    // FLIP animation: animate rows from old positions to new
-    if (animate && Object.keys(prevRowPositions).length) {
-      var newRows = document.querySelectorAll('#do-content .do-table tbody tr[data-key]');
-      newRows.forEach(function(tr) {
-        var key = tr.getAttribute('data-key');
-        if (!prevRowPositions[key]) return;
-        var oldTop = prevRowPositions[key].top;
-        var newRect = tr.getBoundingClientRect();
-        var delta = oldTop - newRect.top;
-        if (Math.abs(delta) < 2) return; // didn't move
-
-        // Disable transition, jump to old position
-        tr.style.transition = 'none';
-        tr.style.transform = 'translateY(' + delta + 'px)';
-        tr.classList.add(delta > 0 ? 'do-moving-down' : 'do-moving-up');
-
-        // Force reflow
-        tr.offsetHeight;
-
-        // Enable transition and animate to new position
-        tr.style.transition = 'transform 1.2s cubic-bezier(.4,0,.2,1)';
-        tr.style.transform = 'translateY(0)';
-
-        // Cleanup after animation
-        tr.addEventListener('transitionend', function handler() {
-          tr.style.transition = '';
-          tr.style.transform = '';
-          tr.classList.remove('do-moving-up', 'do-moving-down');
-          tr.removeEventListener('transitionend', handler);
-        });
-      });
     }
   }
+}
 
-  renderCombined(animate);
-
-  // Fetch live car numbers from NASCAR API to override stale sheet data
+function buildDriverList(table){
+  var rows=table.rows||[],cols=table.cols||[];
+  doDrivers=[];
+  // Read columns T:V (indices 19-21) for NASCAR standings
+  var colLabels=cols.map(function(c){return(c.label||'').trim()});
+  var nameIdx=19,numIdx=20,posIdx=21;
+  // Check if headers are in row 0
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i].c||[];
+    var dName=cellVal(r[nameIdx]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
+    var dNum=cellVal(r[numIdx]).trim();
+    var dPos=cellVal(r[posIdx]).trim();
+    if(dName&&/^\d+$/.test(dPos)&&dName!=='Name'){
+      doDrivers.push({name:dName,num:dNum,pos:parseInt(dPos),owner:''});
+    }
+  }
+  doDrivers.sort(function(a,b){return a.pos-b.pos});
+  // Fetch NASCAR API for current car numbers
   fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
-    if (Array.isArray(drivers)) {
-      drivers.forEach(function(d) {
-        var name = ((d.First_Name||d.FirstName||'')+ ' '+(d.Last_Name||d.LastName||'')).trim();
-        var badge = d.Badge || d.Car_Number || '';
-        if (name && badge) {
-          carMap[name] = String(badge);
-          carMapByKey[matchKey(name)] = String(badge);
-        }
+    if(Array.isArray(drivers)){
+      var numMap={};
+      drivers.forEach(function(d){
+        var nm=((d.First_Name||'')+ ' '+(d.Last_Name||'')).trim().toLowerCase();
+        numMap[nm]=String(d.Badge||d.Car_Number||'');
       });
-      renderCombined(false); // no animation for badge update
+      doDrivers.forEach(function(d){
+        var k=d.name.toLowerCase();
+        if(numMap[k])d.num=numMap[k];
+      });
     }
+    renderDriverTable();
+  }).catch(function(){renderDriverTable()});
+}
+
+function getNextPick(){
+  var picked=doPicks.length;
+  if(picked>=doPickOrder.length)return null;
+  return doPickOrder[picked];
+}
+
+function renderOwnerSlots(){
+  var html='';var next=getNextPick();
+  doOwners.forEach(function(o,idx){
+    html+='<div class="do-owner-row">';
+    html+='<span class="do-finish-badge">'+ordinal(o.finish)+'</span>';
+    var isOnClock=next&&next.ownerIdx===idx;
+    var allFilled=o.picks.length>=o.totalSlots;
+    var cls='do-owner-name'+(isOnClock?' do-on-clock':'')+(allFilled?' do-done':'');
+    var drag=isOnClock?'draggable="true"':'';
+    html+='<span class="'+cls+'" '+drag+' data-owner="'+o.owner.replace(/"/g,'&quot;')+'" data-idx="'+idx+'">'+o.owner+'</span>';
+    html+='<div class="do-slots">';
+    for(var s=0;s<o.totalSlots;s++){
+      var filled=o.picks[s]||null;
+      html+='<div class="do-slot'+(filled?' filled':'')+'">'+( filled?filled:'—')+'</div>';
+    }
+    html+='</div></div>';
+  });
+  document.getElementById('do-owners-list').innerHTML=html;
+  // Update clock
+  var cn=document.getElementById('do-clock-name'),ci=document.getElementById('do-clock-info');
+  if(next){
+    cn.textContent=next.owner;cn.draggable=true;
+    cn.setAttribute('data-owner',next.owner);
+    cn.ondragstart=function(e){e.dataTransfer.setData('text/plain',JSON.stringify({owner:next.owner,ownerIdx:next.ownerIdx}))};
+    ci.textContent='Selection '+(doPicks.length+1)+' of '+doPickOrder.length;
+  }else{
+    cn.textContent='Complete';cn.draggable=false;cn.ondragstart=null;
+    cn.style.borderColor='#27ae60';ci.textContent='All drivers selected!';
+  }
+  document.getElementById('do-undo-btn').disabled=doPicks.length===0;
+  // Attach drag to on-clock owner
+  document.querySelectorAll('.do-owner-name.do-on-clock').forEach(function(el){
+    el.addEventListener('dragstart',function(e){
+      e.dataTransfer.setData('text/plain',JSON.stringify({owner:el.dataset.owner,ownerIdx:parseInt(el.dataset.idx)}));
+    });
+  });
+}
+
+function renderDriverTable(){
+  var html='<table class="do-dtbl"><thead><tr>';
+  html+='<th style="text-align:center;width:40px">Pos</th><th>Driver</th><th>Player</th>';
+  html+='</tr></thead><tbody>';
+  doDrivers.forEach(function(d,i){
+    var picked=d.owner?true:false;
+    var cls=picked?'do-driver-picked':'';
+    html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
+    html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888">'+d.pos+'</td>';
+    var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.style.display=\'none\'"> ':'';
+    html+='<td><div class="do-driver">'+badge+d.name+'</div></td>';
+    html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;color:'+(picked?'#f5c842':'#333')+'">'+( d.owner||'')+'</td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  document.getElementById('do-drivers-table').innerHTML=html;
+  // Attach drop events
+  document.querySelectorAll('.do-dtbl tbody tr:not(.do-driver-picked)').forEach(function(tr){
+    tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('do-driver-dragover')});
+    tr.addEventListener('dragleave',function(){tr.classList.remove('do-driver-dragover')});
+    tr.addEventListener('drop',function(e){
+      e.preventDefault();tr.classList.remove('do-driver-dragover');
+      try{
+        var data=JSON.parse(e.dataTransfer.getData('text/plain'));
+        var driverName=tr.dataset.driver;var dIdx=parseInt(tr.dataset.didx);
+        if(!driverName||doDrivers[dIdx].owner)return;
+        doMakePick(data.ownerIdx,dIdx,driverName);
+      }catch(ex){}
+    });
+  });
+}
+
+function doMakePick(ownerIdx,driverIdx,driverName){
+  var owner=doOwners[ownerIdx];
+  owner.picks.push(driverName);
+  doDrivers[driverIdx].owner=owner.owner;
+  doPicks.push({ownerIdx:ownerIdx,driverIdx:driverIdx,driverName:driverName,owner:owner.owner});
+  saveDOToServer();
+  renderOwnerSlots();renderDriverTable();
+}
+
+function doUndo(){
+  if(!doPicks.length)return;
+  var last=doPicks.pop();
+  doOwners[last.ownerIdx].picks.pop();
+  doDrivers[last.driverIdx].owner='';
+  saveDOToServer();
+  renderOwnerSlots();renderDriverTable();
+}
+
+function saveDOToServer(){
+  fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
+    data=data||{};
+    data.draftOrderPicks=doPicks.map(function(p){return{ownerIdx:p.ownerIdx,driverIdx:p.driverIdx,driverName:p.driverName,owner:p.owner}});
+    fetch(DO_NPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).catch(function(){});
   }).catch(function(){});
 }
 
-// Auto-refresh draft order every 60 seconds
-setInterval(function() {
-  if (document.getElementById('tab-draft-order').classList.contains('active')) {
-    fetchSheet('Draft Order', function(err, table) {
-      if (!err && table) renderDraftOrder(table, true);
+function loadDOFromServer(){
+  fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
+    if(!data||!data.draftOrderPicks||!data.draftOrderPicks.length)return;
+    if(!doOwners.length||!doDrivers.length)return;
+    // Replay picks
+    doPicks=[];
+    doOwners.forEach(function(o){o.picks=[]});
+    doDrivers.forEach(function(d){d.owner=''});
+    data.draftOrderPicks.forEach(function(p){
+      if(p.ownerIdx<doOwners.length&&p.driverIdx<doDrivers.length){
+        doOwners[p.ownerIdx].picks.push(p.driverName);
+        doDrivers[p.driverIdx].owner=p.owner;
+        doPicks.push(p);
+      }
     });
+    renderOwnerSlots();renderDriverTable();
+  }).catch(function(){});
+}
+
+function ordinal(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+
+// Poll for draft order updates every 10 seconds
+setInterval(function(){
+  if(document.getElementById('tab-draft-order').classList.contains('active')){
+    loadDOFromServer();
   }
-}, 60000);
+},10000);
 
 // ─── LEAGUE STATS ───
 function fetchLeagueStats() {
@@ -1683,7 +1656,15 @@ function refreshKeepersLocal(){
   for(var tn in savedKeepers){
     var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-    placeTeamKeepers(team,keepers);
+    keepers.forEach(function(k){
+      var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+      drDrafted.add(k.name);
+      for(var p=0;p<drOrder.length;p++){
+        if(drOrder[p].round===kr&&drOrder[p].name===team.o){
+          drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break;
+        }
+      }
+    });
   }
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
 }
@@ -1706,8 +1687,16 @@ function refreshKeepers(){
     for(var tn in savedKeepers){
       var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
       var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-      placeTeamKeepers(team,keepers,function(slot,k){
-        newKeepers.push({pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name});
+      keepers.forEach(function(k){
+        var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+        drDrafted.add(k.name);
+        for(var p=0;p<drOrder.length;p++){
+          if(drOrder[p].round===kr&&drOrder[p].name===team.o){
+            drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};
+            newKeepers.push({pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name});
+            break;
+          }
+        }
       });
     }
     if(newKeepers.length){
@@ -1718,36 +1707,6 @@ function refreshKeepers(){
   }
 }
 
-// Place a keeper in its keeper-round slot. When two keepers share a round, the duplicate
-// moves to the round AFTER (5+5 -> 5 & 6). At the last round it can't go to 15, so it
-// moves up instead (14+14 -> 13 & 14). Only slots the team still owns count (handles trades).
-function teamSlotInRound(ownerName,rd){
-  for(var p=0;p<drOrder.length;p++){
-    if(drOrder[p].round===rd&&drOrder[p].name===ownerName&&!drPicks[p])return p;
-  }
-  return -1;
-}
-function keeperExactSlot(ownerName,kr){return teamSlotInRound(ownerName,kr)}
-function keeperBumpSlot(ownerName,kr){
-  for(var rd=kr+1;rd<=14;rd++){var p=teamSlotInRound(ownerName,rd);if(p>=0)return p}
-  for(var rd=kr-1;rd>=1;rd--){var p=teamSlotInRound(ownerName,rd);if(p>=0)return p}
-  return -1;
-}
-function placeTeamKeepers(team,keepers,onPlace){
-  var pending=[];
-  keepers.forEach(function(k){
-    var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
-    drDrafted.add(k.name);
-    var slot=keeperExactSlot(team.o,kr);
-    if(slot>=0){drPicks[slot]={pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name,keeper:true};if(onPlace)onPlace(slot,k)}
-    else pending.push(k);
-  });
-  pending.forEach(function(k){
-    var kr=parseInt(k.kr);
-    var slot=keeperBumpSlot(team.o,kr);
-    if(slot>=0){drPicks[slot]={pick:drOrder[slot].pick,owner:drOrder[slot].name,player:k.name,keeper:true};if(onPlace)onPlace(slot,k)}
-  });
-}
 function buildDraftOrder(table){
   var rows=table.rows||[];
   var rawOrder=[];
@@ -1772,100 +1731,16 @@ function buildDraftOrder(table){
     });
   }
   // Traded picks: override owner name for specific rounds
-var PICK_TRADES=[
-    {round:3,from:'Chuck Bush',to:'Brandon Cepelnik'},
-    {round:10,from:'Brandon Cepelnik',to:'Chuck Bush'}
-  ];
-  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].originalName=t.from;drOrder[p].name=t.to;break}}});
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
-    placeTeamKeepers(team,keepers);
+    keepers.forEach(function(k){var kr=parseInt(k.kr);if(isNaN(kr)||kr<1||kr>14)return;
+      for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===kr&&drOrder[p].name===team.o){drPicks[p]={pick:drOrder[p].pick,owner:drOrder[p].name,player:k.name,keeper:true};break}}
+    });
   }
   renderDraftOrderPanel();
   renderLocalPlayers(drCurrentSub);
-}
-
-// ── Headshot fetcher: Sleeper (wider crop) → ESPN bust ───────────────────────
-function getHeadshot(playerName,cb){
-  if(hsCache[playerName]){cb(hsCache[playerName]);return}
-  fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(playerName)+'&limit=1&type=player&sport=football&league=nfl')
-    .then(function(r){return r.json()})
-    .then(function(d){
-      var items=d.items||d.results||[];
-      if(!items.length){cb(null);return}
-      var item=items[0];
-      var id=item.id||(item.$ref&&item.$ref.match(/athletes\/(\d+)/)&&item.$ref.match(/athletes\/(\d+)/)[1]);
-      if(!id){cb(null);return}
-      var sleeperUrl='https://sleepercdn.com/content/nfl/players/'+id+'.jpg';
-      var espnUrl='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
-      var probe=new Image();
-      probe.onload=function(){hsCache[playerName]=sleeperUrl;cb(sleeperUrl)};
-      probe.onerror=function(){hsCache[playerName]=espnUrl;cb(espnUrl)};
-      probe.src=sleeperUrl;
-    }).catch(function(){cb(null)});
-}
-
-// ── Clock player strip ────────────────────────────────────────────────────────
-var _cpLastSig='';
-function updateClockPlayers(ownerName){
-  var leftEl=document.getElementById('dr-cp-left');
-  var rightEl=document.getElementById('dr-cp-right');
-  if(!leftEl||!rightEl)return;
-  var ownerPicks=[];
-  for(var i=0;i<drPicks.length;i++){
-    if(drPicks[i]&&drPicks[i].owner===ownerName)ownerPicks.push(drPicks[i]);
-  }
-  ownerPicks.sort(function(a,b){
-    var slotA=a.pick-1, slotB=b.pick-1;
-    var ra=(drOrder[slotA]&&drOrder[slotA].round)?drOrder[slotA].round:Math.ceil(a.pick/12);
-    var rb=(drOrder[slotB]&&drOrder[slotB].round)?drOrder[slotB].round:Math.ceil(b.pick/12);
-    if(ra!==rb)return ra-rb;
-    return a.pick-b.pick;
-  });
-
-  // Build sig after sort so order is baked in — prevents stale early-return
-  var sig=ownerName+'|'+ownerPicks.map(function(p){return p.pick+':'+p.player}).join(',');
-  if(sig===_cpLastSig)return;
-  _cpLastSig=sig;
-  leftEl.innerHTML='';rightEl.innerHTML='';
-  ownerPicks.forEach(function(pick){appendPlayerSlot(leftEl,pick)});
-}
-function appendPlayerSlot(container,pick){
-  var slot=document.createElement('div');
-  slot.className='dr-cp-slot';
-  var img=document.createElement('img');
-  img.alt=pick.player;
-  var nameDiv=document.createElement('div');
-  nameDiv.className='dr-cp-name';
-  // DEF entries: use ESPN team logo, show city name
-  var defMatch=pick.player.match(/^(\w+)\s+DEF$/);
-  if(defMatch){
-    var teamKey=defMatch[1]; // e.g. "Steelers"
-    var abbr=(DEF_LOGOS[teamKey]||teamKey).toLowerCase();
-    img.src='https://a.espncdn.com/i/teamlogos/nfl/500/'+abbr+'.png';
-    img.onload=function(){img.classList.add('loaded')};
-    img.onerror=function(){slot.style.display='none'};
-    img.style.objectFit='contain';
-    img.style.padding='6px';
-    nameDiv.textContent=teamKey;
-  } else {
-    var lastName=pick.player.replace(/ (Jr\.?|Sr\.?|III|II)$/i,'').split(' ').pop();
-    nameDiv.textContent=lastName;
-    getHeadshot(pick.player,function(capturedImg){
-      return function(url){
-        if(url){
-          capturedImg.src=url;
-          capturedImg.onload=function(){capturedImg.classList.add('loaded')};
-          capturedImg.onerror=function(){capturedImg.closest('.dr-cp-slot').style.display='none'};
-        } else {
-          capturedImg.closest('.dr-cp-slot').style.display='none';
-        }
-      };
-    }(img));
-  }
-  slot.appendChild(img);
-  slot.appendChild(nameDiv);
-  container.appendChild(slot);
 }
 
 function updateClock(){
@@ -1874,8 +1749,6 @@ function updateClock(){
   var cn=document.getElementById('dr-clock-name'),cp=document.getElementById('dr-clock-pick');
   if(nextIdx>=0){
     var o=drOrder[nextIdx];
-    // If owner changed, clear the signature so photos rebuild for the new owner
-    if(cn.textContent!==o.name)_cpLastSig='';
     cn.textContent=o.name;
     cn.draggable=true;
     cn.setAttribute('data-pick',String(nextIdx+1));
@@ -1885,12 +1758,10 @@ function updateClock(){
     cn.ondragstart=function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({pick:nextIdx+1,name:o.name}));
     };
-    updateClockPlayers(o.name);
   } else {
     cn.textContent='Draft Complete';cn.draggable=false;cn.ondragstart=null;
     cn.style.border='2px solid #27ae60';cn.style.cursor='default';
     cp.textContent='All picks are in!';
-    updateClockPlayers('');
   }
 }
 
@@ -1906,16 +1777,15 @@ function renderDraftOrderPanel(){
     if(isOnClock)style=' style="border-color:#f39c12;background:rgba(243,156,18,.1);cursor:grab"';
     if(isKeeper)style=' style="border-color:rgba(200,16,46,.4);background:rgba(200,16,46,.1)"';
     html+='<div class="'+cls+'" '+draggable+' data-pick="'+(idx+1)+'" data-name="'+o.name.replace(/"/g,'&quot;')+'"'+style+'>';
-    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name;
-    if(o.originalName){html+='<span style="font-size:.6rem;color:#ccc;font-weight:400;margin-left:4px;letter-spacing:.5px">(via '+o.originalName+')</span>'}
-    html+='</span>';
+    html+='<span class="dr-pick-num">'+(idx+1)+'.</span><span>'+o.name+'</span>';
     if(picked){var pos=guessPosition(picked.player);var pcls=POS_COLORS[pos]||'';var lbl=isKeeper?'K: ':'';
       html+='<span class="dr-picked-player '+pcls+'">'+lbl+abbrevName(picked.player)+'</span>'}
     html+='</div>';
   });
   document.getElementById('dr-order-list').innerHTML=html;
+  var total=drPicks.filter(function(p){return p}).length;
+  document.getElementById('dr-pick-count').textContent='Pick '+total+' / '+drOrder.length;
   document.getElementById('dr-undo').disabled=!drPicks.some(function(p){return p&&!p.keeper});
-  var drBtn=document.getElementById('dr-reset-btn');if(drBtn)drBtn.disabled=!drPicks.some(function(p){return p&&!p.keeper});
   document.querySelectorAll('.dr-order-item[draggable="true"]').forEach(function(el){
     el.addEventListener('dragstart',function(e){
       e.dataTransfer.setData('text/plain',JSON.stringify({pick:parseInt(el.dataset.pick),name:el.dataset.name}));
@@ -1998,19 +1868,6 @@ function draftUndo(){
   saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
 }
-function resetDraft(){
-  if(!confirm('Reset the draft? This undoes ALL manually drafted picks. Keepers are kept.'))return;
-  for(var i=0;i<drPicks.length;i++){
-    if(drPicks[i]&&!drPicks[i].keeper){
-      drDrafted.delete(drPicks[i].player);
-      drPicks[i]=undefined;
-    }
-  }
-  while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
-  saveDraftToServer();
-  renderDraftOrderPanel();
-  renderLocalPlayers(drCurrentSub);
-}
 
 function openTeamRoster(val){
   if(!val){closeTeamRoster();return}
@@ -2042,7 +1899,7 @@ function renderTeamRoster(teamName){
     var rdLabel='<span style="margin-left:auto;font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
     html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+rdLabel+'</div>';
   });
-  for(var b=0;b<Math.max(0,5-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
+  for(var b=0;b<Math.max(0,4-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
   document.getElementById('dr-roster-body').innerHTML=html;
 }
 function guessPosition(name){
