@@ -896,34 +896,30 @@ function buildDriverList(){
 }
 
 function loadNascarStandings(){
-  fetch('https://cf.nascar.com/cacher/2026/1/1/standings.json').then(function(r){return r.json()}).then(function(standings){
-    doDrivers=[];
-    if(Array.isArray(standings)){
-      // Standings format varies — try to extract top 35
-      standings.slice(0,35).forEach(function(d,i){
-        var name=((d.First_Name||d.first_name||'')+ ' '+(d.Last_Name||d.last_name||'')).trim();
-        var num=String(d.Car_Number||d.car_number||d.Badge||d.badge||'');
-        if(name)doDrivers.push({name:name,num:num,pos:i+1,owner:''});
-      });
-    }
-    if(!doDrivers.length){
-      // Last resort: try drivers.json
-      fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
-        if(Array.isArray(drivers)){
-          drivers.slice(0,35).forEach(function(d,i){
-            var name=((d.First_Name||'')+ ' '+(d.Last_Name||'')).trim();
-            var num=String(d.Badge||d.Car_Number||'');
-            if(name)doDrivers.push({name:name,num:num,pos:i+1,owner:''});
-          });
+  // Fallback: read DriverGroups tab columns B/C from the fantasy NASCAR sheet
+  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups';
+  fetch(url).then(function(r){return r.text()}).then(function(text){
+    try{
+      var data=parseGviz(text);
+      var rows=data.table.rows||[];
+      doDrivers=[];
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i].c||[];
+        var num=cellVal(r[1]).trim();   // Column B = car number
+        var name=cellVal(r[2]).trim();  // Column C = driver name
+        // Strip "## - " prefix from the name (e.g. "5 - Kyle Larson" -> "Kyle Larson")
+        name=name.replace(/^\d+\s*-\s*/,'').trim();
+        if(name&&name!=='Name'&&name!=='Driver'){
+          doDrivers.push({name:name,num:num,pos:doDrivers.length+1,owner:''});
         }
-        addAustinHill();
-        renderDriverTable();
-      }).catch(function(){addAustinHill();renderDriverTable()});
-      return;
+      }
+      renderDriverTable();
+    }catch(e){
+      document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
     }
-    addAustinHill();
-    fetchBadgeNumbers();
-  }).catch(function(){addAustinHill();renderDriverTable()});
+  }).catch(function(){
+    document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
+  });
 }
 
 function addAustinHill(){
