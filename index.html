@@ -119,7 +119,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-owner-name.do-on-clock{border-color:#f39c12;background:rgba(243,156,18,.1);color:#f5c842;cursor:grab}
 .do-owner-name.do-done{opacity:.4;cursor:default;border-color:#333}
 .do-slots{display:flex;gap:3px;flex:1;flex-wrap:wrap}
-.do-slot{min-width:50px;flex:1;padding:3px 5px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.do-slot{min-width:50px;flex:1;padding:3px 5px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;min-height:26px}
+.do-slot .car-num{height:20px;width:auto}
 .do-slot.filled{border-style:solid;border-color:#27ae60;color:#5dde8e;background:rgba(39,174,96,.08)}
 .do-finish-badge{font-size:.6rem;color:#888;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;white-space:nowrap}
 .do-dtbl{width:100%;border-collapse:collapse;font-size:.82rem}
@@ -861,7 +862,7 @@ function buildPickOrder(){
 var LIVE_RACE_SHEET='1NwK1C-Mvv1iVcvS6uw30EiqtHKsLtDMDgQ9YrmdNIm8';
 function buildDriverList(){
   // First try live race sheet
-  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Sheet1';
+  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results';
   fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
     try{
       var data=parseGviz(text);
@@ -962,7 +963,13 @@ function renderOwnerSlots(){
     html+='<div class="do-slots">';
     for(var s=0;s<o.totalSlots;s++){
       var filled=o.picks[s]||null;
-      html+='<div class="do-slot'+(filled?' filled':'')+'">'+( filled?filled:'—')+'</div>';
+      var slotContent='—';
+      if(filled){
+        var fname=typeof filled==='string'?filled:filled.name;
+        var fnum=typeof filled==='string'?'':(filled.num||'');
+        slotContent=fnum?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+fnum+'.png" alt="#'+fnum+'" title="'+fname+'" onerror="this.outerHTML=\''+fname.replace(/'/g,'')+'\'">':fname;
+      }
+      html+='<div class="do-slot'+(filled?' filled':'')+'">'+slotContent+'</div>';
     }
     html+='</div></div>';
   });
@@ -1021,7 +1028,7 @@ function renderDriverTable(){
 
 function doMakePick(ownerIdx,driverIdx,driverName){
   var owner=doOwners[ownerIdx];
-  owner.picks.push(driverName);
+  owner.picks.push({name:driverName,num:doDrivers[driverIdx].num||''});
   doDrivers[driverIdx].owner=owner.owner;
   doPicks.push({ownerIdx:ownerIdx,driverIdx:driverIdx,driverName:driverName,owner:owner.owner});
   saveDOToServer();
@@ -1055,7 +1062,7 @@ function loadDOFromServer(){
     doDrivers.forEach(function(d){d.owner=''});
     data.draftOrderPicks.forEach(function(p){
       if(p.ownerIdx<doOwners.length&&p.driverIdx<doDrivers.length){
-        doOwners[p.ownerIdx].picks.push(p.driverName);
+        doOwners[p.ownerIdx].picks.push({name:p.driverName,num:(doDrivers[p.driverIdx]?doDrivers[p.driverIdx].num:'')||''});
         doDrivers[p.driverIdx].owner=p.owner;
         doPicks.push(p);
       }
