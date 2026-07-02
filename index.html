@@ -909,6 +909,10 @@ function buildDriverList(){
         var name=cellVal(r[0]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
         var num=cellVal(r[1]).trim();
         if(name&&name!=='Name'&&name!=='Driver'){
+          if(!num){
+            var NUM_FIX2={'austin hill':'33','corey heim':'67'};
+            num=NUM_FIX2[name.toLowerCase()]||'';
+          }
           drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
         }
       }
@@ -936,6 +940,10 @@ function loadDriverGroups(){
         var num=cellVal(r[1]).trim();
         var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
         if(name&&name!=='Name'&&name!=='Driver'){
+          if(!num){
+            var NUM_FIX={'austin hill':'33','corey heim':'67'};
+            num=NUM_FIX[name.toLowerCase()]||'';
+          }
           drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
         }
       }
@@ -995,7 +1003,7 @@ function renderOwnerSlots(){
       if(filled){
         var fname=typeof filled==='string'?filled:filled.name;
         var fnum=typeof filled==='string'?'':(filled.num||'');
-        slotContent=fnum?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+fnum+'.png" alt="#'+fnum+'" title="'+fname+'" onerror="this.outerHTML=\''+fname.replace(/'/g,'')+'\'">':fname;
+        slotContent=fnum?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+fnum+'.png" alt="#'+fnum+'" title="'+fname+'" onerror="this.outerHTML=\'<span style=&quot;font-family:Oswald,sans-serif;font-weight:700;color:#f5c842&quot;>#'+fnum+'</span>\'">':fname;
       }
       html+='<div class="do-slot'+(filled?' filled':'')+'">'+slotContent+'</div>';
     }
@@ -1039,7 +1047,7 @@ function renderDriverTable(){
     var pickNum=pickByRow[i]||'';
     html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888;padding-left:8px">'+d.pos+'</td>';
-    var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.style.display=\'none\'"> ':'';
+    var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.outerHTML=\'<span style=&quot;font-family:Oswald,sans-serif;font-weight:700;color:#f5c842;margin-right:4px&quot;>#'+d.num+'</span>\'"> ':'';
     html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+'</div></td>';
     html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;font-size:.78rem;color:'+(picked?'#f5c842':'#333')+';padding-left:6px">'+( d.owner||'')+'</td>';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:'+(pickNum?'#f39c12':'#333')+';padding-left:2px;padding-right:8px">'+pickNum+'</td>';
