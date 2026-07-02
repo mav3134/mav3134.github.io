@@ -916,6 +916,7 @@ function buildDriverList(){
         doDrivers=drivers;
         applyPicksToDrivers();
         renderOwnerSlots();renderDriverTable();
+        loadDOFromServer();
         return;
       }
       loadDriverGroups();
@@ -941,6 +942,7 @@ function loadDriverGroups(){
       doDrivers=drivers;
       applyPicksToDrivers();
       renderOwnerSlots();renderDriverTable();
+      loadDOFromServer();
     }catch(e){
       document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
     }
@@ -1685,19 +1687,29 @@ function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
   fetchSheet('Draft Order',function(err,table){
-    if(!err&&table){
-      buildDraftOrder(table);
-      loadDraftFromServer();
-    }
+    if(!err&&table)buildDraftOrder(table);
+    loadDraftFromServer();
   });
   renderLocalPlayers('ALL');
   startPolling();
 }
 
+var drSaveBusy=false;
 function saveDraftToServer(){
-  var picksToSave=[];
-  drPicks.forEach(function(p){if(p)picksToSave.push({pick:p.pick,owner:p.owner,player:p.player,keeper:p.keeper||false})});
-  fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({picks:picksToSave,liveMode:drLiveMode,keepers:savedKeepers})}).catch(function(){});
+  // MERGE with existing server data — never wipe draft order picks or other keys
+  if(drSaveBusy)return;
+  drSaveBusy=true;
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    data=data||{};
+    var picksToSave=[];
+    drPicks.forEach(function(p){if(p)picksToSave.push({pick:p.pick,owner:p.owner,player:p.player,keeper:p.keeper||false})});
+    data.picks=picksToSave;
+    data.liveMode=drLiveMode;
+    data.keepers=savedKeepers;
+    // draftOrderPicks, computedDraftOrder, draftOrderLocked are preserved untouched
+    fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(function(){drSaveBusy=false}).catch(function(){drSaveBusy=false});
+  }).catch(function(){drSaveBusy=false});
 }
 
 function saveKeepersToServer(){
