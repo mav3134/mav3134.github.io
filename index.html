@@ -819,13 +819,11 @@ var DO_NPOINT='https://api.npoint.io/9643622df799b5dd5e7f';
 var SLOTS_BY_FINISH={12:5,11:4,10:3,9:2,8:2,7:2,6:1,5:1,4:1,3:1,2:1,1:1};
 
 function fetchDraftOrder(){
-  // Fetch League Stats to get 2025 finishes, then fetch drivers
   fetchSheet('League Stats',function(err,table){
     if(!err&&table)buildOwnerSlots(table);
-    fetchSheet('Draft Order',function(err2,table2){
-      if(!err2&&table2)buildDriverList(table2);
-      loadDOFromServer();
-    });
+    buildDriverList();
+    // Load saved picks after a short delay to let drivers load
+    setTimeout(loadDOFromServer,2000);
   });
 }
 
@@ -860,24 +858,75 @@ function buildPickOrder(){
   }
 }
 
-function buildDriverList(table){
-  var rows=table.rows||[],cols=table.cols||[];
-  doDrivers=[];
-  // Read columns T:V (indices 19-21) for NASCAR standings
-  var colLabels=cols.map(function(c){return(c.label||'').trim()});
-  var nameIdx=19,numIdx=20,posIdx=21;
-  // Check if headers are in row 0
-  for(var i=0;i<rows.length;i++){
-    var r=rows[i].c||[];
-    var dName=cellVal(r[nameIdx]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
-    var dNum=cellVal(r[numIdx]).trim();
-    var dPos=cellVal(r[posIdx]).trim();
-    if(dName&&/^\d+$/.test(dPos)&&dName!=='Name'){
-      doDrivers.push({name:dName,num:dNum,pos:parseInt(dPos),owner:''});
+var LIVE_RACE_SHEET='1NwK1C-Mvv1iVcvS6uw30EiqtHKsLtDMDgQ9YrmdNIm8';
+function buildDriverList(){
+  // First try live race sheet
+  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Sheet1';
+  fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
+    try{
+      var data=parseGviz(text);
+      var rows=data.table.rows||[];
+      var drivers=[];
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i].c||[];
+        var name=cellVal(r[0]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
+        var num=cellVal(r[1]).trim();
+        if(name&&name!=='Name'&&name!=='Driver'){
+          drivers.push({name:name,num:num,pos:i+1,owner:''});
+        }
+      }
+      if(drivers.length>0){
+        doDrivers=drivers;
+        addAustinHill();
+        fetchBadgeNumbers();
+        return;
+      }
+    }catch(e){}
+    // Live sheet empty or failed — fall back to NASCAR standings
+    loadNascarStandings();
+  }).catch(function(){loadNascarStandings()});
+}
+
+function loadNascarStandings(){
+  fetch('https://cf.nascar.com/cacher/2026/1/1/standings.json').then(function(r){return r.json()}).then(function(standings){
+    doDrivers=[];
+    if(Array.isArray(standings)){
+      // Standings format varies — try to extract top 35
+      standings.slice(0,35).forEach(function(d,i){
+        var name=((d.First_Name||d.first_name||'')+ ' '+(d.Last_Name||d.last_name||'')).trim();
+        var num=String(d.Car_Number||d.car_number||d.Badge||d.badge||'');
+        if(name)doDrivers.push({name:name,num:num,pos:i+1,owner:''});
+      });
     }
+    if(!doDrivers.length){
+      // Last resort: try drivers.json
+      fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
+        if(Array.isArray(drivers)){
+          drivers.slice(0,35).forEach(function(d,i){
+            var name=((d.First_Name||'')+ ' '+(d.Last_Name||'')).trim();
+            var num=String(d.Badge||d.Car_Number||'');
+            if(name)doDrivers.push({name:name,num:num,pos:i+1,owner:''});
+          });
+        }
+        addAustinHill();
+        renderDriverTable();
+      }).catch(function(){addAustinHill();renderDriverTable()});
+      return;
+    }
+    addAustinHill();
+    fetchBadgeNumbers();
+  }).catch(function(){addAustinHill();renderDriverTable()});
+}
+
+function addAustinHill(){
+  // Always add Austin Hill #33 at the bottom if not already present
+  var found=doDrivers.some(function(d){return d.name.toLowerCase()==='austin hill'});
+  if(!found){
+    doDrivers.push({name:'Austin Hill',num:'33',pos:doDrivers.length+1,owner:''});
   }
-  doDrivers.sort(function(a,b){return a.pos-b.pos});
-  // Fetch NASCAR API for current car numbers
+}
+
+function fetchBadgeNumbers(){
   fetch('https://cf.nascar.com/cacher/2026/1/drivers.json').then(function(r){return r.json()}).then(function(drivers){
     if(Array.isArray(drivers)){
       var numMap={};
