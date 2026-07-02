@@ -119,18 +119,18 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-owner-name.do-on-clock{border-color:#f39c12;background:rgba(243,156,18,.1);color:#f5c842;cursor:grab}
 .do-owner-name.do-done{opacity:.4;cursor:default;border-color:#333}
 .do-slots{display:flex;gap:3px;flex:1;flex-wrap:wrap}
-.do-slot{min-width:50px;flex:1;padding:3px 5px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;min-height:26px}
+.do-slot{width:44px;min-width:44px;max-width:44px;flex:none;padding:3px 2px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;min-height:26px}
 .do-slot .car-num{height:20px;width:auto}
 .do-slot.filled{border-style:solid;border-color:#27ae60;color:#5dde8e;background:rgba(39,174,96,.08)}
 .do-finish-badge{font-size:.6rem;color:#888;background:rgba(255,255,255,.05);padding:1px 5px;border-radius:3px;white-space:nowrap}
 .do-dtbl{width:100%;border-collapse:collapse;font-size:.82rem}
 .do-dtbl th{padding:6px 8px;text-align:left;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#555;background:#12161f;border-bottom:1px solid #1a1f2e;position:sticky;top:0;z-index:2}
-.do-dtbl td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.82rem}
+.do-dtbl td{padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem}
 .do-dtbl tr{transition:background .15s}
 .do-dtbl tr:hover td{background:rgba(255,255,255,.04)}
-.do-dtbl tr.do-driver-picked td{opacity:.4;text-decoration:line-through}
-.do-dtbl tr.do-driver-picked .do-driver-owner{text-decoration:none;opacity:1}
-.do-dtbl tr.do-driver-dragover td{background:rgba(243,156,18,.15)!important;outline:1px solid rgba(243,156,18,.4)}
+.do-dtbl tr.do-driver-picked td{background:rgba(243,156,18,.08)}
+.do-dtbl tr.do-driver-picked:hover td{background:rgba(243,156,18,.14)}
+.do-dtbl tr.do-driver-dragover td{background:rgba(243,156,18,.2)!important;outline:1px solid rgba(243,156,18,.5)}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
 .do-error{text-align:center;padding:40px 20px;color:#e05555;font-size:.9rem;line-height:1.6}
 /* ═══ LEAGUE STATS / LEGACY POOL ═══ */
@@ -259,9 +259,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <!-- ═══ DRAFT ORDER TAB ═══ -->
 <div class="tab-panel" id="tab-draft-order">
 <div class="do-wrap">
-  <div class="do-header">
+  <div class="do-header" style="position:relative">
     <h2>2026 Draft Order</h2>
     <div class="do-live">NASCAR Driver Selection</div>
+    <button class="dr-undo" id="do-lock-btn" onclick="lockDraftOrder()" style="position:absolute;right:0;top:8px;border-color:#c8102e;color:#e05555">🔒 Lock Draft Order</button>
   </div>
   <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
     <div class="dr-clock" id="do-clock" style="flex:1;margin:0;padding:10px 16px">
@@ -276,7 +277,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
       <div class="dr-panel-head">Team Owners</div>
       <div id="do-owners-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
     </div>
-    <div class="dr-player-panel" style="flex:1">
+    <div class="dr-player-panel" style="flex:1;max-width:480px">
       <div class="dr-panel-head">Live Scoring</div>
       <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
     </div>
@@ -816,8 +817,38 @@ function fetchSheet(sheetName, callback) {
 
 // ─── DRAFT ORDER (NASCAR Selection System) ───
 var doOwners=[],doDrivers=[],doPicks=[],doPickOrder=[];
+var doLocked=false;
 var DO_NPOINT='https://api.npoint.io/9643622df799b5dd5e7f';
 var SLOTS_BY_FINISH={12:5,11:4,10:3,9:2,8:2,7:2,6:1,5:1,4:1,3:1,2:1,1:1};
+
+function computeOwnerOrder(){
+  // Reading down the live scoring order, first appearance of each owner = their draft slot
+  var seen=[],order=[];
+  doDrivers.forEach(function(d){
+    if(d.owner&&seen.indexOf(d.owner)<0){seen.push(d.owner);order.push(d.owner)}
+  });
+  return order;
+}
+
+function lockDraftOrder(){
+  var pw=prompt(doLocked?'Enter password to UNLOCK draft order:':'Enter password to LOCK draft order:');
+  if(pw!=='3134'){if(pw!==null)alert('Wrong password.');return}
+  doLocked=!doLocked;
+  updateLockBtn();
+  saveDOToServer();
+}
+
+function updateLockBtn(){
+  var btn=document.getElementById('do-lock-btn');
+  if(!btn)return;
+  if(doLocked){
+    btn.innerHTML='🔒 Draft Order LOCKED';
+    btn.style.borderColor='#27ae60';btn.style.color='#5dde8e';btn.style.background='rgba(39,174,96,.1)';
+  }else{
+    btn.innerHTML='🔒 Lock Draft Order';
+    btn.style.borderColor='#c8102e';btn.style.color='#e05555';btn.style.background='';
+  }
+}
 
 function fetchDraftOrder(){
   fetchSheet('League Stats',function(err,table){
@@ -998,17 +1029,22 @@ function renderOwnerSlots(){
 }
 
 function renderDriverTable(){
+  // Build driver -> pick number map
+  var pickMap={};
+  doPicks.forEach(function(p,i){pickMap[p.driverIdx]=i+1});
   var html='<table class="do-dtbl"><thead><tr>';
-  html+='<th style="text-align:center;width:40px">Pos</th><th>Driver</th><th>Player</th>';
+  html+='<th style="text-align:center;width:36px;padding-left:8px">Pos</th><th style="padding-left:6px">Driver</th><th style="padding-left:6px">Player</th><th style="text-align:center;width:40px;padding-left:2px;padding-right:8px">Pick</th>';
   html+='</tr></thead><tbody>';
   doDrivers.forEach(function(d,i){
     var picked=d.owner?true:false;
     var cls=picked?'do-driver-picked':'';
+    var pickNum=pickMap[i]||'';
     html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
-    html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888">'+d.pos+'</td>';
+    html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888;padding-left:8px">'+d.pos+'</td>';
     var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.style.display=\'none\'"> ':'';
-    html+='<td><div class="do-driver">'+badge+d.name+'</div></td>';
-    html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;color:'+(picked?'#f5c842':'#333')+'">'+( d.owner||'')+'</td>';
+    html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+'</div></td>';
+    html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;font-size:.78rem;color:'+(picked?'#f5c842':'#333')+';padding-left:6px">'+( d.owner||'')+'</td>';
+    html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:'+(pickNum?'#f39c12':'#333')+';padding-left:2px;padding-right:8px">'+pickNum+'</td>';
     html+='</tr>';
   });
   html+='</tbody></table>';
@@ -1051,15 +1087,20 @@ function saveDOToServer(){
   fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
     data=data||{};
     data.draftOrderPicks=doPicks.map(function(p){return{ownerIdx:p.ownerIdx,driverIdx:p.driverIdx,driverName:p.driverName,owner:p.owner}});
+    data.computedDraftOrder=computeOwnerOrder();
+    data.draftOrderLocked=doLocked;
     fetch(DO_NPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).catch(function(){});
   }).catch(function(){});
 }
 
 function loadDOFromServer(){
   fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
-    if(!data||!data.draftOrderPicks||!data.draftOrderPicks.length)return;
+    if(!data)return;
+    // Sync lock state
+    var serverLocked=data.draftOrderLocked||false;
+    if(serverLocked!==doLocked){doLocked=serverLocked;updateLockBtn()}
+    if(!data.draftOrderPicks||!data.draftOrderPicks.length){renderOwnerSlots();return}
     if(!doOwners.length||!doDrivers.length)return;
-    // Replay picks
     doPicks=[];
     doOwners.forEach(function(o){o.picks=[]});
     doDrivers.forEach(function(d){d.owner=''});
@@ -1073,6 +1114,14 @@ function loadDOFromServer(){
     renderOwnerSlots();renderDriverTable();
   }).catch(function(){});
 }
+
+// Live refresh: re-fetch driver running order every 30s unless locked
+setInterval(function(){
+  if(document.getElementById('tab-draft-order').classList.contains('active')&&!doLocked&&doDrivers.length){
+    buildDriverList();
+    setTimeout(loadDOFromServer,1500);
+  }
+},30000);
 
 function ordinal(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
 
@@ -1671,11 +1720,30 @@ function saveKeepersToServer(){
   }).catch(function(){});
 }
 
+var drBaseOrder=[];
+function rebuildFromComputed(order){
+  if(!order||order.length<2)return;
+  var sig=order.join('|');
+  if(sig===drBaseOrder.join('|'))return;
+  drBaseOrder=order.slice();
+  drOrder=[];
+  for(var rd=0;rd<14;rd++){
+    var o=rd%2===0?order.slice():order.slice().reverse();
+    o.forEach(function(name,i){drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:name})});
+  }
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
+}
+
 function loadDraftFromServer(){
   if(drLoading)return;
   drLoading=true;
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     if(!data){drLoading=false;return}
+    // Rebuild draft order from live scoring computed order
+    if(data.computedDraftOrder&&data.computedDraftOrder.length>=12){
+      rebuildFromComputed(data.computedDraftOrder);
+    }
     if(data.keepers){
       for(var tn in data.keepers){
         savedKeepers[tn]=data.keepers[tn];
