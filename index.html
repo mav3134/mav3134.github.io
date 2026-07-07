@@ -172,6 +172,26 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dp-p{font-weight:700;font-size:.82rem}.dp-t{color:#555;font-size:.75rem}
 .dp-k{color:#27ae60;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;margin-left:4px;text-transform:uppercase;letter-spacing:.5px}
 .foot{background:#0a0c12;border-top:1px solid #1a1f2e;padding:12px 20px;text-align:center;margin-top:30px;font-family:'Oswald',sans-serif;font-size:.7rem;color:#333;text-transform:uppercase;letter-spacing:3px}
+/* ═══ ADMIN ═══ */
+.ad-wrap{max-width:1500px;margin:0 auto;padding:20px 16px}
+.ad-slot-card{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;font-size:.72rem}
+.ad-slot-head{padding:6px 10px;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e;display:flex;justify-content:space-between;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.ad-slot-head .t{color:#f5c842}.ad-slot-head .p{color:#5dde8e}
+.ad-row{display:flex;gap:6px;padding:2px 10px;align-items:center;border-bottom:1px solid rgba(255,255,255,.03)}
+.ad-row .rd{font-family:'Oswald',sans-serif;color:#888;min-width:26px;font-size:.62rem}
+.ad-row .sl{font-family:'Oswald',sans-serif;color:#ddd;min-width:34px;font-size:.62rem}
+.ad-row .nm{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-row .pt{font-family:'Oswald',sans-serif;color:#5dde8e;min-width:38px;text-align:right;font-size:.68rem}
+.ad-row.locked{background:rgba(243,156,18,.08)}
+.ad-rank-row{display:flex;gap:5px;align-items:center;padding:3px 6px;border-bottom:1px solid rgba(255,255,255,.03);font-size:.72rem}
+.ad-rank-row .rk{font-family:'Oswald',sans-serif;color:#666;min-width:26px;font-size:.65rem}
+.ad-rank-row .nm{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad-rank-row .pt{font-family:'Oswald',sans-serif;color:#5dde8e;font-size:.65rem;min-width:36px;text-align:right}
+.ad-rank-row.dead{opacity:.3}.ad-rank-row.dead .nm{text-decoration:line-through}
+.ad-rank-row.mine{background:rgba(243,156,18,.1)}
+.ad-x{background:none;border:1px solid #553;color:#e05555;border-radius:3px;cursor:pointer;font-size:.65rem;padding:1px 5px}
+.ad-x:hover{background:rgba(200,16,46,.15)}
+.ad-lock{background:#1a1f2e;border:1px solid #444;color:#aaa;border-radius:3px;font-size:.62rem;padding:1px 2px;cursor:pointer;max-width:52px}
 /* ═══ ROSTER PROJECTIONS ═══ */
 .rp-wrap{max-width:1200px;margin:0 auto;padding:20px 16px}
 .rp-rankings{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;max-width:700px;margin:0 auto 24px}
@@ -382,6 +402,27 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 </div>
 </div>
 
+<!-- ═══ HIDDEN ADMIN TAB (access via #admin) ═══ -->
+<div class="tab-panel" id="tab-admin">
+<div class="ad-wrap">
+  <div class="do-header">
+    <h2>Draft Strategy Lab</h2>
+    <div class="do-live">Optimal 8-Round Plans by Draft Slot &bull; QB/WR/WR/RB/RB/TE/FLEX/BN</div>
+  </div>
+  <div style="text-align:center;margin-bottom:14px">
+    <button class="dr-undo" onclick="adRun()" style="border-color:#f39c12;color:#f5c842;padding:8px 22px">⟳ Re-Run Algorithm</button>
+    <button class="dr-undo" onclick="adReset()" style="margin-left:8px">Reset Locks/Eliminations</button>
+  </div>
+  <div style="display:flex;gap:14px;align-items:flex-start">
+    <div id="ad-slots" style="flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px"></div>
+    <div class="dr-order-panel" style="width:320px;max-height:calc(100vh - 220px);flex-shrink:0">
+      <div class="dr-panel-head">Rankings</div>
+      <div id="ad-ranks" class="dr-order-list"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- MODALS -->
 <div class="pick-overlay" id="picker"><div class="pick-modal"><h2>Who Are You?</h2><div class="pick-sub">Select your team to pick keepers</div><div class="pick-grid" id="pick-grid"></div></div></div>
 <div class="modal-overlay" id="modal"><div class="modal"><div id="modal-form"><h3>Save Keepers</h3><div class="modal-team" id="modal-team"></div><div class="modal-players" id="modal-players"></div><p class="modal-msg">You are saving your own picks and not being a dick and doing someone else's right?</p><div class="modal-actions"><button class="modal-cancel" onclick="cancelModal()">I'm sorry, I'll go back and do mine</button><button class="modal-submit" onclick="saveKeepers()">Yes, save now</button></div></div><div class="modal-sent" id="modal-sent"><div class="check">&#10003;</div><p>Keepers Saved!</p><div id="modal-confirm-players" style="margin:16px 0"></div><div id="modal-quip" style="font-family:'Roboto Condensed',sans-serif;font-size:1rem;color:#e05555;text-align:center;margin:16px 0;padding:12px 16px;background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.15);border-radius:6px;font-style:italic;line-height:1.4"></div><div style="text-align:center;margin-top:18px"><button class="modal-cancel" onclick="closeModal()" style="padding:10px 40px;display:inline-block">Close</button></div></div></div></div>
@@ -407,6 +448,7 @@ function switchTab(id){
   if(id==='league-stats'&&!leagueStatsLoaded){fetchLeagueStats();leagueStatsLoaded=true}
   if(id==='legacy-pool'&&!legacyPoolLoaded){fetchLegacyPool();legacyPoolLoaded=true}
   if(id==='roster-proj'){renderRosterProjections()}
+  if(id==='admin'){adRun()}
   if(id==='draft-room'){
     if(!draftRoomLoaded){initDraftRoom();draftRoomLoaded=true}
     else{refreshKeepers()}
@@ -2213,6 +2255,187 @@ setInterval(function(){
     renderRosterProjections();
   }
 },10000);
+
+var ADMIN_RANKS=[[1,"Bijan Robinson","RB"],[2,"Jahmyr Gibbs","RB"],[3,"Ja'Marr Chase","WR"],[4,"Puka Nacua","WR"],[5,"Jaxon Smith-Njigba","WR"],[6,"Amon-Ra St. Brown","WR"],[7,"Christian McCaffrey","RB"],[8,"Jonathan Taylor","RB"],[9,"CeeDee Lamb","WR"],[10,"Justin Jefferson","WR"],[11,"James Cook III","RB"],[12,"Ashton Jeanty","RB"],[13,"Drake London","WR"],[14,"De'Von Achane","RB"],[15,"Nico Collins","WR"],[16,"Brock Bowers","TE"],[17,"A.J. Brown","WR"],[18,"Saquon Barkley","RB"],[19,"Chase Brown","RB"],[20,"George Pickens","WR"],[21,"Omarion Hampton","RB"],[22,"Trey McBride","TE"],[23,"Derrick Henry","RB"],[24,"Chris Olave","WR"],[25,"Kenneth Walker III","RB"],[26,"Josh Allen","QB"],[27,"Rashee Rice","WR"],[28,"DeVonta Smith","WR"],[29,"Jeremiyah Love","RB"],[30,"Tetairoa McMillan","WR"],[31,"Tee Higgins","WR"],[32,"Kyren Williams","RB"],[33,"Zay Flowers","WR"],[34,"Drake Maye","QB"],[35,"Lamar Jackson","QB"],[36,"Malik Nabers","WR"],[37,"Breece Hall","RB"],[38,"Colston Loveland","TE"],[39,"Josh Jacobs","RB"],[40,"Garrett Wilson","WR"],[41,"Ladd McConkey","WR"],[42,"Javonte Williams","RB"],[43,"Emeka Egbuka","WR"],[44,"Travis Etienne Jr.","RB"],[45,"Joe Burrow","QB"],[46,"Jaylen Waddle","WR"],[47,"Terry McLaurin","WR"],[48,"Luther Burden III","WR"],[49,"Davante Adams","WR"],[50,"Jameson Williams","WR"],[51,"Cam Skattebo","RB"],[52,"Bucky Irving","RB"],[53,"Mike Evans","WR"],[54,"D'Andre Swift","RB"],[55,"Quinshon Judkins","RB"],[56,"Christian Watson","WR"],[57,"Jayden Daniels","QB"],[58,"TreVeyon Henderson","RB"],[59,"Tyler Warren","TE"],[60,"Jalen Hurts","QB"],[61,"DJ Moore","WR"],[62,"David Montgomery","RB"],[63,"Rome Odunze","WR"],[64,"Bhayshul Tuten","RB"],[65,"Tucker Kraft","TE"],[66,"Carnell Tate","WR"],[67,"Caleb Williams","QB"],[68,"Justin Herbert","QB"],[69,"Jadarian Price","RB"],[70,"Jaylen Warren","RB"],[71,"Marvin Harrison Jr.","WR"],[72,"Alec Pierce","WR"],[73,"Trevor Lawrence","QB"],[74,"DK Metcalf","WR"],[75,"Rhamondre Stevenson","RB"],[76,"Harold Fannin Jr.","TE"],[77,"Chuba Hubbard","RB"],[78,"Tony Pollard","RB"],[79,"Courtland Sutton","WR"],[80,"Brian Thomas Jr.","WR"],[81,"Dak Prescott","QB"],[82,"Rico Dowdle","RB"],[83,"Kyle Pitts Sr.","TE"],[84,"Sam LaPorta","TE"],[85,"Jaxson Dart","QB"],[86,"Jordyn Tyson","WR"],[87,"Chris Godwin Jr.","WR"],[88,"RJ Harvey","RB"],[89,"Parker Washington","WR"],[90,"Kyle Monangai","RB"],[91,"Brock Purdy","QB"],[92,"Michael Wilson","WR"],[93,"Makai Lemon","WR"],[94,"Blake Corum","RB"],[95,"Michael Pittman Jr.","WR"],[96,"J.K. Dobbins","RB"],[97,"Jakobi Meyers","WR"],[98,"Patrick Mahomes II","QB"],[99,"Bo Nix","QB"],[100,"Kenny Gainwell","RB"],[101,"Quentin Johnston","WR"],[102,"Travis Kelce","TE"],[103,"Matthew Stafford","QB"],[104,"Jordan Addison","WR"],[105,"Wan'Dale Robinson","WR"],[106,"Ricky Pearsall","WR"],[107,"Aaron Jones Sr.","RB"],[108,"Dalton Kincaid","TE"],[109,"Rachaad White","RB"],[110,"Jayden Reed","WR"],[111,"Jared Goff","QB"],[112,"George Kittle","TE"],[113,"Josh Downs","WR"],[114,"Kyler Murray","QB"],[115,"Jake Ferguson","TE"],[116,"Jacory Croskey-Merritt","RB"],[117,"Isaiah Likely","TE"],[118,"Dallas Goedert","TE"],[119,"Jordan Mason","RB"],[120,"Jordan Love","QB"],[121,"Xavier Worthy","WR"],[122,"Baker Mayfield","QB"],[123,"Jayden Higgins","WR"],[124,"Tyrone Tracy Jr.","RB"],[125,"Tyler Shough","QB"],[126,"Khalil Shakir","WR"],[127,"Mark Andrews","TE"],[128,"Romeo Doubs","WR"],[129,"Chris Rodriguez Jr.","RB"],[130,"KC Concepcion","WR"],[131,"Malik Willis","QB"],[132,"Zach Charbonnet","RB"],[133,"Jonathon Brooks","RB"],[134,"Tyler Allgeier","RB"],[135,"Jalen Coker","WR"],[136,"Matthew Golden","WR"],[137,"Woody Marks","RB"],[138,"Isiah Pacheco","RB"],[139,"Juwan Johnson","TE"],[140,"Tyjae Spears","RB"],[141,"Dylan Sampson","RB"],[142,"C.J. Stroud","QB"],[143,"Hunter Henry","TE"],[144,"Oronde Gadsden II","TE"],[145,"Brenton Strange","TE"],[146,"Rashid Shaheed","WR"],[147,"Keaton Mitchell","RB"],[148,"Sam Darnold","QB"],[149,"Cam Ward","QB"],[150,"Jauan Jennings","WR"],[151,"Brian Robinson Jr.","RB"],[152,"Alvin Kamara","RB"],[153,"Jerry Jeudy","WR"],[154,"Omar Cooper Jr.","WR"],[155,"Tank Bigsby","RB"],[156,"Chig Okonkwo","TE"],[157,"Jonah Coleman","RB"],[158,"Denzel Boston","WR"],[159,"Jalen McMillan","WR"],[160,"Daniel Jones","QB"],[161,"Dalton Schultz","TE"],[162,"Adonai Mitchell","WR"],[163,"Travis Hunter","WR"],[164,"Bryce Young","QB"],[165,"Braelon Allen","RB"],[166,"Tre Tucker","WR"],[167,"Kayshon Boutte","WR"],[168,"Kenyon Sadiq","TE"],[169,"Tre' Harris","WR"],[170,"Ryan Flournoy","WR"],[171,"Troy Franklin","WR"],[172,"T.J. Hockenson","TE"],[173,"AJ Barner","TE"],[174,"Emanuel Wilson","RB"],[175,"Isaac TeSlaa","WR"],[176,"Stefon Diggs","WR"],[177,"James Conner","RB"],[178,"Calvin Ridley","WR"],[179,"Kimani Vidal","RB"],[180,"Sean Tucker","RB"],[182,"Ray Davis","RB"],[183,"Jaylin Noel","WR"],[184,"Pat Bryant","WR"],[185,"Jacoby Brissett","QB"],[186,"Deebo Samuel Sr.","WR"],[187,"Gunnar Helm","TE"],[188,"Emmett Johnson","RB"],[189,"De'Zhaun Stribling","WR"],[191,"Jalen Nailor","WR"],[192,"Mike Washington Jr.","RB"],[193,"Malik Washington","WR"],[194,"Darnell Mooney","WR"],[196,"Nicholas Singleton","RB"],[198,"David Njoku","TE"],[199,"Pat Freiermuth","TE"],[200,"Chimere Dike","WR"],[202,"Brandon Aiyuk","WR"],[203,"Terrance Ferguson","TE"],[204,"Cade Otton","TE"],[208,"Ted Hurst III","WR"],[209,"Germie Bernard","WR"],[214,"Dontayvion Wicks","WR"],[218,"Kaytron Allen","RB"],[219,"Antonio Williams","WR"],[220,"Tank Dell","WR"],[221,"Jaylen Wright","RB"],[223,"Rashod Bateman","WR"],[224,"Ollie Gordon II","RB"],[226,"MarShawn Lloyd","RB"],[227,"Aaron Rodgers","QB"],[228,"Geno Smith","QB"],[230,"Justice Hill","RB"],[232,"Zachariah Branch","WR"],[233,"Colby Parkinson","TE"],[236,"Cooper Kupp","WR"],[239,"Seth McGowan","RB"],[241,"Elic Ayomanor","WR"],[242,"Fernando Mendoza","QB"],[244,"Keon Coleman","WR"],[246,"Christian Kirk","WR"],[248,"Eli Stowers","TE"],[249,"Jack Bech","WR"],[250,"Tyreek Hill","WR"]];
+// ═══ ADMIN DRAFT STRATEGY LAB ═══
+var adDead={},adLocks={}; // adDead[name]=true; adLocks[name]=round(1-14)
+function adNorm(s){return s.toLowerCase().replace(/\./g,'').replace(/\s+(jr|sr|ii|iii|iv|v)$/,'').trim()}
+var _adPtsIdx=null;
+function adPts(name){
+  if(!_adPtsIdx){_adPtsIdx={};for(var k in PROJ){_adPtsIdx[adNorm(k)]=PROJ[k]}}
+  return _adPtsIdx[adNorm(name)]||0;
+}
+function adPool(){
+  // Available players: not eliminated, not locked
+  return ADMIN_RANKS.filter(function(p){return !adDead[p[1]]&&adLocks[p[1]]==null})
+    .map(function(p){return{rank:p[0],name:p[1],pos:p[2],pts:adPts(p[1])}});
+}
+function adPickNum(slot,rd){return rd%2===1?(rd-1)*12+slot:(rd-1)*12+(13-slot)}
+
+function adCombos(qbNeed,rbMin,wrMin,teMin,total){
+  // Generate (qb,rb,wr,te) counts summing to total
+  var out=[];
+  var q=qbNeed;
+  var skill=total-q;
+  if(skill<0)return out;
+  for(var rb=Math.max(0,rbMin);rb<=skill;rb++)
+    for(var wr=Math.max(0,wrMin);wr<=skill-rb;wr++){
+      var te=skill-rb-wr;
+      if(te<Math.max(0,teMin))continue;
+      if(te>3)continue; // sanity cap
+      out.push({QB:q,RB:rb,WR:wr,TE:te});
+    }
+  return out;
+}
+
+function adPerms(arr){
+  // Unique permutations of a small array
+  var results=[];
+  arr=arr.slice().sort();
+  function rec(cur,rem){
+    if(!rem.length){results.push(cur.slice());return}
+    var seen={};
+    for(var i=0;i<rem.length;i++){
+      if(seen[rem[i]])continue;seen[rem[i]]=1;
+      cur.push(rem[i]);
+      rec(cur,rem.slice(0,i).concat(rem.slice(i+1)));
+      cur.pop();
+    }
+  }
+  rec([],arr);
+  return results;
+}
+
+function adSolveSlot(slot){
+  var pool=adPool();
+  // byPos sorted by pts desc
+  var byPos={QB:[],RB:[],WR:[],TE:[]};
+  pool.forEach(function(p){if(byPos[p.pos])byPos[p.pos].push(p)});
+  for(var k in byPos)byPos[k].sort(function(a,b){return b.pts-a.pts});
+
+  // Locked rounds for rounds 1-8
+  var lockedByRound={};
+  for(var name in adLocks){
+    var rd=adLocks[name];
+    if(rd>=1&&rd<=8){
+      var pos='RB';
+      for(var i=0;i<ADMIN_RANKS.length;i++){if(ADMIN_RANKS[i][1]===name){pos=ADMIN_RANKS[i][2];break}}
+      lockedByRound[rd]={name:name,pos:pos,pts:adPts(name),locked:true};
+    }
+  }
+  var openRounds=[];
+  for(var rd=1;rd<=8;rd++){if(!lockedByRound[rd])openRounds.push(rd)}
+
+  // Remaining requirements after locks
+  var lc={QB:0,RB:0,WR:0,TE:0};
+  for(var rd in lockedByRound){var lp=lockedByRound[rd];if(lc[lp.pos]!=null)lc[lp.pos]++}
+  var qbNeed=Math.max(0,1-lc.QB);
+  var rbMin=Math.max(0,2-lc.RB),wrMin=Math.max(0,2-lc.WR),teMin=Math.max(0,1-lc.TE);
+
+  var combos=adCombos(qbNeed,rbMin,wrMin,teMin,openRounds.length);
+  var best=null;
+  combos.forEach(function(c){
+    var seq=[];
+    for(var i=0;i<c.QB;i++)seq.push('QB');
+    for(var i=0;i<c.RB;i++)seq.push('RB');
+    for(var i=0;i<c.WR;i++)seq.push('WR');
+    for(var i=0;i<c.TE;i++)seq.push('TE');
+    adPerms(seq).forEach(function(perm){
+      // Greedy fill: for each open round in order, take best available of perm position
+      var used={},picksArr=[],total=0,valid=true;
+      for(var i=0;i<openRounds.length;i++){
+        var rd=openRounds[i],pos=perm[i],pk=adPickNum(slot,rd);
+        var chosen=null;
+        var list=byPos[pos]||[];
+        for(var j=0;j<list.length;j++){
+          if(used[list[j].name])continue;
+          if(list[j].rank>=pk){chosen=list[j];break}
+        }
+        if(!chosen){valid=false;break}
+        used[chosen.name]=1;
+        picksArr.push({rd:rd,name:chosen.name,pos:pos,pts:chosen.pts});
+        total+=chosen.pts;
+      }
+      if(!valid)return;
+      // Add locked
+      for(var rd in lockedByRound){var lp=lockedByRound[rd];picksArr.push({rd:parseInt(rd),name:lp.name,pos:lp.pos,pts:lp.pts,locked:true});total+=lp.pts}
+      if(!best||total>best.total)best={total:total,picks:picksArr};
+    });
+  });
+  if(!best)return null;
+  best.picks.sort(function(a,b){return a.rd-b.rd});
+  // Assign lineup slots
+  var slots=['QB','RB','RB','WR','WR','TE','FLEX','BN'];
+  var assigned=[],rem=best.picks.slice();
+  ['QB','RB','RB','WR','WR','TE'].forEach(function(s){
+    for(var i=0;i<rem.length;i++){if(rem[i].pos===s){rem[i].slot=s;rem.splice(i,1)[0];break}}
+  });
+  // Re-do assignment properly
+  var picks2=best.picks.slice();
+  var slotAssign={};
+  function take(pos){for(var i=0;i<picks2.length;i++){if(!picks2[i].slot&&picks2[i].pos===pos)return picks2[i]}return null}
+  var q=take('QB');if(q)q.slot='QB';
+  var r1=take('RB');if(r1)r1.slot='RB';
+  var r2=take('RB');if(r2)r2.slot='RB';
+  var w1=take('WR');if(w1)w1.slot='WR';
+  var w2=take('WR');if(w2)w2.slot='WR';
+  var t1=take('TE');if(t1)t1.slot='TE';
+  // FLEX = best remaining, BN = last
+  var remaining=picks2.filter(function(p){return !p.slot}).sort(function(a,b){return b.pts-a.pts});
+  if(remaining[0])remaining[0].slot='FLEX';
+  if(remaining[1])remaining[1].slot='BN';
+  return best;
+}
+
+function adRun(){
+  _adPtsIdx=null;
+  var html='';
+  for(var slot=1;slot<=12;slot++){
+    var sol=adSolveSlot(slot);
+    html+='<div class="ad-slot-card"><div class="ad-slot-head"><span class="t">Slot '+slot+'</span><span class="p">'+(sol?sol.total.toFixed(1):'—')+'</span></div>';
+    if(sol){
+      sol.picks.forEach(function(p){
+        var pcls=POS_COLORS[p.pos]||'';
+        html+='<div class="ad-row'+(p.locked?' locked':'')+'"><span class="rd">Rd'+p.rd+'</span><span class="sl">'+(p.slot||p.pos)+'</span><span class="nm '+pcls+'">'+p.name+(p.locked?' \ud83d\udd12':'')+'</span><span class="pt">'+p.pts.toFixed(1)+'</span></div>';
+      });
+    } else {
+      html+='<div class="ad-row"><span class="nm" style="color:#e05555">No valid plan (too many locks/elims)</span></div>';
+    }
+    html+='</div>';
+  }
+  document.getElementById('ad-slots').innerHTML=html;
+  adRenderRanks();
+}
+
+function adRenderRanks(){
+  var html='';
+  ADMIN_RANKS.forEach(function(p){
+    var name=p[1],dead=adDead[name],lockRd=adLocks[name];
+    var pcls=POS_COLORS[p[2]]||'';
+    html+='<div class="ad-rank-row'+(dead?' dead':'')+(lockRd?' mine':'')+'">';
+    html+='<span class="rk">'+p[0]+'</span>';
+    html+='<span class="nm '+pcls+'">'+name+(lockRd?' (Rd'+lockRd+')':'')+'</span>';
+    html+='<span class="pt">'+adPts(name).toFixed(1)+'</span>';
+    html+='<button class="ad-x" onclick="adToggleDead(\''+name.replace(/'/g,"\\'")+'\')">'+(dead?'\u21ba':'\u2715')+'</button>';
+    var sel='<select class="ad-lock" onchange="adSetLock(\''+name.replace(/'/g,"\\'")+'\',this.value)"><option value="">Lock</option>';
+    for(var r=1;r<=14;r++){sel+='<option value="'+r+'"'+(lockRd===r?' selected':'')+'>Rd '+r+'</option>'}
+    sel+='</select>';
+    html+=sel;
+    html+='</div>';
+  });
+  document.getElementById('ad-ranks').innerHTML=html;
+}
+
+function adToggleDead(name){
+  if(adDead[name])delete adDead[name];else{adDead[name]=true;delete adLocks[name]}
+  adRenderRanks();
+}
+function adSetLock(name,val){
+  if(!val){delete adLocks[name]}
+  else{adLocks[name]=parseInt(val);delete adDead[name]}
+  adRenderRanks();
+}
+function adReset(){adDead={};adLocks={};adRun()}
 
 </script>
 </body>
