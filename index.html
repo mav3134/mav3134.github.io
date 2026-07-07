@@ -407,7 +407,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="ad-wrap">
   <div class="do-header">
     <h2>Draft Strategy Lab</h2>
-    <div class="do-live">Optimal 8-Round Plans by Draft Slot &bull; QB/WR/WR/RB/RB/TE/FLEX/BN</div>
+    <div class="do-live">Optimal 7-Round Plans by Draft Slot &bull; QB/WR/WR/RB/RB/TE/FLEX</div>
   </div>
   <div style="text-align:center;margin-bottom:14px">
     <select class="dr-team-select" id="ad-my-team" onchange="adSetMyTeam(this.value)" style="margin-right:10px"><option value="">My Team...</option></select>
@@ -2343,74 +2343,87 @@ function adPerms(arr){
 
 function adSolveSlot(slot){
   var pool=adPool();
-  // byPos sorted by pts desc
   var byPos={QB:[],RB:[],WR:[],TE:[]};
   pool.forEach(function(p){if(byPos[p.pos])byPos[p.pos].push(p)});
   for(var k in byPos)byPos[k].sort(function(a,b){return b.pts-a.pts});
 
-  // Locked rounds for rounds 1-8
-  var lockedByRound={};
+  // Gather all locks (manual + auto), split into in-window (rd 1-7) and late (rd 8+)
   var allLocks={};
   for(var n in adLocks)allLocks[n]=adLocks[n];
   for(var n in adAutoLocks)allLocks[n]=adAutoLocks[n];
+  var lockedByRound={},lateLocks=[];
   for(var name in allLocks){
     var rd=allLocks[name];
-    if(rd>=1&&rd<=8){
-      var pos='RB';
-      for(var i=0;i<ADMIN_RANKS.length;i++){if(ADMIN_RANKS[i][1]===name){pos=ADMIN_RANKS[i][2];break}}
-      lockedByRound[rd]={name:name,pos:pos,pts:adPts(name),locked:true};
-    }
+    var pos='RB';
+    for(var i=0;i<ADMIN_RANKS.length;i++){if(ADMIN_RANKS[i][1]===name){pos=ADMIN_RANKS[i][2];break}}
+    var entry={name:name,pos:pos,pts:adPts(name),rd:rd,locked:true};
+    if(rd>=1&&rd<=7)lockedByRound[rd]=entry;
+    else if(rd>7)lateLocks.push(entry);
   }
-  var openRounds=[];
-  for(var rd=1;rd<=8;rd++){if(!lockedByRound[rd])openRounds.push(rd)}
 
-  // Remaining requirements after locks
-  var lc={QB:0,RB:0,WR:0,TE:0};
-  for(var rd in lockedByRound){var lp=lockedByRound[rd];if(lc[lp.pos]!=null)lc[lp.pos]++}
-  var qbNeed=Math.max(0,1-lc.QB);
-  var rbMin=Math.max(0,2-lc.RB),wrMin=Math.max(0,2-lc.WR),teMin=Math.max(0,1-lc.TE);
+  // All open rounds in window
+  var allOpen=[];
+  for(var rd=1;rd<=7;rd++){if(!lockedByRound[rd])allOpen.push(rd)}
 
-  var combos=adCombos(qbNeed,rbMin,wrMin,teMin,openRounds.length);
+  // Try every subset of late locks as potential starters
+  function subsets(arr){
+    var out=[[]];
+    arr.forEach(function(item){
+      var cur=out.slice();
+      cur.forEach(function(s){out.push(s.concat([item]))});
+    });
+    return out;
+  }
+
   var best=null;
-  combos.forEach(function(c){
-    var seq=[];
-    for(var i=0;i<c.QB;i++)seq.push('QB');
-    for(var i=0;i<c.RB;i++)seq.push('RB');
-    for(var i=0;i<c.WR;i++)seq.push('WR');
-    for(var i=0;i<c.TE;i++)seq.push('TE');
-    adPerms(seq).forEach(function(perm){
-      // Greedy fill: for each open round in order, take best available of perm position
-      var used={},picksArr=[],total=0,valid=true;
-      for(var i=0;i<openRounds.length;i++){
-        var rd=openRounds[i],pos=perm[i],pk=adPickNum(slot,rd);
-        var chosen=null;
-        var list=byPos[pos]||[];
-        for(var j=0;j<list.length;j++){
-          if(used[list[j].name])continue;
-          if(list[j].rank>=pk){chosen=list[j];break}
+  subsets(lateLocks).forEach(function(S){
+    // Drop |S| open rounds from the END (least valuable picks get displaced)
+    if(S.length>allOpen.length)return;
+    var openRounds=allOpen.slice(0,allOpen.length-S.length);
+    // Position counts already covered by in-window locks + subset S
+    var lc={QB:0,RB:0,WR:0,TE:0};
+    for(var rd in lockedByRound){var lp=lockedByRound[rd];if(lc[lp.pos]!=null)lc[lp.pos]++}
+    S.forEach(function(lp){if(lc[lp.pos]!=null)lc[lp.pos]++});
+    // Lineup: 7 spots. QB=1, RB>=2, WR>=2, TE>=1, +FLEX
+    var qbNeed=Math.max(0,1-lc.QB);
+    if(lc.QB>1)return; // can't start 2 QBs
+    var rbMin=Math.max(0,2-lc.RB),wrMin=Math.max(0,2-lc.WR),teMin=Math.max(0,1-lc.TE);
+    var combos=adCombos(qbNeed,rbMin,wrMin,teMin,openRounds.length);
+    var lockedPts=0,lockedArr=[];
+    for(var rd in lockedByRound){lockedArr.push(lockedByRound[rd]);lockedPts+=lockedByRound[rd].pts}
+    S.forEach(function(lp){lockedArr.push(lp);lockedPts+=lp.pts});
+
+    combos.forEach(function(c){
+      var seq=[];
+      for(var i=0;i<c.QB;i++)seq.push('QB');
+      for(var i=0;i<c.RB;i++)seq.push('RB');
+      for(var i=0;i<c.WR;i++)seq.push('WR');
+      for(var i=0;i<c.TE;i++)seq.push('TE');
+      adPerms(seq).forEach(function(perm){
+        var used={},picksArr=[],total=0,valid=true;
+        for(var i=0;i<openRounds.length;i++){
+          var rd=openRounds[i],pos=perm[i],pk=adPickNum(slot,rd);
+          var chosen=null,list=byPos[pos]||[];
+          for(var j=0;j<list.length;j++){
+            if(used[list[j].name])continue;
+            if(list[j].rank>=pk){chosen=list[j];break}
+          }
+          if(!chosen){valid=false;break}
+          used[chosen.name]=1;
+          picksArr.push({rd:rd,name:chosen.name,pos:pos,pts:chosen.pts});
+          total+=chosen.pts;
         }
-        if(!chosen){valid=false;break}
-        used[chosen.name]=1;
-        picksArr.push({rd:rd,name:chosen.name,pos:pos,pts:chosen.pts});
-        total+=chosen.pts;
-      }
-      if(!valid)return;
-      // Add locked
-      for(var rd in lockedByRound){var lp=lockedByRound[rd];picksArr.push({rd:parseInt(rd),name:lp.name,pos:lp.pos,pts:lp.pts,locked:true});total+=lp.pts}
-      if(!best||total>best.total)best={total:total,picks:picksArr};
+        if(!valid)return;
+        lockedArr.forEach(function(lp){picksArr.push({rd:lp.rd,name:lp.name,pos:lp.pos,pts:lp.pts,locked:true})});
+        total+=lockedPts;
+        if(!best||total>best.total)best={total:total,picks:picksArr};
+      });
     });
   });
   if(!best)return null;
   best.picks.sort(function(a,b){return a.rd-b.rd});
   // Assign lineup slots
-  var slots=['QB','RB','RB','WR','WR','TE','FLEX','BN'];
-  var assigned=[],rem=best.picks.slice();
-  ['QB','RB','RB','WR','WR','TE'].forEach(function(s){
-    for(var i=0;i<rem.length;i++){if(rem[i].pos===s){rem[i].slot=s;rem.splice(i,1)[0];break}}
-  });
-  // Re-do assignment properly
-  var picks2=best.picks.slice();
-  var slotAssign={};
+  var picks2=best.picks;
   function take(pos){for(var i=0;i<picks2.length;i++){if(!picks2[i].slot&&picks2[i].pos===pos)return picks2[i]}return null}
   var q=take('QB');if(q)q.slot='QB';
   var r1=take('RB');if(r1)r1.slot='RB';
@@ -2418,10 +2431,8 @@ function adSolveSlot(slot){
   var w1=take('WR');if(w1)w1.slot='WR';
   var w2=take('WR');if(w2)w2.slot='WR';
   var t1=take('TE');if(t1)t1.slot='TE';
-  // FLEX = best remaining, BN = last
-  var remaining=picks2.filter(function(p){return !p.slot}).sort(function(a,b){return b.pts-a.pts});
+  var remaining=picks2.filter(function(p){return !p.slot});
   if(remaining[0])remaining[0].slot='FLEX';
-  if(remaining[1])remaining[1].slot='BN';
   return best;
 }
 
