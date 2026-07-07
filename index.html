@@ -2103,9 +2103,14 @@ function rpLookup(name){
   }
   if(PROJ[name]!=null)pts=PROJ[name];
   else{
-    // Case-insensitive match
-    var nl=name.toLowerCase();
-    for(var k in PROJ){if(k.toLowerCase()===nl){pts=PROJ[k];break}}
+    // Normalized match: lowercase, strip suffixes (Jr, Sr, II-V) and periods
+    var norm=function(s){return s.toLowerCase().replace(/\./g,'').replace(/\s+(jr|sr|ii|iii|iv|v)$/,'').trim()};
+    if(!window._projNorm){
+      window._projNorm={};
+      for(var k in PROJ){window._projNorm[norm(k)]=PROJ[k]}
+    }
+    var v=window._projNorm[norm(name)];
+    if(v!=null)pts=v;
   }
   if(pts==null){
     for(var i=0;i<DRAFT_DB.length;i++){
