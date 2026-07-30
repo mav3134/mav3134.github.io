@@ -96,6 +96,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
   <div class="wrap">
     <div class="total-box"><div class="total-num" id="total-12">&mdash;</div><div class="total-lbl">Projected Points (Drafted + Optimal Remaining)</div></div>
     <table class="stbl"><thead><tr><th>Rd</th><th>Pick</th><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th>Rank</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="plan-12"></tbody></table>
+    <div class="note" id="offboard" style="display:none;text-align:left;background:#0d1019;border:1px solid #1e2330;border-radius:6px;margin-top:12px"></div>
     <div class="note">Linked to the league Draft Room. Before the draft this is the ideal 7-round plan with all saved keepers already off the board (K = keeper). As real picks come in, taken players are eliminated, your picks fill roster slots in the round taken (green), and the remaining rounds re-optimize &mdash; players slide down the board as others get taken, so someone ranked ahead of your pick can become available if later-ranked players went early.</div>
   </div>
 </div>
@@ -351,6 +352,19 @@ function run12(){
   if(keeperCount)bits.push(keeperCount+' keeper'+(keeperCount>1?'s':'')+' off the board');
   bits.push(maxPick?('Through pick '+maxPick):'Draft not started');
   document.getElementById('live-info').textContent=bits.join(' • ');
+  // transparency: list exactly who is off the board and why
+  var kNames=[],pNames=[];
+  for(var tn2 in liveKeepers){
+    (liveKeepers[tn2]||[]).forEach(function(k){if(k&&k.name)kNames.push(k.name+(tn2===MY_TEAM?' (yours)':''))});
+  }
+  livePicks.forEach(function(pk){
+    if(pk&&pk.player&&!pk.keeper&&!keeperNames[normName(pk.player)])pNames.push(pk.player);
+  });
+  var ob=document.getElementById('offboard');
+  ob.innerHTML=(kNames.length?'<b>Kept:</b> '+kNames.join(', '):'')+
+    (kNames.length&&pNames.length?'<br>':'')+
+    (pNames.length?'<b>Drafted:</b> '+pNames.join(', '):'');
+  ob.style.display=(kNames.length||pNames.length)?'block':'none';
 }
 function pollDraft(){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
