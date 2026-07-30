@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Draft Strategy Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Anton&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;min-height:100vh}
+.hero{background:linear-gradient(135deg,#0d1019,#1a1f2e 40%,#0d1019);padding:20px 24px 14px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#c8102e,#ff6b35,#c8102e,transparent)}
+.hero h1{font-family:'Anton',sans-serif;font-size:2rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin-bottom:4px}
+.hero h1 span{background:linear-gradient(180deg,#c8102e,#ff6b35);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-family:'Oswald',sans-serif;font-size:.78rem;color:#777;text-transform:uppercase;letter-spacing:2px}
+.tab-bar{display:flex;justify-content:center;background:#0d1019;border-bottom:1px solid #1a1f2e;padding:0 16px;overflow-x:auto;gap:0}
+.tab-btn{font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;padding:14px 26px;color:#555;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab-btn:hover{color:#999}
+.tab-btn.active{color:#fff;border-bottom-color:#c8102e}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.live-dot{display:inline-block;width:7px;height:7px;background:#27ae60;border-radius:50%;margin-left:6px;animation:pulse 2s infinite;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.slot-bar{display:flex;justify-content:center;align-items:center;gap:6px;padding:16px;flex-wrap:wrap}
+.slot-lbl{font-family:'Oswald',sans-serif;font-size:.75rem;color:#777;text-transform:uppercase;letter-spacing:1.5px;margin-right:8px}
+.slot-btn{font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;width:38px;height:38px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#888;cursor:pointer;transition:all .15s}
+.slot-btn:hover{border-color:#555;color:#ccc}
+.slot-btn.active{background:linear-gradient(135deg,#c8102e,#8b0000);border-color:#c8102e;color:#fff;box-shadow:0 0 12px rgba(200,16,46,.4)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 40px}
+.total-box{text-align:center;padding:10px 0 18px}
+.total-num{font-family:'Anton',sans-serif;font-size:2.6rem;background:linear-gradient(180deg,#f5c842,#e67e22);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.total-lbl{font-family:'Oswald',sans-serif;font-size:.72rem;color:#777;text-transform:uppercase;letter-spacing:2px;margin-top:3px}
+.stbl{width:100%;border-collapse:collapse;font-size:.92rem;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden}
+.stbl th{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#555;background:rgba(255,255,255,.03);padding:9px 12px;text-align:left;border-bottom:1px solid #1a1f2e}
+.stbl td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.stbl tr:last-child td{border-bottom:none}
+.stbl tr:hover td{background:rgba(255,255,255,.03)}
+.pos-tag{font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:1px}
+.pos-QB{background:rgba(231,76,60,.18);color:#e74c3c}.pos-RB{background:rgba(39,174,96,.18);color:#2ecc71}.pos-WR{background:rgba(52,152,219,.18);color:#3498db}.pos-TE{background:rgba(243,156,18,.18);color:#f39c12}
+.slot-tag{font-family:'Oswald',sans-serif;font-size:.68rem;color:#666;letter-spacing:1px;text-transform:uppercase}
+.pts-cell{font-family:'Oswald',sans-serif;font-weight:600;color:#f5c842;text-align:right}
+.mine-row td{background:rgba(39,174,96,.08)!important}
+.note{text-align:center;font-size:.8rem;color:#666;padding:12px;line-height:1.5}
+.status-bar{display:flex;justify-content:center;align-items:center;gap:14px;padding:6px 0 2px;font-family:'Oswald',sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:1.5px;color:#777;flex-wrap:wrap}
+.status-ok{color:#27ae60}.status-err{color:#e05555}
+/* projections tab */
+.ptbl-wrap{overflow-x:auto;max-width:1500px;margin:0 auto;padding:0 12px 50px}
+.ptbl{width:100%;border-collapse:collapse;font-size:.8rem;background:#0d1019;border:1px solid #1e2330}
+.ptbl th{font-family:'Oswald',sans-serif;font-size:.64rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#667;background:#12161f;padding:8px 6px;text-align:center;border-bottom:1px solid #1a1f2e;cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0}
+.ptbl th:hover{color:#ccc}
+.ptbl th.sorted{color:#f5c842}
+.ptbl td{padding:4px 6px;border-bottom:1px solid rgba(255,255,255,.035);text-align:center;white-space:nowrap}
+.ptbl td.pl{text-align:left;font-weight:700}
+.ptbl tr:hover td{background:rgba(255,255,255,.03)}
+.ptbl input{width:58px;background:transparent;border:1px solid transparent;border-radius:3px;color:#bbb;font-family:'Roboto Condensed',sans-serif;font-size:.8rem;text-align:center;padding:2px 1px;outline:none}
+.ptbl input:hover{border-color:#2a2f3e}
+.ptbl input:focus{border-color:#c8102e;background:#12161f;color:#fff}
+.ptbl input.edited{color:#f5c842;font-weight:700}
+.ptbl .fp{font-family:'Oswald',sans-serif;font-weight:600;color:#f5c842}
+.proj-tools{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px;flex-wrap:wrap}
+.proj-tools input[type=text]{font-family:'Roboto Condensed',sans-serif;font-size:.85rem;padding:6px 12px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#ccc;width:210px;outline:none}
+.proj-tools input[type=text]:focus{border-color:#c8102e}
+.tool-btn{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:7px 14px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#999;cursor:pointer;transition:all .15s}
+.tool-btn:hover{border-color:#c8102e;color:#fff}
+.pos-filter{display:flex;gap:4px}
+.pf-btn{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;padding:7px 12px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#888;cursor:pointer}
+.pf-btn.active{background:linear-gradient(135deg,#c8102e,#8b0000);border-color:#c8102e;color:#fff}
+@media(max-width:640px){.stbl{font-size:.8rem}.stbl th,.stbl td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<div class="hero"><h1><span>Draft Strategy</span> Lab</h1><div class="hero-sub">Optimal Picks by Draft Slot &bull; Half PPR &bull; 4pt Pass TD</div></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tb-t10" onclick="switchTab('t10')">10 Team</button>
+  <button class="tab-btn" id="tb-t12" onclick="switchTab('t12')">12 Team<span class="live-dot"></span></button>
+  <button class="tab-btn" id="tb-proj" onclick="switchTab('proj')">Projections</button>
+</div>
+
+<div class="tab-panel active" id="tab-t10">
+  <div class="slot-bar"><span class="slot-lbl">Draft Position</span><span id="slots-10"></span></div>
+  <div class="wrap">
+    <div class="total-box"><div class="total-num" id="total-10">&mdash;</div><div class="total-lbl">Max Projected Points (7 Rounds)</div></div>
+    <table class="stbl"><thead><tr><th>Rd</th><th>Pick</th><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th>Rank</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="plan-10"></tbody></table>
+    <div class="note">Opponents draft strictly in ranking order. Your picks come off the board too, so later opponents take the next best available rank.</div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-t12">
+  <div class="slot-bar"><span class="slot-lbl">Draft Position</span><span id="slots-12"></span></div>
+  <div class="status-bar">
+    <span id="live-status">Draft room: connecting&hellip;</span>
+    <span id="live-info"></span>
+  </div>
+  <div class="wrap">
+    <div class="total-box"><div class="total-num" id="total-12">&mdash;</div><div class="total-lbl">Projected Points (Drafted + Optimal Remaining)</div></div>
+    <table class="stbl"><thead><tr><th>Rd</th><th>Pick</th><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th>Rank</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="plan-12"></tbody></table>
+    <div class="note">Linked to the league Draft Room. Players already picked are off the board; your picks (That's What Cheesehead) fill roster slots in the round they were taken, highlighted green. Remaining rounds re-optimize automatically as picks come in.</div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-proj">
+  <div class="proj-tools">
+    <input type="text" id="proj-search" placeholder="Search player / team..." oninput="renderProj()">
+    <span class="pos-filter" id="pos-filter"></span>
+    <button class="tool-btn" onclick="resetEdits()">Reset All Edits</button>
+    <span id="save-status" style="font-family:'Oswald',sans-serif;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:#666"></span>
+  </div>
+  <div class="ptbl-wrap">
+    <table class="ptbl"><thead><tr id="proj-head"></tr></thead><tbody id="proj-body"></tbody></table>
+  </div>
+</div>
+
+<script>
+var PLAYERS_RAW=[["Jahmyr Gibbs","DET","RB",1,0,0,0,274.4,1380.5,13.8,70.9,580.2,4.1,1.1],["Bijan Robinson","ATL","RB",2,0,0,0,289.5,1426.4,9.5,79.6,737.1,3.5,1.8],["Ja'Marr Chase","CIN","WR",3,0,0,0,3,17,0,121.2,1510.2,10.6,1],["Puka Nacua","LAR","WR",4,0,0,0,13.6,85,1.4,117,1539,9,1],["Jaxon Smith-Njigba","SEA","WR",5,0,0,0,5.5,30.4,0.1,110.9,1568.2,9.2,1.1],["Amon-Ra St. Brown","DET","WR",6,0,0,0,3.1,11.8,0,117,1390.3,10.5,0.4],["Christian McCaffrey","SF","RB",7,0,0,0,270.9,1099.4,9.2,75.9,669.4,4.7,1.1],["CeeDee Lamb","DAL","WR",8,0,0,0,2.4,12.5,0,97.7,1298.1,7.5,0.3],["Jonathan Taylor","IND","RB",9,0,0,0,327.4,1509.8,12.9,43.8,326.7,1.4,1.7],["Justin Jefferson","MIN","WR",10,0,0,0,1.3,5.5,0,98.6,1302,6.8,0.3],["James Cook III","BUF","RB",11,0,0,0,287.3,1403.5,10.3,33.3,281.7,1.9,2.4],["Ashton Jeanty","LV","RB",12,0,0,0,281.4,1107.1,8,58.6,414.4,3.3,1.1],["Drake London","ATL","WR",13,0,0,0,0,0,0,101.7,1329.6,9.4,1],["Saquon Barkley","PHI","RB",14,0,0,0,295.8,1310.8,8.2,41.7,330.3,2.1,1],["A.J. Brown","NE","WR",15,0,0,0,0,0,0,88.7,1234.3,7.6,0.3],["Brock Bowers","LV","TE",16,0,0,0,0,0,0,96.5,1025.3,7.5,0.2],["Chase Brown","CIN","RB",17,0,0,0,239.4,1040,7.5,64.4,430.1,3.9,1.1],["Nico Collins","HOU","WR",18,0,0,0,1.4,8.3,0.4,82.5,1213.2,7.3,0.8],["De'Von Achane","MIA","RB",19,0,0,0,237.9,1197.5,6,65.3,490.6,4,1],["Omarion Hampton","LAC","RB",20,0,0,0,249.1,1072.9,10,51.6,352.6,2,1.1],["George Pickens","DAL","WR",21,0,0,0,0.3,-0.3,0,82.7,1202.7,8.4,0.5],["Trey McBride","ARI","TE",22,0,0,0,0,0,0,110.3,1065.4,6.9,0.2],["Derrick Henry","BAL","RB",23,0,0,0,314,1568.1,13.4,17.8,172.1,0.7,1.7],["Kenneth Walker III","KC","RB",24,0,0,0,255.7,1158.1,8.3,45.1,347.2,1.2,0.9],["Rashee Rice","KC","WR",25,0,0,0,5.4,25.5,0.9,98.7,1099.2,9.7,0.6],["Chris Olave","NO","WR",26,0,0,0,0.3,0,0,94.1,1169.1,7.8,0.3],["Josh Allen","BUF","QB",27,3812.8,27.4,11.2,118.1,585.5,11.8,0,0,0,4.1],["DeVonta Smith","PHI","WR",28,0,0,0,0,0,0,87.8,1134.7,6,0.3],["Zay Flowers","BAL","WR",29,0,0,0,9.9,58.8,0.5,81.9,1168.2,6.5,1.5],["Tee Higgins","CIN","WR",30,0,0,0,0,0,0,70.7,964.6,9.1,0.2],["Kyren Williams","LAR","RB",31,0,0,0,240.2,1118.1,10.1,33.5,239.6,2.2,1.5],["Tetairoa McMillan","CAR","WR",32,0,0,0,0,0,0,78.3,1121.9,6.4,0.9],["Jeremiyah Love","ARI","RB",33,0,0,0,238.3,1078.7,7.2,54.4,419.5,2.1,2.2],["Lamar Jackson","BAL","QB",34,3649.8,28.3,9.6,118.4,639.8,3.2,0,0,0,4.2],["Josh Jacobs","GB","RB",35,0,0,0,288.7,1160.8,12,35.7,283.7,1.2,1.3],["Garrett Wilson","NYJ","WR",36,0,0,0,1.1,4.3,0,97.5,1106.2,6.4,1.1],["Breece Hall","NYJ","RB",37,0,0,0,259.3,1159.7,6.5,47.4,411.3,2.2,1.7],["Emeka Egbuka","TB","WR",38,0,0,0,1.4,7.3,0,72.9,1096.6,7.5,0.3],["Colston Loveland","CHI","TE",39,0,0,0,0,0,0,78.1,915.8,6.7,0.2],["Javonte Williams","DAL","RB",40,0,0,0,255.5,1157.4,10.4,33,192.2,1.2,1.6],["Drake Maye","NE","QB",41,4063.5,28.3,10.4,100.3,505.2,3.7,0,0,0,5.6],["Ladd McConkey","LAC","WR",42,0,0,0,0,0,0,76.9,976.9,6.4,0.3],["Malik Nabers","NYG","WR",43,0,0,0,2.7,7.5,0,76.7,1025.3,7.9,0.3],["Jaylen Waddle","DEN","WR",44,0,0,0,1.7,12.4,0,74.6,983.8,6,0.3],["Terry McLaurin","WAS","WR",45,0,0,0,0.3,0.3,0,71.6,982.6,7.6,0.3],["Joe Burrow","CIN","QB",46,4169.8,33.3,11.6,48.3,179,1.4,0,0,0,1.9],["Travis Etienne Jr.","NO","RB",47,0,0,0,244.6,1035.5,5.3,44.9,351.1,3,1],["Davante Adams","LAR","WR",48,0,0,0,0,0,0,68.5,925.9,10.2,0.2],["Luther Burden III","CHI","WR",49,0,0,0,7.7,38.2,0.1,72.7,972.7,5.7,0.3],["Cam Skattebo","NYG","RB",50,0,0,0,243.4,1015.7,8.1,45.8,364,2.5,1.6],["Mike Evans","SF","WR",51,0,0,0,0,0,0,65.1,918,6.7,0.2],["Jameson Williams","DET","WR",52,0,0,0,7.3,42,0.5,64.4,1064.9,6.6,0.2],["Quinshon Judkins","CLE","RB",53,0,0,0,289.4,1104.3,8.1,31.3,218.3,0.6,0.9],["Jayden Daniels","WAS","QB",54,3697.1,24.1,11,130,685.3,4.7,0,0,0,2.8],["Christian Watson","GB","WR",55,0,0,0,1.7,8,0,56,901.6,7.4,0.3],["Bucky Irving","TB","RB",56,0,0,0,259.3,1031.9,6.2,40.7,342,2.3,1],["D'Andre Swift","CHI","RB",57,0,0,0,233.1,1052.8,8,34.8,299.8,1,1],["Tyler Warren","IND","TE",58,0,0,0,0,0,0,82.9,870.5,5.4,0.3],["David Montgomery","HOU","RB",59,0,0,0,225.5,936.6,7.3,30.5,226.4,0.5,1],["TreVeyon Henderson","NE","RB",60,0,0,0,190.1,885.9,7.3,37.7,261.5,1.2,0.9],["Jalen Hurts","PHI","QB",61,3571,24.2,7.4,111.8,461.3,8.4,0,0,0,4],["DJ Moore","BUF","WR",62,0,0,0,10.3,54,0.5,69.1,899.6,7,0.8],["Rome Odunze","CHI","WR",63,0,0,0,0.3,1.3,0,63.4,980,8.1,0.3],["Bhayshul Tuten","JAC","RB",64,0,0,0,243,992.6,8.2,29.2,221.6,2.1,2.2],["Tucker Kraft","GB","TE",65,0,0,0,0,0,0,58.7,755.6,6.3,0.2],["Jadarian Price","SEA","RB",66,0,0,0,215.2,911.9,7.6,26,220.1,1.1,2],["Caleb Williams","CHI","QB",67,3827.6,27.4,9.3,79,397.9,2.1,0,0,0,3],["Justin Herbert","LAC","QB",68,3858.8,26.2,11.7,78.4,459,2.1,0,0,0,2.8],["Jaylen Warren","PIT","RB",69,0,0,0,188,825.5,4.8,42,320.6,1.5,0.9],["Carnell Tate","TEN","WR",70,0,0,0,0.7,3,0,66.3,902.7,4.5,1.4],["Marvin Harrison Jr.","ARI","WR",71,0,0,0,0,0,0,67.2,945.3,6,0.3],["Tony Pollard","TEN","RB",72,0,0,0,238.8,1045.3,5.9,31.9,207.7,0.5,2.1],["Trevor Lawrence","JAC","QB",73,3892.9,26.6,13,72.5,321.1,4.9,0,0,0,3.4],["Rhamondre Stevenson","NE","RB",74,0,0,0,168.8,733.6,6.5,36.8,309.8,1.6,2.1],["Alec Pierce","IND","WR",75,0,0,0,0,0,0,64,1048.9,6.5,0.3],["Dak Prescott","DAL","QB",76,4294,30.9,11.3,49.1,173.3,1.7,0,0,0,2.8],["DK Metcalf","PIT","WR",77,0,0,0,0.7,3.3,0.3,64.2,923.4,6,0.2],["Harold Fannin Jr.","CLE","TE",78,0,0,0,0,0,0,78.3,815.4,5.4,0.8],["Brian Thomas Jr.","JAC","WR",79,0,0,0,2.7,18,0.4,55.7,837.7,5.3,0.2],["Chuba Hubbard","CAR","RB",80,0,0,0,208.8,841.5,5.4,36.3,259.6,1.8,1.5],["Sam LaPorta","DET","TE",81,0,0,0,0,0,0,69.8,809.2,5.5,0.2],["Kyle Pitts Sr.","ATL","TE",82,0,0,0,0,0,0,79.5,882.1,4.7,0.1],["Courtland Sutton","DEN","WR",83,0,0,0,0,0,0,69.4,902.9,7.5,0.2],["Parker Washington","JAC","WR",84,0,0,0,5.3,13.6,0.1,60.9,843.6,5.4,0.4],["Rico Dowdle","PIT","RB",85,0,0,0,206.6,899,6.2,32.1,225.6,1,1],["Chris Godwin Jr.","TB","WR",86,0,0,0,0.3,0.3,0,67.8,772.8,5.2,0.3],["Jordyn Tyson","NO","WR",87,0,0,0,0.7,3,0,63.2,856.5,4.3,1.3],["Jaxson Dart","NYG","QB",88,3592.9,22.6,11.1,100.9,549.4,6.5,0,0,0,2.9],["J.K. Dobbins","DEN","RB",89,0,0,0,218.2,1020.7,6.6,17.7,94.3,0.6,0.7],["RJ Harvey","DEN","RB",90,0,0,0,130.4,495.5,4.6,46.6,343.9,3.5,0.8],["Kyle Monangai","CHI","RB",91,0,0,0,191,816.6,5.2,22.9,192.7,0.4,0.7],["Brock Purdy","SF","QB",92,4119.6,27.7,14.3,70.5,304.1,3.9,0,0,0,4.3],["Michael Wilson","ARI","WR",93,0,0,0,0,0.7,0,66.3,810.6,4.4,0.2],["Quentin Johnston","LAC","WR",94,0,0,0,1.7,6.3,0,53.6,755.9,6.9,0.7],["Michael Pittman Jr.","PIT","WR",95,0,0,0,0,0,0,80.5,803.3,5,0.3],["Blake Corum","LAR","RB",96,0,0,0,167.7,801.5,6.4,11.9,80.3,0.2,0.7],["Patrick Mahomes II","KC","QB",97,3832.6,27.4,11.6,60.4,359.1,3.4,0,0,0,2],["Makai Lemon","PHI","WR",98,0,0,0,1.5,7,0,56.8,798.1,4.6,1.3],["Bo Nix","DEN","QB",99,3743,26.8,11,79.1,341.1,3.6,0,0,0,2],["Jakobi Meyers","JAC","WR",100,0,0,0,4.7,23,0.1,70.6,814.5,5.4,0.8],["Wan'Dale Robinson","TEN","WR",101,0,0,0,2,9.5,0.1,83,833.8,3.6,0.3],["Kenny Gainwell","TB","RB",102,0,0,0,110.7,485.2,3.8,49.7,351.6,2,0.9],["Travis Kelce","KC","TE",103,0,0,0,0,0,0,74.9,784.4,4.8,0.3],["Matthew Stafford","LAR","QB",104,4191.7,34,8.6,23.7,33.1,0.2,0,0,0,2.8],["Ricky Pearsall","SF","WR",105,0,0,0,4.2,21.2,0.1,59.7,832,3.9,0.3],["George Kittle","SF","TE",106,0,0,0,0,0,0,66.3,756.3,5.6,0.2],["Jordan Addison","MIN","WR",107,0,0,0,2.7,37.1,0.4,55.2,757.6,5.4,0.2],["Josh Downs","IND","WR",108,0,0,0,1.4,4.3,0,74.9,722.2,4.2,0.8],["Rachaad White","WAS","RB",109,0,0,0,139.9,618.2,5.4,39,263.3,1.6,0.8],["Aaron Jones Sr.","MIN","RB",110,0,0,0,160,681.9,3.6,41,303.3,1.7,1.6],["Jared Goff","DET","QB",111,4298.7,31.6,10,23.7,48.2,0.2,0,0,0,3.7],["Dalton Kincaid","BUF","TE",112,0,0,0,0,0,0,56.8,701.6,5.5,0.2],["Jayden Reed","GB","WR",113,0,0,0,12,86.6,0.1,62.8,757.8,4.8,0.4],["Kyler Murray","MIN","QB",114,3496.7,23.5,14,79.6,475.8,3.4,0,0,0,3.8],["Jake Ferguson","DAL","TE",115,0,0,0,0,0,0,74.1,607.3,5.9,1.4],["Jacory Croskey-Merritt","WAS","RB",116,0,0,0,182.3,820.7,7.5,11.2,79.6,0.2,1.7],["Jonathon Brooks","CAR","RB",117,0,0,0,162.8,657,4.2,25.1,192.9,1.1,1.4],["Jordan Mason","MIN","RB",118,0,0,0,181.6,827.5,5.8,14.5,75.8,0.1,1],["Dallas Goedert","PHI","TE",119,0,0,0,0,0,0,65.5,689.1,7.5,0.2],["Xavier Worthy","KC","WR",120,0,0,0,15.5,99.3,0.9,55.1,721.8,4.2,0.2],["Baker Mayfield","TB","QB",121,3836.5,25.9,12.5,57.7,362.1,1.5,0,0,0,3.7],["Jordan Love","GB","QB",122,3840.7,26.7,10.2,46.1,194.6,0.6,0,0,0,3],["Tyler Shough","NO","QB",123,3976.6,22.1,11.7,78.2,329.1,4.1,0,0,0,3.6],["Jayden Higgins","HOU","WR",124,0,0,0,0,0,0,49.3,608.8,4.7,0.2],["Mark Andrews","BAL","TE",125,0,0,0,0,0,0,58.3,607.6,7.4,0.3],["Isaiah Likely","NYG","TE",126,0,0,0,0,0,0,62.9,746.2,5.1,1.3],["Tyrone Tracy Jr.","NYG","RB",127,0,0,0,118.3,502.6,2.5,26.3,203.3,1.2,0.8],["Khalil Shakir","BUF","WR",128,0,0,0,1.1,5.5,0,72.4,748.1,4.2,0.8],["Chris Rodriguez Jr.","JAC","RB",129,0,0,0,133.8,553.1,5.1,5.4,42.5,0.1,0.6],["Romeo Doubs","NE","WR",130,0,0,0,0,0,0,57.8,751.3,5.3,0.3],["Jalen Coker","CAR","WR",131,0,0,0,0,0,0,57.4,694.7,4.6,0.8],["Tyler Allgeier","ARI","RB",132,0,0,0,111.7,428.1,4.2,17,108.5,0.2,0.6],["Malik Willis","MIA","QB",133,3366.8,17.7,12.5,124.5,641.4,4.1,0,0,0,6.1],["Woody Marks","HOU","RB",134,0,0,0,142.6,555.4,2.7,24,197.8,1.8,0.8],["KC Concepcion","CLE","WR",135,0,0,0,4.2,22.4,0.1,55.7,707.8,3.1,1.3],["Matthew Golden","GB","WR",136,0,0,0,5.5,27.3,0.1,54.9,731.6,4.2,0.4],["Isiah Pacheco","DET","RB",137,0,0,0,139.2,581.1,3.5,21.1,136.1,0.6,0.8],["Alvin Kamara","NO","RB",138,0,0,0,126.4,485.8,2.7,35.1,242.7,1.3,0.8],["Tyjae Spears","TEN","RB",139,0,0,0,92.1,368,2.9,45.9,305.2,1.2,0.7],["Zach Charbonnet","SEA","RB",140,0,0,0,130.5,532.3,5.6,19.8,147,0.5,0.7],["C.J. Stroud","HOU","QB",141,3878.3,23.5,11.4,54.4,238.6,1,0,0,0,3.5],["Dylan Sampson","CLE","RB",142,0,0,0,73.5,254.1,1.3,35.9,284.6,2.1,1.2],["Sam Darnold","SEA","QB",143,4087.9,27.3,12.8,44,131.8,0.6,0,0,0,5.3],["Rashid Shaheed","SEA","WR",144,0,0,0,13.4,88.8,0.3,49.9,754.7,3.7,0.8],["Juwan Johnson","NO","TE",145,0,0,0,0,0,0,64.5,726.2,3.2,1.3],["Brenton Strange","JAC","TE",146,0,0,0,0,0,0,60,658,4.3,0.2],["Hunter Henry","NE","TE",147,0,0,0,0,0,0,56.3,651.7,5.4,0.1],["Keaton Mitchell","LAC","RB",148,0,0,0,85.2,395.4,1.9,11.5,82.7,0.2,0.7],["Cam Ward","TEN","QB",149,3587.7,19.8,10.4,44.2,185.5,2,0,0,0,5.4],["Tank Bigsby","PHI","RB",150,0,0,0,85.6,419.4,3.2,3.3,29.3,0.1,0.2],["Brian Robinson Jr.","ATL","RB",151,0,0,0,129.3,563.9,4.3,6.9,43.1,0.1,0.7],["Oronde Gadsden II","LAC","TE",152,0,0,0,0,0,0,45.5,563.9,3.6,0.7],["Chig Okonkwo","WAS","TE",153,0,0,0,0,0,0,53.9,567.2,2.7,0.1],["Jauan Jennings","MIN","WR",154,0,0,0,0,0,0,48.7,557,5.2,0.7],["Jonah Coleman","DEN","RB",155,0,0,0,28.3,117.9,0.9,8.1,58.5,0.3,0.1],["Jerry Jeudy","CLE","WR",156,0,0,0,0.5,2,0,54.2,746.8,2.9,0.7],["Adonai Mitchell","NYJ","WR",157,0,0,0,2.2,11.2,0.1,38.5,563.9,3.3,0.5],["Daniel Jones","IND","QB",158,3759.6,23.5,11.4,66,251.1,4,0,0,0,3.8],["Bryce Young","CAR","QB",160,3363.3,22.1,12.4,58.3,257.5,3,0,0,0,3],["Tre Tucker","LV","WR",161,0,0,0,11.2,52.9,0.2,50.1,634.1,3.8,0.1],["Denzel Boston","CLE","WR",162,0,0,0,1,5,0,48.8,612,2.9,0.8],["Omar Cooper Jr.","NYJ","WR",163,0,0,0,2.1,12.5,0.1,46.3,550.3,3.3,1.2],["Jalen McMillan","TB","WR",164,0,0,0,4.7,26.8,0.1,46.6,605.7,3.9,0.2],["Dalton Schultz","HOU","TE",165,0,0,0,0,0,0,65.8,630.1,3.4,0.2],["Braelon Allen","NYJ","RB",166,0,0,0,106,427.9,4.3,12.9,93.7,0.7,1.7],["Travis Hunter","JAC","WR",168,0,0,0,2,10.8,0.1,41.6,496.2,3.3,0.4],["Tre' Harris","LAC","WR",170,0,0,0,0,0,0,34.5,407.8,2.5,0.4],["Ryan Flournoy","DAL","WR",172,0,0,0,2.2,12.4,0.1,34,384.5,2.7,0.4],["T.J. Hockenson","MIN","TE",173,0,0,0,0,0,0,63.9,574,3.3,0.2],["James Conner","ARI","RB",174,0,0,0,42.5,155,1.5,18,131,1,0],["AJ Barner","SEA","TE",175,0,0,0,0,0,0,48.6,469.5,4.9,0.2],["Kenyon Sadiq","NYJ","TE",177,0,0,0,0,0,0,51.1,558,4.1,0.7],["Kayshon Boutte","NE","WR",179,0,0,0,0,0,0,30.3,462.5,4,0.1],["Sean Tucker","TB","RB",180,0,0,0,38.8,163.6,2.2,0.5,3,0,0.1],["Jacoby Brissett","ARI","QB",181,3590.7,19.7,10.4,48.7,215.1,1.4,0,0,0,4.8],["Kimani Vidal","LAC","RB",182,0,0,0,62.2,251,1.6,11.9,104.3,0.7,0.1],["Calvin Ridley","TEN","WR",184,0,0,0,4.5,27.5,0.6,48.1,785.4,3.3,0.2],["Emanuel Wilson","SEA","RB",185,0,0,0,69.7,289.5,1.7,7.7,52.1,0,0.5],["Jaylin Noel","HOU","WR",187,0,0,0,4.2,22.2,0.1,39.5,452.3,2.5,0.4],["Troy Franklin","DEN","WR",190,0,0,0,3,10.8,0,36.5,395.9,3.4,0.6],["Ray Davis","BUF","RB",195,0,0,0,32.3,137.8,1.1,7.8,60,0.4,0.2],["Isaac TeSlaa","DET","WR",198,0,0,0,0,0,0,25.4,351.8,4.1,0.1],["De'Zhaun Stribling","SF","WR",199,0,0,0,1.5,6.5,0,32.3,440.4,2.5,0.6],["Pat Bryant","DEN","WR",200,0,0,0,0,0,0,28.4,319.7,2.1,0.3],["Jalen Nailor","LV","WR",201,0,0,0,2,8.5,0,42,566.9,4.4,0.2],["Darnell Mooney","NYG","WR",202,0,0,0,1.1,6,0,36.5,534.8,2.8,0.1],["Emmett Johnson","KC","RB",208,0,0,0,39.7,165.1,1.3,5.2,41.1,0.2,0.1],["Malik Washington","MIA","WR",210,0,0,0,13.4,80.2,0.7,43.5,390,2.3,0.8],["Nicholas Singleton","TEN","RB",211,0,0,0,20.3,83.4,0.6,4.3,29.9,0.2,0.1],["Dontayvion Wicks","PHI","WR",212,0,0,0,0.5,3,0,31.1,354.9,2.4,0.1],["Terrance Ferguson","LAR","TE",214,0,0,0,0,0,0,36.3,500.3,4.5,0.2],["Gunnar Helm","TEN","TE",215,0,0,0,0,0,0,48.9,443.1,3.1,0.2],["Rashod Bateman","BAL","WR",217,0,0,0,0,0,0,38.3,594.4,6,0.2],["Mike Washington Jr.","LV","RB",221,0,0,0,92.8,352.5,2.1,15.2,121.5,0.6,0.7],["MarShawn Lloyd","GB","RB",223,0,0,0,50.6,211.5,1.5,6.5,48.6,0.3,0.2],["Jaylen Wright","MIA","RB",224,0,0,0,79.9,308,1.5,7.2,52.5,0.1,1.2],["Pat Freiermuth","PIT","TE",226,0,0,0,0,0,0,53,557.9,4.3,0.2],["Geno Smith","NYJ","QB",227,3455.5,21.8,14.8,57.3,209.6,1,0,0,0,2.2],["Cade Otton","TB","TE",229,0,0,0,0,0,0,54.8,556.7,3.1,0.1],["Antonio Williams","WAS","WR",230,0,0,0,3.5,18.7,0.1,44.4,600.1,3.6,1.2],["Ted Hurst III","TB","WR",231,0,0,0,1,6.5,0,28.9,389.3,2.6,0.6],["Kaytron Allen","WAS","RB",232,0,0,0,23.6,110.8,0.7,3.1,25.5,0.1,0],["David Njoku","LAC","TE",233,0,0,0,0,0,0,35.9,336.9,4,0.1],["Cooper Kupp","SEA","WR",234,0,0,0,0.5,1.5,0,47.4,583.8,3.4,0.7],["Aaron Rodgers","PIT","QB",235,3479.1,21.7,9.4,26,82.5,0.6,0,0,0,2.7],["Tank Dell","HOU","WR",236,0,0,0,10.2,48.8,0.1,43.1,545.8,3.4,0.1],["Chimere Dike","TEN","WR",237,0,0,0,10.1,33.6,0.3,26.1,252.9,3.3,0.6],["Jaydon Blue","DAL","RB",241,0,0,0,48.7,205,1.5,8.8,61.9,0.4,0.2],["Keon Coleman","BUF","WR",242,0,0,0,0,0,0,19.4,266,2.3,0.2],["Zachariah Branch","ATL","WR",243,0,0,0,0,0,0,31.4,382.1,1.9,0.3],["Ollie Gordon II","MIA","RB",244,0,0,0,49.4,202.8,1.2,3.9,27.8,0.1,0.2],["Colby Parkinson","LAR","TE",246,0,0,0,0,0,0,34.3,354.3,3.9,0.6],["Elic Ayomanor","TEN","WR",247,0,0,0,0,0,0,23.9,323,3.2,0],["Jack Bech","LV","WR",248,0,0,0,0,0,0,38,440.8,1.6,0.4],["Germie Bernard","PIT","WR",249,0,0,0,2.1,10.8,0,44.6,550.8,3.1,0.8],["Justice Hill","BAL","RB",250,0,0,0,56.4,273.5,2.2,34.7,303,1.8,0.2],["George Holani","SEA","RB",252,0,0,0,38.9,164.2,1.5,8,62.2,0.3,0.2],["Evan Engram","DEN","TE",253,0,0,0,0,0,0,53.4,471.8,2.7,0.1],["Oscar Delp","NO","TE",254,0,0,0,0,0,0,3.9,36.5,0.2,0],["Fernando Mendoza","LV","QB",255,2887.2,16.1,12.2,50.4,227.1,1.3,0,0,0,2.7],["Tory Horton","SEA","WR",256,0,0,0,0.5,3,0,30.3,400.9,4.2,0.6],["Isaiah Davis","NYJ","RB",257,0,0,0,26.4,135,0.9,9.9,78.2,0.2,0],["Tua Tagovailoa","ATL","QB",258,2724.3,15.8,8.3,19.6,46.6,0.1,0,0,0,2.3],["Demond Claiborne","MIN","RB",259,0,0,0,27.7,121.5,0.9,3.3,25.2,0.1,0.1],["DJ Giddens","IND","RB",260,0,0,0,33.6,141.5,1,8.6,56.7,0.3,0.2],["Jordan James","SF","RB",261,0,0,0,102.3,416.6,3.2,16.1,148.3,0.7,1.2],["Christian Kirk","SF","WR",262,0,0,0,0,0,0,39.5,476,3,0.1],["Chris Brooks","GB","RB",263,0,0,0,72.7,323.2,1.3,15.4,107.6,0.3,0.6],["Tyquan Thornton","KC","WR",264,0,0,0,0,0,0,25.4,465.9,3.5,0.1],["Elijah Sarratt","BAL","WR",265,0,0,0,0,0,0,19.5,294.4,1.8,0.2],["Trey Benson","ARI","RB",266,0,0,0,0,0,0,0,0,0,0],["Eli Stowers","PHI","TE",267,0,0,0,0,0,0,22.7,232.4,1.5,0.6],["Devin Neal","NO","RB",269,0,0,0,22.5,89.5,1,2.5,17.5,0,0],["Malik Davis","DAL","RB",270,0,0,0,79.6,373.1,2.7,6.6,52.3,0.1,0.1],["Malachi Fields","NYG","WR",271,0,0,0,0,0,0,13.2,157.6,0.9,0.1],["Ty Johnson","BUF","RB",272,0,0,0,51.6,218.7,2,24.9,250.7,2.1,0.2],["Greg Dulcich","MIA","TE",273,0,0,0,0,0,0,54.6,619.7,3.2,1.2],["Samaje Perine","CIN","RB",274,0,0,0,98.9,443.2,3.7,17.9,135.1,0.4,1.9],["Darius Slayton","NYG","WR",275,0,0,0,1.6,8.6,0,35.4,521,2.5,0.7],["Chris Bell","MIA","WR",277,0,0,0,0,0,0,34.2,448.9,1.7,0.4],["Devaughn Vele","NO","WR",278,0,0,0,0,0,0,35.1,422.8,2.8,0.1],["Kaleb Johnson","PIT","RB",279,0,0,0,8.6,35.8,0.2,0,0,0,0],["Michael Penix Jr.","ATL","QB",280,1350,7.2,3.7,13.5,46.9,0.3,0,0,0,1],["Kendre Miller","NO","RB",281,0,0,0,12.9,54.6,0.3,0,0,0,0],["Marvin Mims Jr.","DEN","WR",282,0,0,0,8.2,45,0.3,24.2,272.5,1.6,0.4],["LeQuint Allen Jr.","JAC","RB",283,0,0,0,8,33.9,0.2,21.7,148,0.8,0.1],["Xavier Legette","CAR","WR",286,0,0,0,2.1,10.8,0.1,26.6,308.1,2.1,0.3],["Mason Taylor","NYJ","TE",287,0,0,0,0,0,0,44.5,390.8,2.4,0.1],["Theo Johnson","NYG","TE",289,0,0,0,0,0,0,27.7,315.4,2.9,0.1],["Devin Singletary","NYG","RB",290,0,0,0,35.6,142.6,1,4.2,26.3,0.1,0.1],["Chris Brazzell II","CAR","WR",291,0,0,0,0,0,0,22.5,287.9,1.7,0.2],["Hollywood Brown","PHI","WR",292,0,0,0,0,0,0,31.3,389.5,3.3,0.1],["Deshaun Watson","CLE","QB",293,2023.2,10.4,7.3,44.7,197.3,1.3,0,0,0,3.3],["Kirk Cousins","LV","QB",294,783.6,5.1,3.9,5.2,9,0.1,0,0,0,0.9],["Jerome Ford","WAS","RB",295,0,0,0,17.5,97,0.5,4,23.5,0,0],["Najee Harris","LAC","RB",296,0,0,0,28,126,1,2,18,0,0],["Kaelon Black","SF","RB",297,0,0,0,98.1,387.6,3.2,8.6,79.4,0.6,1.1],["Shedeur Sanders","CLE","QB",298,1581.7,8.7,6.5,24.4,143.8,0.9,0,0,0,1.2],["Brashard Smith","KC","RB",299,0,0,0,25,89,0.5,10.5,71,0.5,0],["Mack Hollins","NE","WR",300,0,0,0,0,0,0,10.8,126.7,0.8,0.1],["Kyle Williams","NE","WR",301,0,0,0,4.1,22.3,0.2,6.4,91.5,0.6,0.1],["Emari Demercado","KC","RB",302,0,0,0,76.8,425.9,1.7,16.3,119,0.8,1.7],["Adam Randall","BAL","RB",303,0,0,0,55.1,281.5,2,10.3,103.4,1.1,0.6],["Isaac Guerendo","SF","RB",305,0,0,0,16.5,80,0.5,2,18.5,0,0],["Trevor Etienne","CAR","RB",306,0,0,0,24.8,105.6,0.6,8.2,59.2,0.3,0.1],["Mike Gesicki","CIN","TE",307,0,0,0,0,0,0,44,461.1,3.9,0.1],["Tahj Brooks","CIN","RB",308,0,0,0,30.5,129.3,0.9,0,0,0,0.1],["Jarquez Hunter","LAR","RB",311,0,0,0,32,148,1,1,14,0,0],["Isaiah Bond","CLE","WR",312,0,0,0,4.3,23.5,0.1,5.6,73.7,0.4,0.1],["Seth McGowan","IND","RB",313,0,0,0,22.3,97.1,1.2,3.2,26.9,0.1,0],["Skyler Bell","BUF","WR",314,0,0,0,0,0,0,15.1,205.5,1.2,0.2],["Ja'Kobi Lane","BAL","WR",317,0,0,0,1.5,8.5,0,30.4,459.2,3.4,0.6],["Will Shipley","PHI","RB",319,0,0,0,9.3,39.6,0.3,11.3,83.4,0.4,0.1],["Jake Tonges","SF","TE",321,0,0,0,0,0,0,19.2,200.7,1.5,0.1],["Andrei Iosivas","CIN","WR",322,0,0,0,2.5,11.1,0,31.1,393.6,2.9,0.1],["Cedric Tillman","CLE","WR",324,0,0,0,0,-0.5,0,21.5,269,2.3,0],["Konata Mumpfield","LAR","WR",325,0,0,0,0,0,0,9.9,126.6,1.2,0.1],["J.J. McCarthy","MIN","QB",326,340.2,1.8,1.4,5.9,27,0.2,0,0,0,0.4],["Darnell Washington","PIT","TE",327,0,0,0,0,0,0,30.7,327.7,2,0.6],["Jalen Royals","KC","WR",328,0,0,0,0,0,0,17.1,198.7,1.6,0.2],["Calvin Austin III","NYG","WR",329,0,0,0,0,0,0,20.5,273.7,2.2,0],["Luke McCaffrey","WAS","WR",330,0,0,0,0,0,0,12,189,2,0],["Tez Johnson","TB","WR",331,0,0,0,4.4,23.2,0.2,6.7,77.5,0.6,0.1],["Bam Knight","ARI","RB",332,0,0,0,0,0,0,0,0,0,0],["Max Klare","LAR","TE",334,0,0,0,0,0,0,7.5,82.6,0.7,0],["Caleb Douglas","MIA","WR",335,0,0,0,1,5.5,0,33.1,419,2.3,0.7],["Olamide Zaccheaus","ATL","WR",336,0,0,0,1.5,9.5,0,31.9,295.6,1.9,0.1],["Jahan Dotson","ATL","WR",337,0,0,0,0,0,0,31.9,401,2,0.2],["Tyler Higbee","LAR","TE",338,0,0,0,0,0,0,26.1,306.4,2.4,0],["Joshua Palmer","BUF","WR",339,0,0,0,0,0,0,25.9,337.3,1.6,0.1],["DeMario Douglas","NE","WR",340,0,0,0,4.1,21.4,0.2,22.7,271,1.5,0.3],["Jalen Tolbert","MIA","WR",341,0,0,0,0,0,0,35.4,441.7,1.8,0.3],["Elijah Arroyo","SEA","TE",342,0,0,0,0,0,0,19,198.7,1.6,0.1],["Mac Jones","SF","QB",343,160.2,1,0.5,2.7,8.4,0,0,0,0,0.1],["Dont'e Thornton Jr.","LV","WR",344,0,0,0,0,0,0,12.1,167.7,0.6,0.1],["Cole Kmet","CHI","TE",345,0,0,0,0,0,0,25.9,271.4,2.2,0.1],["Noah Gray","KC","TE",348,0,0,0,0,0,0,21,211.3,1.5,0.1],["Xavier Hutchinson","HOU","WR",349,0,0,0,2.1,14.2,0,24.8,300.8,2,0.1],["Michael Mayer","LV","TE",350,0,0,0,0,0,0,40,377.5,2.1,0.1],["Anthony Richardson Sr.","IND","QB",351,254,2,1,9,38,0,0,0,0,0],["Kendrick Bourne","ARI","WR",352,0,0,0,0,0,0,22.7,239.7,0.7,0.2],["Carson Beck","ARI","QB",354,337.8,2.2,1.2,5.2,20.1,0.1,0,0,0,0.2],["Justin Fields","KC","QB",357,175.1,1,0.8,3.6,18.4,0.1,0,0,0,0.1],["Treylon Burks","WAS","WR",358,0,0,0,0,0,0,15.8,215.5,1.3,0.1],["Jawhar Jordan","HOU","RB",359,0,0,0,51.3,218.5,1.1,11,87,0.5,0.5],["Ja'Tavion Sanders","CAR","TE",360,0,0,0,0,0,0,29.3,263.8,2,0.1],["Ty Simpson","LAR","QB",362,298.2,2.6,0.8,4.1,18.4,0,0,0,0,0.1],["Brenen Thompson","LAC","WR",363,0,0,0,2.1,11.3,0.1,9.5,120.9,0.7,0.1],["John Metchie III","CAR","WR",364,0,0,0,3,-4,0,65,617,6,0],["Dawson Knox","BUF","TE",365,0,0,0,0,0,0,28.7,328.7,2.9,0.1],["Jaylin Lane","WAS","WR",366,0,0,0,0,0,0,22.8,280.9,1.8,0.2],["Bryce Lance","NO","WR",367,0,0,0,0,0,0,16.4,204.3,0.9,0.2],["Noah Fant","NO","TE",371,0,0,0,0,0,0,30.4,285,1.7,1.6],["Erick All Jr.","CIN","TE",372,0,0,0,0,0,0,26.1,228.3,1.6,0.1],["Kalif Raymond","CHI","WR",374,0,0,0,4.6,27.2,0.2,19.2,186.9,0.9,0.2],["Eli Raridon","NE","TE",375,0,0,0,0,0,0,18.8,195.8,1.5,0.6],["Phil Mafah","DAL","RB",376,0,0,0,32,142,1,4,34,0,0],["Dameon Pierce","PHI","RB",379,0,0,0,35,161,1,0,0,0,0],["Luke Musgrave","GB","TE",380,0,0,0,0,0,0,23,223.1,1.2,0.1],["Cyrus Allen","KC","WR",382,0,0,0,0,0,0,6.4,79.7,0.5,0.1],["John Bates","WAS","TE",383,0,0,0,0,0,0,18.4,173.7,1.6,0.6],["KaVontae Turpin","DAL","WR",385,0,0,0,17.7,102.5,0.4,18.2,230.3,1.7,0.4],["Jordan Whittington","LAR","WR",386,0,0,0,2.3,12.1,0.1,15,171.9,1.2,0.2],["Kevin Coleman Jr.","MIA","WR",387,0,0,0,0,0,0,21.1,270.5,0.7,0.2],["Ben Sinnott","WAS","TE",388,0,0,0,0,0,0,11.8,116.3,1.4,0],["Tommy Tremble","CAR","TE",390,0,0,0,0,0,0,26.5,253.1,2,0.1],["Nick Westbrook-Ikhine","IND","WR",391,0,0,0,0,0,0,34.3,432.7,3,0.3],["Tutu Atwell","MIA","WR",393,0,0,0,2.2,11.3,0.1,20.4,291.7,0.5,0.2],["Joe Milton III","DAL","QB",394,172.5,1.1,0.5,3.5,16.3,0,0,0,0,0.1],["Savion Williams","GB","WR",395,0,0,0,9,47,0.3,23.9,272,2,0.3],["Kyle Juszczyk","SF","RB",398,0,0,0,4.2,10.3,0.1,23.8,209.5,1.5,0.1],["Mitchell Evans","CAR","TE",403,0,0,0,0,0,0,15,138.1,1.5,0.1],["Elijah Higgins","ARI","TE",404,0,0,0,0,0,0,21.9,196.2,0.8,0.6],["Dyami Brown","WAS","WR",405,0,0,0,0,0,0,29.9,394.6,2.7,0.3],["Roschon Johnson","CHI","RB",406,0,0,0,33,115,3,3,17,0,0],["Jam Miller","NE","RB",407,0,0,0,34,156,1,2,25,0,0],["Devontez Walker","BAL","WR",409,0,0,0,0,0,0,11.6,166.4,1.2,0.1],["Dylan Laube","LV","RB",411,0,0,0,0,0,0,0,0,0,0],["Rasheen Ali","BAL","RB",413,0,0,0,0,0,0,0,0,0,0],["Hunter Luepke","DAL","RB",414,0,0,0,13.3,56.1,0.4,8.6,61.7,0.4,0.1],["Daniel Bellinger","TEN","TE",415,0,0,0,0,0,0,19.3,222.3,1.7,0],["Ashton Dulin","IND","WR",416,0,0,0,5.1,46.2,0.1,22.5,378.4,1.5,0.1],["Zavion Thomas","CHI","WR",418,0,0,0,0,0,0,12.5,153.5,1.2,0.1],["Zavier Scott","MIN","RB",420,0,0,0,0,0,0,0,0,0,0],["Greg Dortch","DET","WR",421,0,0,0,4.6,24,0.4,4.1,39.8,0.3,0.1],["Ty Chandler","NO","RB",422,0,0,0,51,138,1,12,57,0,0],["Austin Hooper","ATL","TE",426,0,0,0,0,0,0,22.5,236.8,1.6,0.1],["Joe Flacco","CIN","QB",427,169.2,1.2,0.8,2.2,8.6,0,0,0,0,0.6],["Colbie Young","CIN","WR",428,0,0,0,0,0,0,3.5,43.2,0.3,0],["Jahdae Walker","CHI","WR",430,0,0,0,0.5,3.5,0,17.1,225.8,2.7,0],["Marlin Klein","HOU","TE",432,0,0,0,0,0,0,19.5,193.7,1.1,0.5],["Marcus Mariota","WAS","QB",433,256.6,2,0.8,1.4,7.9,0,0,0,0,0.1],["Josh Oliver","MIN","TE",434,0,0,0,0,0,0,18.6,193.9,2.4,0.1],["Jeremy McNichols","WAS","RB",435,0,0,0,17,88,1,7,54,0,0],["Elijah Mitchell","PHI","RB",437,0,0,0,35,159,1,2,22,0,0],["Demarcus Robinson","SF","WR",439,0,0,0,0.5,2.5,0,17.7,252.3,1.7,0],["Mitch Tinsley","CIN","WR",440,0,0,0,0,0,0,6.6,84,0.8,0.1],["Theo Wease Jr.","MIA","WR",441,0,0,0,2,8,0,48,685,5,1],["Charlie Kolar","LAC","TE",442,0,0,0,0,0,0,17.8,205.2,1.9,0],["Adam Trautman","DEN","TE",444,0,0,0,0,0,0,19.4,194,1.5,0],["Frank Gore Jr.","BUF","RB",447,0,0,0,37,174,2,3,26,0,0],["Xavier Smith","LAR","WR",452,0,0,0,0,0,0,7.2,89.3,0.7,0.1],["Jameis Winston","NYG","QB",455,194.8,1.3,1.3,2.6,10.9,0,0,0,0,0.6],["Donovan Edwards","MIA","RB",457,0,0,0,31,130,1,2,19,0,0],["Drew Sample","CIN","TE",459,0,0,0,0,0,0,15.1,123.1,1.1,0.1],["Jacob Saylors","DET","RB",461,0,0,0,0,0,0,0,0,0,0],["Malik Benson","LV","WR",462,0,0,0,0,0,0,6.4,79.4,0.3,0.1],["Odell Beckham Jr.","NYG","WR",465,0,0,0,0.5,2.7,0,14.3,175.9,1,0.1],["Derius Davis","LAC","WR",466,0,0,0,2.1,11,0.1,3.5,37.8,0.3,0.1],["Luke Schoonmaker","DAL","TE",467,0,0,0,0,0,0,13.2,121.7,0.9,0],["Tanner Hudson","CIN","TE",469,0,0,0,0,0,0,13.1,110.2,0.9,0.1],["Mo Alie-Cox","IND","TE",473,0,0,0,0,0,0,10.9,110.7,0.9,0.1],["Brock Wright","DET","TE",474,0,0,0,0,0,0,19.4,175.1,2.3,0],["AJ Dillon","CAR","RB",485,0,0,0,123,509,3,16,136,1,5],["Alec Ingold","LAC","RB",486,0,0,0,2.1,8.6,0.1,7.9,58.2,0.2,0.1],["Patrick Ricard","NYG","RB",493,0,0,0,0,0,0,4,26.9,0.1,0],["Salvon Ahmed","CHI","RB",495,0,0,0,35,152,1,1,12,0,0],["Gardner Minshew II","ARI","QB",498,147.9,0.8,0.3,2.4,9.3,0,0,0,0,0.1],["Cade Stover","HOU","TE",499,0,0,0,0,0,0,15.2,128.2,0.9,0.1],["Max Bredeson","MIN","RB",502,0,0,0,2,8.5,0.1,4.5,29.4,0.2,0],["Durham Smythe","BAL","TE",505,0,0,0,0,0,0,9.8,94.1,0.7,0.1],["Adam Prentice","DEN","RB",507,0,0,0,4.1,17.4,0.1,4.1,29.8,0.2,0],["Quinn Ewers","MIA","QB",508,167.6,1.2,0.9,3,11.7,0,0,0,0,0.1],["Van Jefferson","WAS","WR",510,0,0,0,0,0,0,28,357.7,1.9,0.2],["Reggie Gilliam","NE","RB",519,0,0,0,0,0,0,4.1,29.8,0.2,0],["Will Kacmarek","MIA","TE",522,0,0,0,0,0,0,26.6,250.8,1.9,0.6],["Jackson Hawes","BUF","TE",523,0,0,0,0,0,0,10.6,115.1,1.4,0],["Nate Boerkircher","JAC","TE",525,0,0,0,0,0,0,14.9,155.3,1.3,0.5],["Riley Leonard","IND","QB",527,208.6,1.4,0.8,1.6,7.2,0,0,0,0,0.2],["Nate Adkins","DEN","TE",530,0,0,0,0,0,0,11.9,88.3,1.8,0],["Myles Price","MIN","WR",531,0,0,0,0,0,0,0,0,0,0],["Anthony Gould","IND","WR",534,0,0,0,0,0,0,7,74.3,0.3,0.1],["British Brooks","HOU","RB",536,0,0,0,4.2,18,0.1,0,0,0,0],["Will Mallory","IND","TE",537,0,0,0,0,0,0,11,125,1,0],["Isaiah Williams","NYJ","WR",538,0,0,0,2.2,12.7,0.1,3.8,35.8,0.1,0.1],["Tyler Conklin","DET","TE",542,0,0,0,0,0,0,3.7,38,0.3,0],["Michael Burton","CLE","RB",544,0,0,0,6.6,13.8,0.6,5.1,33.2,0.6,0],["Braxton Berrios","NYG","WR",546,0,0,0,0,0,0,0,0,0,0],["Michael Bandy","DEN","WR",547,0,0,0,0,0,0,0,0,0,0],["Jeremy Ruckert","NYJ","TE",551,0,0,0,0,0,0,19.7,145.8,1.3,0],["Reggie Virgil","ARI","WR",555,0,0,0,0,0,0,3.4,39.3,0.1,0],["Skyy Moore","GB","WR",559,0,0,0,0,0,0,0,0,0,0],["Arian Smith","NYJ","WR",564,0,0,0,4.3,23.7,0.2,0,0,0,0],["KeAndre Lambert-Smith","LAC","WR",565,0,0,0,0,0,0,9.6,120.8,0.9,0.1],["Foster Moreau","HOU","TE",568,0,0,0,0,0,0,9.3,105.7,1.3,0],["Devin Duvernay","ARI","WR",569,0,0,0,0,0,0,0,0,0,0],["Bub Means","NO","WR",0,0,0,0,1,6,0,38,516,3,1],["Davis Allen","LAR","TE",0,0,0,0,0,0,0,16.9,157.3,1.9,0],["Ben Sims","MIA","TE",0,0,0,0,0,0,0,19.5,184.7,1.2,0],["Nick Vannett","SEA","TE",0,0,0,0,0,0,0,10,95,2,0],["Jack Endries","CIN","TE",0,0,0,0,0,0,0,13,123,1,0],["Tanner McLachlan","SF","TE",0,0,0,0,0,0,0,12,118,1,0],["Charlie Woerner","ATL","TE",0,0,0,0,0,0,0,14.5,127.4,0.6,0],["Grant Calcaterra","PHI","TE",0,0,0,0,0,0,0,11,115,1,0],["Israel Abanikanda","DAL","RB",0,0,0,0,32,147,1,1,14,0,0],["Cam Grandy","CIN","TE",0,0,0,0,0,0,0,13,100,1,0],["Dallen Bentley","DEN","TE",0,0,0,0,0,0,0,12,105,1,0],["Thomas Fidone II","NYG","TE",0,0,0,0,0,0,0,10,101,1,0],["Jared Wiley","KC","TE",0,0,0,0,0,0,0,11,95,1,0],["Jaren Kanak","TEN","TE",0,0,0,0,0,0,0,10,96,1,0],["Connor Heyward","LV","TE",0,0,0,0,4.2,17.6,0.1,9,66,1.1,0],["Drake Dabney","GB","TE",0,0,0,0,0,0,0,9,94,1,0],["Seydou Traore","MIA","TE",0,0,0,0,0,0,0,9,87,1,0],["Josh Whyle","GB","TE",0,0,0,0,0,0,0,9,86,1,0],["Devin Culp","TB","TE",0,0,0,0,0,0,0,7.3,76.1,1.2,0],["Payne Durham","TB","TE",0,0,0,0,0,0,0,7.6,80.8,0.8,0],["Tyler Badie","DEN","RB",0,0,0,0,4.1,17.6,0.1,8,65.5,0.4,0.1],["Brevyn Spann-Ford","DAL","TE",0,0,0,0,0,0,0,7.4,71.4,0.7,0],["Tanner Koziol","JAC","TE",0,0,0,0,0,0,0,7,73.3,0.6,0],["Tip Reiman","ARI","TE",0,0,0,0,0,0,0,7.9,62.3,0.6,0],["Joe Royer","CLE","TE",0,0,0,0,0,0,0,6.9,64.3,0.6,0],["Hunter Long","JAC","TE",0,0,0,0,0,0,0,5,44.5,1,0],["Davis Mills","HOU","QB",0,182.5,1.3,0.5,2.7,9,0,0,0,0,0.1],["Andrew Beck","NYJ","TE",0,0,0,0,0.5,4,0,4.6,31.6,1.1,0],["Shane Buechele","BUF","QB",0,150,1,0,4,20,0,0,0,0,0],["Kenny Pickett","CAR","QB",0,155.5,1.3,0.8,2.8,10.9,0,0,0,0,0.1],["Blake Whiteheart","CLE","TE",0,0,0,0,0,0,0,7.1,62.9,0.3,0.1],["Will Levis","TEN","QB",0,137,1,0,4,19,0,0,0,0,0],["Jarrett Stidham","DEN","QB",0,152.2,1.1,0.3,3.3,12.9,0,0,0,0,0.1],["Tyson Bagent","CHI","QB",0,168,1,0.2,2.8,8.6,0,0,0,0,0.1],["Tommy DeVito","NE","QB",0,149.8,1,0.4,1.9,9.5,0.1,0,0,0,0.1],["Teddy Bridgewater","DET","QB",0,157.9,1,0.4,3.1,8.9,0,0,0,0,0],["Jake Browning","TB","QB",0,157.4,1,0.9,3.1,15.7,0,0,0,0,0.1],["Jack Stoll","CLE","TE",0,0,0,0,0,0,0,5.5,47.5,0.5,0],["Tanner McKee","PHI","QB",0,141,1,0.2,3,9.9,0,0,0,0,0],["Tyrod Taylor","GB","QB",0,173.5,0.9,0.8,2.1,10.7,0,0,0,0,0.2],["Trey Lance","LAC","QB",0,148.2,1,0.8,3.2,13.4,0,0,0,0,0.1],["Tyler Huntley","BAL","QB",0,130.8,0.9,0.3,3.5,18.7,0,0,0,0,0.1],["Mason Rudolph","PIT","QB",0,148.4,0.9,0.3,2.6,10.6,0,0,0,0,0.1],["Spencer Rattler","NO","QB",0,156.7,0.9,0.8,2.7,12.1,0,0,0,0,0.1],["Bo Melton","GB","WR",0,0,0,0,4.5,26,0.1,2.9,37.6,0.3,0.1],["Mason Tipton","NO","WR",0,0,0,0,4.3,23.6,0.2,3.3,37.5,0.2,0.1],["Andy Dalton","PHI","QB",0,140,1,0,5,23,0,0,0,0,1],["Behren Morton","NE","QB",0,121,1,0,2,10,0,0,0,0,0],["Nick Mullens","JAC","QB",0,140.2,1.1,0.4,3.1,3.7,0,0,0,0,0.1],["Drew Lock","SEA","QB",0,146.6,0.9,0.8,3.1,13.1,0,0,0,0,0.1],["Chris Oladokun","KC","QB",0,148,1,0,4,18,0,0,0,0,1],["Adrian Martinez","SF","QB",0,114,1,0,3,7,0,0,0,0,0],["Garrett Nussmeier","KC","QB",0,111,1,0,2,8,0,0,0,0,0],["Cole Payton","PHI","QB",0,105,1,0,2,10,0,0,0,0,0],["Kyle Allen","BUF","QB",0,138.4,1,0.6,2,3.6,0,0,0,0,0.1],["Cade Klubnik","NYJ","QB",0,136.8,0.9,0.6,1.8,8.2,0,0,0,0,0.1],["Tyrell Shavers","BUF","WR",0,0,0,0,0,0,0,4,52.2,0.3,0],["Ben Skowronek","PIT","WR",0,0,0,0,0,0,0,5.4,51,0.2,0],["Jalen Milroe","SEA","QB",0,90,1,0,5,14,0,0,0,0,0],["Drew Allar","PIT","QB",0,101,1,0,2,8,0,0,0,0,0],["Mitchell Trubisky","TEN","QB",0,138.5,0.8,0.4,2.6,4.7,0,0,0,0,0.1],["Luke Farrell","SF","TE",0,0,0,0,0,0,0,4.3,41.2,0.3,0],["David Moore","CAR","WR",0,0,0,0,2.1,11.4,0.1,3.1,36.7,0.2,0.1],["CJ Dippre","NE","TE",0,0,0,0,0,0,0,3.9,37.3,0.3,0],["Jonathan Mingo","DAL","WR",0,0,0,0,0,0,0,2.9,40.7,0.3,0],["Lucas Krull","DEN","TE",0,0,0,0,0,0,0,3.9,35.4,0.3,0],["Darius Cooper","PHI","WR",0,0,0,0,0,0,0,3.3,37.7,0.3,0],["Drew Ogletree","IND","TE",0,0,0,0,0,0,0,3.7,35.3,0.3,0],["Josh Cuevas","BAL","TE",0,0,0,0,0,0,0,3.3,35.8,0.3,0],["Sam Roush","CHI","TE",0,0,0,0,0,0,0,3.7,33.8,0.3,0],["Eric Saubert","SEA","TE",0,0,0,0,0,0,0,3.4,34.4,0.3,0],["Justin Watson","HOU","WR",0,0,0,0,0,0,0,3.1,41.6,0.2,0],["Will Howard","PIT","QB",0,95.7,0.7,0.3,1.3,5,0,0,0,0,0],["Tai Felton","MIN","WR",0,0,0,0,0,0,0,3.7,37,0.2,0],["Ian Thomas","LV","TE",0,0,0,0,0,0,0,3.8,35.9,0.2,0],["Johnny Mundt","PHI","TE",0,0,0,0,0,0,0,3.5,35.4,0.2,0],["Riley Nowakowski","PIT","TE",0,0,0,0,0,0,0,4.3,29,0.2,0],["Malachi Corley","CLE","WR",0,0,0,0,6.4,43.8,0.2,0,0,0,0.1],["Kaden Wetjen","PIT","WR",0,0,0,0,2.1,11.6,0.1,1.6,18.8,0.1,0],["Brady Cook","NYJ","QB",0,60,0.5,0.5,2,10.5,0,0,0,0,0],["Chris Manhertz","NYG","TE",0,0,0,0,0,0,0,1.8,16.3,0.1,0],["Jimmy Horn Jr.","CAR","WR",0,0,0,0,4.1,24.7,0.1,0,0,0,0],["JuJu Smith-Schuster","NYG","WR",0,0,0,0,0,0,0,1.4,12.4,0.1,0],["Kameron Johnson","TB","WR",0,0,0,0,2.2,12.1,0.1,0,0,0,0],["Mason Kinsey","TEN","WR",0,0,0,0,0,0,0,0,0,0,0],["Britain Covey","PHI","WR",0,0,0,0,0,0,0,0,0,0,0],["Dareke Young","LV","WR",0,0,0,0,0,0,0,0,0,0,0],["Jacob Cowing","SF","WR",0,0,0,0,0,0,0,0,0,0,0],["Charlie Jones","CIN","WR",0,0,0,0,0,0,0,0,0,0,0],["Barion Brown","NO","WR",0,0,0,0,0,0,0,0,0,0,0],["Jalen Brooks","ARI","WR",0,0,0,0,0,0,0,0,0,0,0],["Brycen Tremayne","CAR","WR",0,0,0,0,0,0,0,0,0,0,0],["Nikko Remigio","KC","WR",0,0,0,0,0,0,0,0,0,0,0],["Jeshaun Jones","MIN","WR",0,0,0,0,0,0,0,0,0,0,0],["Efton Chism III","NE","WR",0,0,0,0,0,0,0,0,0,0,0],["LaJohntay Wester","BAL","WR",0,0,0,0,0,0,0,0,0,0,0],["Ke'Shawn Williams","CIN","WR",0,0,0,0,0,0,0,0,0,0,0],["Gage Larvadain","CLE","WR",0,0,0,0,0,0,0,0,0,0,0],["Josh Cameron","JAC","WR",0,0,0,0,0,0,0,0,0,0,0],["Quintin Morris","JAC","TE",0,0,0,0,0,0,0,0,0,0,0],["Cole Turner","MIA","TE",0,0,0,0,0,0,0,0,0,0,0],["Jelani Woods","NYJ","TE",0,0,0,0,0,0,0,0,0,0,0],["Julian Hill","NE","TE",0,0,0,0,0,0,0,0,0,0,0],["DeeJay Dallas","JAC","RB",0,0,0,0,0,0,0,0,0,0,0],["Kene Nwangwu","NYJ","RB",0,0,0,0,0,0,0,0,0,0,0],["Chris Collier","LV","RB",0,0,0,0,0,0,0,0,0,0,0],["Josh Williams","TB","RB",0,0,0,0,0,0,0,0,0,0,0],["Josh Johnson","CIN","QB",0,0,0,0,0,0,0,0,0,0,0],["Stetson Bennett IV","LAR","QB",0,0,0,0,0,0,0,0,0,0,0],["Aidan O'Connell","LV","QB",0,0,0,0,0,0,0,0,0,0,0]];
+</script>
+<script>
+/* ═══════════ CORE DATA ═══════════ */
+var STAT_FIELDS=['paY','paTD','int','ruA','ruY','ruTD','rec','reY','reTD','fl'];
+var PLAYERS=PLAYERS_RAW.map(function(r,i){
+  return {id:i,name:r[0],team:r[1],pos:r[2],rank:r[3]||null,
+    paY:r[4],paTD:r[5],int:r[6],ruA:r[7],ruY:r[8],ruTD:r[9],rec:r[10],reY:r[11],reTD:r[12],fl:r[13]};
+});
+function normName(n){return String(n).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\.?$/,'').replace(/[^a-z]/g,'')}
+var BY_NORM={};PLAYERS.forEach(function(p){BY_NORM[normName(p.name)]=p});
+
+/* Half PPR scoring: 0.04/pass yd, 4/pass TD, -1/INT, 0.1/rush+rec yd, 6/rush+rec TD, 0.5/rec, -2/fumble lost */
+function calcPts(p){
+  return p.paY*0.04 + p.paTD*4 - p.int*1 + p.ruY*0.1 + p.ruTD*6 + p.rec*0.5 + p.reY*0.1 + p.reTD*6 - p.fl*2;
+}
+PLAYERS.forEach(function(p){p.pts=calcPts(p)});
+// rank-ordered board (unranked players are never taken by simulated opponents)
+var RANKED=PLAYERS.filter(function(p){return p.rank}).sort(function(a,b){return a.rank-b.rank});
+
+/* ═══════════ OPTIMIZER ═══════════ */
+/* Roster: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX(RB/WR/TE) over 7 rounds. */
+function mySnakePicks(teams,slot,rounds){
+  var out=[];
+  for(var rd=0;rd<rounds;rd++){
+    out.push(rd%2===0 ? rd*teams+slot : rd*teams+(teams-slot+1));
+  }
+  return out;
+}
+// all distinct permutations of a multiset
+function multisetPerms(arr){
+  var counts={};arr.forEach(function(x){counts[x]=(counts[x]||0)+1});
+  var keys=Object.keys(counts),out=[],cur=[];
+  (function rec(n){
+    if(n===0){out.push(cur.slice());return}
+    for(var i=0;i<keys.length;i++){
+      if(counts[keys[i]]>0){counts[keys[i]]--;cur.push(keys[i]);rec(n-1);cur.pop();counts[keys[i]]++;}
+    }
+  })(arr.length);
+  return out;
+}
+// need = {QB:x,RB:x,WR:x,TE:x,FLEX:x} -> list of position sequences (FLEX expanded)
+function posSequences(need){
+  var seqs=[],flexOpts=need.FLEX>0?['RB','WR','TE']:[null];
+  flexOpts.forEach(function(fx){
+    var base=[];
+    ['QB','RB','WR','TE'].forEach(function(pos){
+      var n=need[pos]+(fx===pos?need.FLEX:0);
+      for(var i=0;i<n;i++)base.push(pos);
+    });
+    multisetPerms(base).forEach(function(s){seqs.push(s)});
+  });
+  // dedupe (different flex choices can produce identical sequences won't happen since counts differ, but cheap to skip)
+  return seqs;
+}
+/*
+ simulate(opts):
+   teams, slot, taken(Set of player ids already gone), startPick(next overall pick #),
+   need(remaining roster need), roundsLeft(list of my future overall pick #s)
+ Opponents take the best-ranked untaken player at every pick that isn't mine.
+ For each candidate position sequence, my pick = highest projected untaken player of that position.
+ Returns {picks:[{player,pos}], total}
+*/
+function simulate(teams,slot,takenIds,startPick,myPickNums,need){
+  var best=null,seqs=posSequences(need);
+  var lastMy=myPickNums.length?myPickNums[myPickNums.length-1]:0;
+  for(var s=0;s<seqs.length;s++){
+    var seq=seqs[s];
+    var taken=new Set(takenIds);
+    var rp=0; // pointer into RANKED
+    var total=0,picks=[],ok=true,myIdx=0;
+    for(var pk=startPick;pk<=lastMy&&myIdx<seq.length;pk++){
+      if(pk===myPickNums[myIdx]){
+        var pos=seq[myIdx],bestP=null;
+        for(var i=0;i<PLAYERS.length;i++){
+          var p=PLAYERS[i];
+          if(p.pos===pos&&!taken.has(p.id)&&(bestP===null||p.pts>bestP.pts))bestP=p;
+        }
+        if(!bestP){ok=false;break}
+        taken.add(bestP.id);total+=bestP.pts;picks.push(bestP);myIdx++;
+      } else {
+        while(rp<RANKED.length&&taken.has(RANKED[rp].id))rp++;
+        if(rp<RANKED.length)taken.add(RANKED[rp].id);
+      }
+    }
+    if(ok&&(best===null||total>best.total))best={total:total,picks:picks,seq:seq};
+  }
+  return best;
+}
+// assign slot labels (QB/RB1/RB2/WR1/WR2/TE/FLEX) to a list of picked positions in order
+function slotLabels(posList,preFilled){
+  var used=preFilled||{QB:0,RB:0,WR:0,TE:0,FLEX:0};
+  var cap={QB:1,RB:2,WR:2,TE:1};
+  return posList.map(function(pos){
+    if(used[pos]<cap[pos]){used[pos]++;return pos==='QB'||pos==='TE'?pos:pos+used[pos];}
+    used.FLEX++;return 'FLEX';
+  });
+}
+function remainingNeed(filled){
+  return {QB:Math.max(0,1-filled.QB),RB:Math.max(0,2-filled.RB),WR:Math.max(0,2-filled.WR),
+          TE:Math.max(0,1-filled.TE),FLEX:Math.max(0,1-filled.FLEX)};
+}
+// classify already-drafted players into starting slots, overflow -> FLEX, beyond that ignored (bench)
+function classifyMine(myPlayers){
+  var filled={QB:0,RB:0,WR:0,TE:0,FLEX:0},cap={QB:1,RB:2,WR:2,TE:1},labels=[];
+  myPlayers.forEach(function(p){
+    if(filled[p.pos]<cap[p.pos]){filled[p.pos]++;labels.push(p.pos==='QB'||p.pos==='TE'?p.pos:p.pos+filled[p.pos]);}
+    else if(p.pos!=='QB'&&filled.FLEX<1){filled.FLEX++;labels.push('FLEX');}
+    else labels.push('BENCH');
+  });
+  return {filled:filled,labels:labels};
+}
+
+/* ═══════════ 10-TEAM TAB ═══════════ */
+var slot10=1,slot12=1;
+function buildSlotBtns(containerId,n,cur,fn){
+  var el=document.getElementById(containerId);el.innerHTML='';
+  for(var i=1;i<=n;i++){
+    var b=document.createElement('button');b.className='slot-btn'+(i===cur?' active':'');b.textContent=i;
+    b.onclick=(function(v){return function(){fn(v)}})(i);
+    el.appendChild(b);
+  }
+}
+function posTag(pos){return '<span class="pos-tag pos-'+pos+'">'+pos+'</span>'}
+function renderPlan(tbodyId,totalId,rows,total){
+  var html='';
+  rows.forEach(function(r){
+    html+='<tr'+(r.mine?' class="mine-row"':'')+'><td>'+r.round+'</td><td>'+r.pick+'</td>'+
+      '<td><span class="slot-tag">'+r.slot+'</span></td><td style="font-weight:700">'+r.player.name+'</td>'+
+      '<td style="color:#888">'+r.player.team+'</td><td>'+posTag(r.player.pos)+'</td>'+
+      '<td style="color:#888">'+(r.player.rank||'&mdash;')+'</td><td class="pts-cell">'+r.player.pts.toFixed(1)+'</td></tr>';
+  });
+  document.getElementById(tbodyId).innerHTML=html;
+  document.getElementById(totalId).textContent=total.toFixed(1);
+}
+function run10(){
+  buildSlotBtns('slots-10',10,slot10,function(v){slot10=v;run10()});
+  var myPicks=mySnakePicks(10,slot10,7);
+  var best=simulate(10,slot10,new Set(),1,myPicks,{QB:1,RB:2,WR:2,TE:1,FLEX:1});
+  if(!best)return;
+  var labels=slotLabels(best.picks.map(function(p){return p.pos}));
+  renderPlan('plan-10','total-10',best.picks.map(function(p,i){
+    return {round:i+1,pick:myPicks[i],slot:labels[i],player:p};
+  }),best.total);
+}
+
+/* ═══════════ 12-TEAM LIVE TAB ═══════════ */
+var DRAFT_API='https://api.npoint.io/9643622df799b5dd5e7f';
+var MY_TEAM="That's What Cheesehead";
+var livePicks=[],liveOk=false;
+function run12(){
+  buildSlotBtns('slots-12',12,slot12,function(v){slot12=v;run12()});
+  var taken=new Set(),minePicked=[];// [{player,pick}]
+  var maxPick=0;
+  livePicks.forEach(function(pk){
+    if(!pk||!pk.player)return;
+    if(pk.pick>maxPick)maxPick=pk.pick;
+    var p=BY_NORM[normName(pk.player)];
+    if(!p)return;
+    taken.add(p.id);
+    if(pk.owner===MY_TEAM||pk.team===MY_TEAM)minePicked.push({player:p,pick:pk.pick});
+  });
+  minePicked.sort(function(a,b){return a.pick-b.pick});
+  var cls=classifyMine(minePicked.map(function(m){return m.player}));
+  var need=remainingNeed(cls.filled);
+  var allMy=mySnakePicks(12,slot12,7);
+  var futureMy=allMy.filter(function(n){return n>maxPick});
+  var slotsNeeded=Object.keys(need).reduce(function(a,k){return a+need[k]},0);
+  futureMy=futureMy.slice(0,slotsNeeded);
+  var best=futureMy.length?simulate(12,slot12,taken,maxPick+1,futureMy,need):{total:0,picks:[]};
+  var rows=[],total=0;
+  minePicked.forEach(function(m,i){
+    rows.push({round:Math.ceil(m.pick/12),pick:m.pick,slot:cls.labels[i],player:m.player,mine:true});
+    if(cls.labels[i]!=='BENCH')total+=m.player.pts;
+  });
+  if(best){
+    var futFilled={QB:cls.filled.QB,RB:cls.filled.RB,WR:cls.filled.WR,TE:cls.filled.TE,FLEX:cls.filled.FLEX};
+    var labels=slotLabels(best.picks.map(function(p){return p.pos}),futFilled);
+    best.picks.forEach(function(p,i){
+      rows.push({round:Math.ceil(futureMy[i]/12),pick:futureMy[i],slot:labels[i],player:p});
+    });
+    total+=best.total;
+  }
+  renderPlan('plan-12','total-12',rows,total);
+  var info=document.getElementById('live-info');
+  info.textContent=maxPick?('Through pick '+maxPick+' • '+minePicked.length+' of your picks in'):'No picks made yet';
+}
+function pollDraft(){
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    livePicks=(data&&data.picks)||[];
+    liveOk=true;
+    var st=document.getElementById('live-status');
+    st.textContent='Draft room: connected';st.className='status-ok';
+    if(document.getElementById('tab-t12').classList.contains('active'))run12();
+    applyRemoteEdits((data&&data.draftstratEdits)||{});
+  }).catch(function(){
+    var st=document.getElementById('live-status');
+    st.textContent='Draft room: offline (retrying)';st.className='status-err';
+  });
+}
+
+/* ═══════════ PROJECTIONS TAB ═══════════ */
+var edits={};// normName -> {field:value}
+var editsLoaded=false;
+var COLS=[
+ {k:'rank',l:'Rk'},{k:'name',l:'Player'},{k:'team',l:'Team'},{k:'pos',l:'Pos'},{k:'pts',l:'FPTS'},
+ {k:'paY',l:'Pass Yds',e:1},{k:'paTD',l:'Pass TD',e:1},{k:'int',l:'INT',e:1},
+ {k:'ruA',l:'Rush Att',e:1},{k:'ruY',l:'Rush Yds',e:1},{k:'ruTD',l:'Rush TD',e:1},
+ {k:'rec',l:'Rec',e:1},{k:'reY',l:'Rec Yds',e:1},{k:'reTD',l:'Rec TD',e:1},{k:'fl',l:'Fum Lost',e:1}
+];
+var sortKey='pts',sortDir=-1,posFilter='ALL';
+function buildProjHead(){
+  var html='';
+  COLS.forEach(function(c){
+    html+='<th data-k="'+c.k+'" class="'+(sortKey===c.k?'sorted':'')+'" onclick="setSort(\''+c.k+'\')">'+c.l+
+      (sortKey===c.k?(sortDir<0?' ▼':' ▲'):'')+'</th>';
+  });
+  document.getElementById('proj-head').innerHTML=html;
+}
+function setSort(k){
+  if(sortKey===k)sortDir=-sortDir;
+  else{sortKey=k;sortDir=(k==='name'||k==='team'||k==='pos'||k==='rank')?1:-1;}
+  renderProj();
+}
+function buildPosFilter(){
+  var el=document.getElementById('pos-filter');el.innerHTML='';
+  ['ALL','QB','RB','WR','TE'].forEach(function(p){
+    var b=document.createElement('button');b.className='pf-btn'+(posFilter===p?' active':'');b.textContent=p;
+    b.onclick=function(){posFilter=p;renderProj()};
+    el.appendChild(b);
+  });
+}
+function renderProj(){
+  buildProjHead();buildPosFilter();
+  var q=(document.getElementById('proj-search').value||'').toLowerCase();
+  var list=PLAYERS.filter(function(p){
+    if(posFilter!=='ALL'&&p.pos!==posFilter)return false;
+    if(q&&p.name.toLowerCase().indexOf(q)<0&&p.team.toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+  list.sort(function(a,b){
+    var av=a[sortKey],bv=b[sortKey];
+    if(sortKey==='rank'){av=av||9999;bv=bv||9999}
+    if(typeof av==='string')return sortDir*av.localeCompare(bv);
+    return sortDir*(av-bv);
+  });
+  var html='';
+  list.forEach(function(p){
+    var nn=normName(p.name),ed=edits[nn]||{};
+    html+='<tr><td style="color:#666">'+(p.rank||'')+'</td><td class="pl">'+p.name+'</td>'+
+      '<td style="color:#888">'+p.team+'</td><td>'+posTag(p.pos)+'</td>'+
+      '<td class="fp" id="fp-'+p.id+'">'+p.pts.toFixed(1)+'</td>';
+    COLS.forEach(function(c){
+      if(!c.e)return;
+      html+='<td><input type="number" step="any" value="'+(+p[c.k].toFixed(1))+'"'+
+        (ed[c.k]!==undefined?' class="edited"':'')+
+        ' onchange="statEdit('+p.id+',\''+c.k+'\',this)"></td>';
+    });
+    html+='</tr>';
+  });
+  document.getElementById('proj-body').innerHTML=html;
+}
+var saveTimer=null;
+function statEdit(id,field,inp){
+  var p=PLAYERS[id],v=parseFloat(inp.value);
+  if(isNaN(v))v=0;
+  p[field]=v;p.pts=calcPts(p);
+  var nn=normName(p.name);
+  edits[nn]=edits[nn]||{};edits[nn][field]=v;
+  inp.classList.add('edited');
+  var fp=document.getElementById('fp-'+p.id);if(fp)fp.textContent=p.pts.toFixed(1);
+  scheduleSave();
+  run10();run12();
+}
+function applyRemoteEdits(remote){
+  if(editsLoaded)return; // apply only once at load; local edits win afterwards
+  editsLoaded=true;
+  // merge: remote values first, any local edits made before load win
+  remote=remote||{};
+  for(var rn in remote){
+    edits[rn]=Object.assign({},remote[rn],edits[rn]||{});
+  }
+  for(var nn in edits){
+    var p=BY_NORM[nn];if(!p)continue;
+    for(var f in edits[nn]){if(STAT_FIELDS.indexOf(f)>=0)p[f]=edits[nn][f]}
+    p.pts=calcPts(p);
+  }
+  renderProj();run10();run12();
+}
+function scheduleSave(){
+  var st=document.getElementById('save-status');st.textContent='Saving…';st.style.color='#f39c12';
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveEdits,1500);
+}
+function saveEdits(){
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    data=data||{};
+    data.draftstratEdits=edits;
+    return fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  }).then(function(){
+    var st=document.getElementById('save-status');st.textContent='Saved ✓';st.style.color='#27ae60';
+  }).catch(function(){
+    var st=document.getElementById('save-status');st.textContent='Save failed — will retry';st.style.color='#e05555';
+    scheduleSave();
+  });
+}
+function resetEdits(){
+  if(!confirm('Reset ALL stat edits back to the FantasyPros projections?'))return;
+  edits={};
+  PLAYERS.forEach(function(p,i){
+    var r=PLAYERS_RAW[i];
+    p.paY=r[4];p.paTD=r[5];p.int=r[6];p.ruA=r[7];p.ruY=r[8];p.ruTD=r[9];p.rec=r[10];p.reY=r[11];p.reTD=r[12];p.fl=r[13];
+    p.pts=calcPts(p);
+  });
+  saveEdits();renderProj();run10();run12();
+}
+
+/* ═══════════ TABS + INIT ═══════════ */
+function switchTab(id){
+  ['t10','t12','proj'].forEach(function(t){
+    document.getElementById('tab-'+t).classList.toggle('active',t===id);
+    document.getElementById('tb-'+t).classList.toggle('active',t===id);
+  });
+  if(id==='t12')run12();
+}
+run10();run12();renderProj();
+pollDraft();setInterval(pollDraft,5000);
+</script>
+</body>
+</html>
