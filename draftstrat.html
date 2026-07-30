@@ -96,7 +96,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
   <div class="wrap">
     <div class="total-box"><div class="total-num" id="total-12">&mdash;</div><div class="total-lbl">Projected Points (Drafted + Optimal Remaining)</div></div>
     <table class="stbl"><thead><tr><th>Rd</th><th>Pick</th><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th>Rank</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="plan-12"></tbody></table>
-    <div class="note">Linked to the league Draft Room. Players already picked are off the board; your picks (That's What Cheesehead) fill roster slots in the round they were taken, highlighted green. Remaining rounds re-optimize automatically as picks come in.</div>
+    <div class="note">Linked to the league Draft Room. Before the draft this is the ideal 7-round plan with all saved keepers already off the board (K = keeper). As real picks come in, taken players are eliminated, your picks fill roster slots in the round taken (green), and the remaining rounds re-optimize &mdash; players slide down the board as others get taken, so someone ranked ahead of your pick can become available if later-ranked players went early.</div>
   </div>
 </div>
 
@@ -169,19 +169,21 @@ function posSequences(need){
   return seqs;
 }
 /*
- simulate(opts):
-   teams, slot, taken(Set of player ids already gone), startPick(next overall pick #),
-   need(remaining roster need), roundsLeft(list of my future overall pick #s)
- Opponents take the best-ranked untaken player at every pick that isn't mine.
- For each candidate position sequence, my pick = highest projected untaken player of that position.
- Returns {picks:[{player,pos}], total}
+ simulate: opponents take the best-RANKED untaken player at every pick that
+ isn't mine (so players slide down as others get taken — the live "rerank").
+ blocked = overall pick #s that consume nothing from the board (materialized
+ keeper picks). roundSkips = {round: n} opponent picks per round that consume
+ nothing (keepers whose exact pick # isn't known yet).
+ For each candidate position sequence, my pick = highest projected untaken
+ player of that position. Returns {picks:[player], total}
 */
-function simulate(teams,slot,takenIds,startPick,myPickNums,need){
+function simulate(teams,takenIds,startPick,myPickNums,need,blocked,roundSkips){
   var best=null,seqs=posSequences(need);
   var lastMy=myPickNums.length?myPickNums[myPickNums.length-1]:0;
   for(var s=0;s<seqs.length;s++){
     var seq=seqs[s];
     var taken=new Set(takenIds);
+    var skips={};if(roundSkips)for(var k in roundSkips)skips[k]=roundSkips[k];
     var rp=0; // pointer into RANKED
     var total=0,picks=[],ok=true,myIdx=0;
     for(var pk=startPick;pk<=lastMy&&myIdx<seq.length;pk++){
@@ -193,7 +195,11 @@ function simulate(teams,slot,takenIds,startPick,myPickNums,need){
         }
         if(!bestP){ok=false;break}
         taken.add(bestP.id);total+=bestP.pts;picks.push(bestP);myIdx++;
+      } else if(blocked&&blocked.has(pk)){
+        continue; // keeper slot — consumes no board player
       } else {
+        var rd=Math.ceil(pk/teams);
+        if(skips[rd]>0){skips[rd]--;continue} // unplaced keeper this round
         while(rp<RANKED.length&&taken.has(RANKED[rp].id))rp++;
         if(rp<RANKED.length)taken.add(RANKED[rp].id);
       }
@@ -251,7 +257,7 @@ function renderPlan(tbodyId,totalId,rows,total){
 function run10(){
   buildSlotBtns('slots-10',10,slot10,function(v){slot10=v;run10()});
   var myPicks=mySnakePicks(10,slot10,7);
-  var best=simulate(10,slot10,new Set(),1,myPicks,{QB:1,RB:2,WR:2,TE:1,FLEX:1});
+  var best=simulate(10,new Set(),1,myPicks,{QB:1,RB:2,WR:2,TE:1,FLEX:1},null,null);
   if(!best)return;
   var labels=slotLabels(best.picks.map(function(p){return p.pos}));
   renderPlan('plan-10','total-10',best.picks.map(function(p,i){
@@ -261,31 +267,74 @@ function run10(){
 
 /* ═══════════ 12-TEAM LIVE TAB ═══════════ */
 var DRAFT_API='https://api.npoint.io/9643622df799b5dd5e7f';
-var MY_TEAM="That's What Cheesehead";
-var livePicks=[],liveOk=false;
+var MY_TEAM="That's What Cheesehead",MY_OWNER="Brent Brevak";
+function isMine(s){return s===MY_TEAM||s===MY_OWNER}
+var livePicks=[],liveKeepers={},liveOk=false;
 function run12(){
   buildSlotBtns('slots-12',12,slot12,function(v){slot12=v;run12()});
-  var taken=new Set(),minePicked=[];// [{player,pick}]
-  var maxPick=0;
+  var taken=new Set();        // player ids off the board (picked or kept, any team)
+  var blocked=new Set();      // overall pick #s that consume nothing (materialized keeper picks)
+  var roundSkips={};          // round -> # opponent keepers with no exact pick # yet
+  var mineEntries=[];         // [{player, round, pickNum?, keeper?}]
+  var keeperNames={};         // norm name -> true
+  var maxPick=0,keeperCount=0;
+
+  // 1) keepers from data.keepers (exist even before the draft order is set)
+  for(var tn in liveKeepers){
+    (liveKeepers[tn]||[]).forEach(function(k){
+      if(!k||!k.name)return;
+      var nn=normName(k.name),p=BY_NORM[nn],kr=parseInt(k.kr);
+      keeperNames[nn]=true;keeperCount++;
+      if(p)taken.add(p.id);
+      if(tn===MY_TEAM){
+        if(p&&kr>=1&&kr<=7)mineEntries.push({player:p,round:kr,keeper:true});
+      } else if(kr>=1&&kr<=7){
+        roundSkips[kr]=(roundSkips[kr]||0)+1;
+      }
+    });
+  }
+  // 2) real picks from the draft room
   livePicks.forEach(function(pk){
     if(!pk||!pk.player)return;
+    var nn=normName(pk.player),p=BY_NORM[nn];
+    if(pk.keeper||keeperNames[nn]){
+      // keeper materialized at an exact pick # — block that slot precisely
+      if(p)taken.add(p.id);
+      if(pk.pick){
+        blocked.add(pk.pick);
+        var rd=Math.ceil(pk.pick/12);
+        if(!isMine(pk.owner)&&roundSkips[rd]>0)roundSkips[rd]--; // exact # known, drop the approximation
+        if(isMine(pk.owner)){
+          for(var i=0;i<mineEntries.length;i++){
+            if(mineEntries[i].keeper&&mineEntries[i].player&&p&&mineEntries[i].player.id===p.id){mineEntries[i].pickNum=pk.pick;break}
+          }
+        }
+      }
+      return; // keeper picks don't advance the live draft clock
+    }
     if(pk.pick>maxPick)maxPick=pk.pick;
-    var p=BY_NORM[normName(pk.player)];
     if(!p)return;
     taken.add(p.id);
-    if(pk.owner===MY_TEAM||pk.team===MY_TEAM)minePicked.push({player:p,pick:pk.pick});
+    if(isMine(pk.owner))mineEntries.push({player:p,round:Math.ceil(pk.pick/12),pickNum:pk.pick});
   });
-  minePicked.sort(function(a,b){return a.pick-b.pick});
-  var cls=classifyMine(minePicked.map(function(m){return m.player}));
+
+  mineEntries.sort(function(a,b){return a.round-b.round});
+  var cls=classifyMine(mineEntries.map(function(m){return m.player}));
   var need=remainingNeed(cls.filled);
-  var allMy=mySnakePicks(12,slot12,7);
-  var futureMy=allMy.filter(function(n){return n>maxPick});
+  var allMy=mySnakePicks(12,slot12,7); // index rd-1 -> overall pick #
+  var filledRounds={};mineEntries.forEach(function(m){filledRounds[m.round]=true});
+  var futureMy=[];
+  for(var rd=1;rd<=7;rd++){
+    if(!filledRounds[rd]&&allMy[rd-1]>maxPick)futureMy.push(allMy[rd-1]);
+  }
   var slotsNeeded=Object.keys(need).reduce(function(a,k){return a+need[k]},0);
-  futureMy=futureMy.slice(0,slotsNeeded);
-  var best=futureMy.length?simulate(12,slot12,taken,maxPick+1,futureMy,need):{total:0,picks:[]};
+  if(futureMy.length>slotsNeeded)futureMy=futureMy.slice(0,slotsNeeded);
+  var best=futureMy.length?simulate(12,taken,maxPick+1,futureMy,need,blocked,roundSkips):{total:0,picks:[]};
+
   var rows=[],total=0;
-  minePicked.forEach(function(m,i){
-    rows.push({round:Math.ceil(m.pick/12),pick:m.pick,slot:cls.labels[i],player:m.player,mine:true});
+  mineEntries.forEach(function(m,i){
+    rows.push({round:m.round,pick:m.pickNum||allMy[m.round-1],
+      slot:cls.labels[i]+(m.keeper?' • K':''),player:m.player,mine:true});
     if(cls.labels[i]!=='BENCH')total+=m.player.pts;
   });
   if(best){
@@ -296,13 +345,17 @@ function run12(){
     });
     total+=best.total;
   }
+  rows.sort(function(a,b){return a.round-b.round});
   renderPlan('plan-12','total-12',rows,total);
-  var info=document.getElementById('live-info');
-  info.textContent=maxPick?('Through pick '+maxPick+' • '+minePicked.length+' of your picks in'):'No picks made yet';
+  var bits=[];
+  if(keeperCount)bits.push(keeperCount+' keeper'+(keeperCount>1?'s':'')+' off the board');
+  bits.push(maxPick?('Through pick '+maxPick):'Draft not started');
+  document.getElementById('live-info').textContent=bits.join(' • ');
 }
 function pollDraft(){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     livePicks=(data&&data.picks)||[];
+    liveKeepers=(data&&data.keepers)||{};
     liveOk=true;
     var st=document.getElementById('live-status');
     st.textContent='Draft room: connected';st.className='status-ok';
