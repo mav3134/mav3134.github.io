@@ -131,6 +131,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-dtbl tr.do-driver-picked td{background:rgba(243,156,18,.08)}
 .do-dtbl tr.do-driver-picked:hover td{background:rgba(243,156,18,.14)}
 .do-dtbl tr.do-driver-dragover td{background:rgba(243,156,18,.2)!important;outline:1px solid rgba(243,156,18,.5)}
+.do-dtbl tbody tr:not(.do-driver-picked){cursor:grab}
+.do-owner-row.do-drop-ok{background:rgba(243,156,18,.15);border-radius:5px;outline:1px solid rgba(243,156,18,.5)}
+.do-owner-row.do-drop-no{background:rgba(200,16,46,.12);border-radius:5px;outline:1px solid rgba(200,16,46,.4)}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
 .do-error{text-align:center;padding:40px 20px;color:#e05555;font-size:.9rem;line-height:1.6}
 /* ═══ LEAGUE STATS / LEGACY POOL ═══ */
@@ -1073,7 +1076,7 @@ function renderOwnerSlots(){
   if(!doOwners.length)return;
   var html='';var next=getNextPick();
   doOwners.forEach(function(o,idx){
-    html+='<div class="do-owner-row">';
+    html+='<div class="do-owner-row" data-idx="'+idx+'">';
     html+='<span class="do-finish-badge">'+ordinal(o.finish)+'</span>';
     var isOnClock=next&&next.ownerIdx===idx;
     var allFilled=o.picks.length>=o.totalSlots;
@@ -1110,6 +1113,30 @@ function renderOwnerSlots(){
       e.dataTransfer.setData('text/plain',JSON.stringify({owner:el.dataset.owner,ownerIdx:parseInt(el.dataset.idx)}));
     });
   });
+  // Reverse direction: a dragged driver can be dropped anywhere on an owner row
+  // (name or slot boxes). It always becomes that owner's NEXT pick in the order,
+  // and only the on-clock owner can receive (same rule as dragging the name out).
+  document.querySelectorAll('#do-owners-list .do-owner-row').forEach(function(row){
+    row.addEventListener('dragover',function(e){
+      if(!window._doDragDriver)return;
+      e.preventDefault();
+      var nx=getNextPick();
+      row.classList.add(nx&&nx.ownerIdx===parseInt(row.dataset.idx)?'do-drop-ok':'do-drop-no');
+    });
+    row.addEventListener('dragleave',function(){row.classList.remove('do-drop-ok');row.classList.remove('do-drop-no')});
+    row.addEventListener('drop',function(e){
+      e.preventDefault();row.classList.remove('do-drop-ok');row.classList.remove('do-drop-no');
+      try{
+        var data=JSON.parse(e.dataTransfer.getData('text/plain'));
+        if(data.driver===undefined)return; // not a driver drag
+        var nx=getNextPick();
+        if(!nx||nx.ownerIdx!==parseInt(row.dataset.idx))return; // only the on-clock owner
+        var dIdx=parseInt(data.didx);
+        if(!doDrivers[dIdx]||doDrivers[dIdx].owner)return;
+        doMakePick(nx.ownerIdx,dIdx,data.driver);
+      }catch(ex){}
+    });
+  });
 }
 
 function renderDriverTable(){
@@ -1140,16 +1167,30 @@ function renderDriverTable(){
   html+='</tbody></table>';
   document.getElementById('do-drivers-table').innerHTML=html;
   document.querySelectorAll('.do-dtbl tbody tr:not(.do-driver-picked)').forEach(function(tr){
-    tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('do-driver-dragover')});
+    tr.addEventListener('dragover',function(e){
+      if(window._doDragDriver)return; // driver-on-driver: not a target
+      e.preventDefault();tr.classList.add('do-driver-dragover');
+    });
     tr.addEventListener('dragleave',function(){tr.classList.remove('do-driver-dragover')});
     tr.addEventListener('drop',function(e){
       e.preventDefault();tr.classList.remove('do-driver-dragover');
       try{
         var data=JSON.parse(e.dataTransfer.getData('text/plain'));
+        if(data.ownerIdx===undefined)return; // only owner-name drags land on drivers
         var driverName=tr.dataset.driver;var dIdx=parseInt(tr.dataset.didx);
         if(!driverName||doDrivers[dIdx].owner)return;
         doMakePick(data.ownerIdx,dIdx,driverName);
       }catch(ex){}
+    });
+    // Reverse direction: drivers are draggable onto an owner row
+    tr.setAttribute('draggable','true');
+    tr.addEventListener('dragstart',function(e){
+      window._doDragDriver=true;
+      e.dataTransfer.setData('text/plain',JSON.stringify({driver:tr.dataset.driver,didx:parseInt(tr.dataset.didx)}));
+    });
+    tr.addEventListener('dragend',function(){
+      window._doDragDriver=false;
+      document.querySelectorAll('.do-owner-row').forEach(function(r){r.classList.remove('do-drop-ok');r.classList.remove('do-drop-no')});
     });
   });
 }
