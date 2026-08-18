@@ -134,6 +134,11 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-dtbl tbody tr:not(.do-driver-picked){cursor:grab}
 .do-owner-row.do-drop-ok{background:rgba(243,156,18,.15);border-radius:5px;outline:1px solid rgba(243,156,18,.5)}
 .do-owner-row.do-drop-no{background:rgba(200,16,46,.12);border-radius:5px;outline:1px solid rgba(200,16,46,.4)}
+.do-ord-row{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:3px 0;border:1px solid #2a2d3a;border-radius:4px;background:rgba(255,255,255,.03);font-family:'Oswald',sans-serif;font-size:.78rem}
+.do-ord-num{font-weight:700;color:#f39c12;width:20px;text-align:center;flex-shrink:0}
+.do-ord-name{color:#ccc;font-weight:600;text-transform:uppercase;letter-spacing:.3px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.do-ord-row.do-ord-pending{opacity:.4}
+.do-ord-note{font-size:.68rem;color:#555;padding:8px 4px;line-height:1.5;font-family:'Roboto Condensed',sans-serif}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
 .do-error{text-align:center;padding:40px 20px;color:#e05555;font-size:.9rem;line-height:1.6}
 /* ═══ LEAGUE STATS / LEGACY POOL ═══ */
@@ -318,7 +323,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     </div>
     <button class="dr-undo" id="do-undo-btn" onclick="doUndo()" disabled>↩ Undo</button>
   </div>
-  <div style="display:flex;gap:12px;min-height:500px">
+  <div style="display:flex;gap:12px;min-height:500px;flex-wrap:wrap">
     <div class="dr-order-panel" style="width:340px" id="do-owners-panel">
       <div class="dr-panel-head">Team Owners</div>
       <div id="do-owners-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
@@ -326,6 +331,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <div class="dr-player-panel" style="flex:1;max-width:480px">
       <div class="dr-panel-head">Live Scoring</div>
       <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
+    </div>
+    <div class="dr-order-panel" style="width:230px">
+      <div class="dr-panel-head">Current Draft Order</div>
+      <div id="do-draft-order-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
     </div>
   </div>
 </div>
@@ -957,6 +966,36 @@ function computeOwnerOrder(){
   return order;
 }
 
+// ─── CURRENT DRAFT ORDER PANEL (right of Live Scoring) ───
+var doPrevOrder=[],doOrderDeltas={};
+function renderComputedOrder(){
+  var el=document.getElementById('do-draft-order-list');
+  if(!el)return;
+  if(!doOwners.length){el.innerHTML='<div class="do-loading">Loading...</div>';return}
+  var order=computeOwnerOrder();
+  var pickedSet={};
+  doDrivers.forEach(function(d){if(d.owner)pickedSet[d.owner]=true});
+  // arrows show movement since the order last changed (survive routine re-renders)
+  if(doPrevOrder.length&&order.join('|')!==doPrevOrder.join('|')){
+    doOrderDeltas={};
+    order.forEach(function(o,i){
+      var pi=doPrevOrder.indexOf(o);
+      if(pi>=0&&pi!==i)doOrderDeltas[o]=pi-i; // positive = moved up
+    });
+  }
+  if(order.join('|')!==doPrevOrder.join('|'))doPrevOrder=order.slice();
+  var html='';
+  order.forEach(function(o,i){
+    var d=doOrderDeltas[o]||0;
+    var arrow=d>0?'<span style="color:#2ecc71;font-size:.68rem;font-weight:700">▲'+d+'</span>'
+      :(d<0?'<span style="color:#e05555;font-size:.68rem;font-weight:700">▼'+(-d)+'</span>':'');
+    html+='<div class="do-ord-row'+(pickedSet[o]?'':' do-ord-pending')+'">'+
+      '<span class="do-ord-num">'+(i+1)+'</span><span class="do-ord-name">'+o+'</span>'+arrow+'</div>';
+  });
+  html+='<div class="do-ord-note">Order = each player’s first driver reading down the live scoring. Greyed players haven’t picked yet.</div>';
+  el.innerHTML=html;
+}
+
 function lockDraftOrder(){
   var pw=prompt(doLocked?'Enter password to UNLOCK draft order:':'Enter password to LOCK draft order:');
   if(pw!=='3134'){if(pw!==null)alert('Wrong password.');return}
@@ -1166,6 +1205,7 @@ function renderDriverTable(){
   });
   html+='</tbody></table>';
   document.getElementById('do-drivers-table').innerHTML=html;
+  renderComputedOrder();
   document.querySelectorAll('.do-dtbl tbody tr:not(.do-driver-picked)').forEach(function(tr){
     tr.addEventListener('dragover',function(e){
       if(window._doDragDriver)return; // driver-on-driver: not a target
