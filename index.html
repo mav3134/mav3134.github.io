@@ -114,9 +114,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-place{font-family:'Oswald',sans-serif;font-weight:600;color:#888;text-align:center}
 .do-place.top3{color:#f1c40f}
 .do-owner-row{padding:4px 8px;margin:3px 0;display:flex;align-items:center;gap:6px;font-family:'Oswald',sans-serif;font-size:.75rem}
-.do-owner-name{font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:#ccc;min-width:110px;cursor:grab;padding:4px 8px;border:1px solid #2a2d3a;border-radius:4px;background:rgba(255,255,255,.03);user-select:none;transition:all .15s}
-.do-owner-name:hover{border-color:#555;background:rgba(255,255,255,.06)}
-.do-owner-name.do-on-clock{border-color:#f39c12;background:rgba(243,156,18,.1);color:#f5c842;cursor:grab}
+.do-owner-name{font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:#ccc;min-width:110px;padding:4px 8px;border:1px solid #2a2d3a;border-radius:4px;background:rgba(255,255,255,.03);user-select:none;transition:all .15s}
+.do-owner-name.do-on-clock{border-color:#f39c12;background:rgba(243,156,18,.1);color:#f5c842}
 .do-owner-name.do-done{opacity:.4;cursor:default;border-color:#333}
 .do-slots{display:flex;gap:3px;flex:1;flex-wrap:wrap}
 .do-slot{width:44px;min-width:44px;max-width:44px;flex:none;padding:3px 2px;border:1px dashed #2a2d3a;border-radius:3px;font-size:.68rem;color:#555;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;justify-content:center;min-height:26px}
@@ -131,9 +130,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-dtbl tr.do-driver-picked td{background:rgba(243,156,18,.08)}
 .do-dtbl tr.do-driver-picked:hover td{background:rgba(243,156,18,.14)}
 .do-dtbl tr.do-driver-dragover td{background:rgba(243,156,18,.2)!important;outline:1px solid rgba(243,156,18,.5)}
-.do-dtbl tbody tr:not(.do-driver-picked){cursor:grab}
-.do-owner-row.do-drop-ok{background:rgba(243,156,18,.15);border-radius:5px;outline:1px solid rgba(243,156,18,.5)}
-.do-owner-row.do-drop-no{background:rgba(200,16,46,.12);border-radius:5px;outline:1px solid rgba(200,16,46,.4)}
+.do-pick-btn{font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:5px 14px;margin-left:auto;border-radius:4px;border:1px solid #f39c12;color:#f5c842;background:rgba(243,156,18,.12);cursor:pointer;transition:all .15s;flex-shrink:0}
+.do-pick-btn:hover{background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff}
+.do-pick-btn:active{transform:scale(.95)}
 .do-ord-row{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:3px 0;border:1px solid #2a2d3a;border-radius:4px;background:rgba(255,255,255,.03);font-family:'Oswald',sans-serif;font-size:.78rem}
 .do-ord-num{font-weight:700;color:#f39c12;width:20px;text-align:center;flex-shrink:0}
 .do-ord-name{color:#ccc;font-weight:600;text-transform:uppercase;letter-spacing:.3px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -315,13 +314,13 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <div class="do-live">NASCAR Driver Selection</div>
     <button class="dr-undo" id="do-lock-btn" onclick="lockDraftOrder()" style="position:absolute;right:0;top:8px;border-color:#c8102e;color:#e05555">🔒 Lock Draft Order</button>
   </div>
-  <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-    <div class="dr-clock" id="do-clock" style="flex:1;margin:0;padding:10px 16px">
-      <div class="dr-clock-label">On the Clock</div>
+  <div class="dr-clock" id="do-clock" style="margin:0 0 12px;padding:10px 16px">
+    <div class="dr-clock-label">On the Clock</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap">
       <div class="dr-clock-name" id="do-clock-name" style="font-size:1.3rem;padding:3px 16px">—</div>
-      <div class="dr-clock-pick" id="do-clock-info">Loading...</div>
+      <button class="dr-undo" id="do-undo-btn" onclick="doUndo()" disabled>↩ Undo</button>
     </div>
-    <button class="dr-undo" id="do-undo-btn" onclick="doUndo()" disabled>↩ Undo</button>
+    <div class="dr-clock-pick" id="do-clock-info">Loading...</div>
   </div>
   <div style="display:flex;gap:12px;min-height:500px;flex-wrap:wrap">
     <div class="dr-order-panel" style="width:340px" id="do-owners-panel">
@@ -1120,8 +1119,7 @@ function renderOwnerSlots(){
     var isOnClock=next&&next.ownerIdx===idx;
     var allFilled=o.picks.length>=o.totalSlots;
     var cls='do-owner-name'+(isOnClock?' do-on-clock':'')+(allFilled?' do-done':'');
-    var drag=isOnClock?'draggable="true"':'';
-    html+='<span class="'+cls+'" '+drag+' data-owner="'+o.owner.replace(/"/g,'&quot;')+'" data-idx="'+idx+'">'+o.owner+'</span>';
+    html+='<span class="'+cls+'" data-owner="'+o.owner.replace(/"/g,'&quot;')+'" data-idx="'+idx+'">'+o.owner+'</span>';
     html+='<div class="do-slots">';
     for(var s=0;s<o.totalSlots;s++){
       var filled=o.picks[s]||null;
@@ -1138,44 +1136,13 @@ function renderOwnerSlots(){
   document.getElementById('do-owners-list').innerHTML=html;
   var cn=document.getElementById('do-clock-name'),ci=document.getElementById('do-clock-info');
   if(next){
-    cn.textContent=next.owner;cn.draggable=true;
-    cn.setAttribute('data-owner',next.owner);
-    cn.ondragstart=function(e){e.dataTransfer.setData('text/plain',JSON.stringify({owner:next.owner,ownerIdx:next.ownerIdx}))};
+    cn.textContent=next.owner;
     ci.textContent='Selection '+(doPicks.length+1)+' of '+doPickOrder.length;
   }else{
-    cn.textContent='Complete';cn.draggable=false;cn.ondragstart=null;
+    cn.textContent='Complete';
     cn.style.borderColor='#27ae60';ci.textContent='All drivers selected!';
   }
   document.getElementById('do-undo-btn').disabled=doPicks.length===0;
-  document.querySelectorAll('.do-owner-name.do-on-clock').forEach(function(el){
-    el.addEventListener('dragstart',function(e){
-      e.dataTransfer.setData('text/plain',JSON.stringify({owner:el.dataset.owner,ownerIdx:parseInt(el.dataset.idx)}));
-    });
-  });
-  // Reverse direction: a dragged driver can be dropped anywhere on an owner row
-  // (name or slot boxes). It always becomes that owner's NEXT pick in the order,
-  // and only the on-clock owner can receive (same rule as dragging the name out).
-  document.querySelectorAll('#do-owners-list .do-owner-row').forEach(function(row){
-    row.addEventListener('dragover',function(e){
-      if(!window._doDragDriver)return;
-      e.preventDefault();
-      var nx=getNextPick();
-      row.classList.add(nx&&nx.ownerIdx===parseInt(row.dataset.idx)?'do-drop-ok':'do-drop-no');
-    });
-    row.addEventListener('dragleave',function(){row.classList.remove('do-drop-ok');row.classList.remove('do-drop-no')});
-    row.addEventListener('drop',function(e){
-      e.preventDefault();row.classList.remove('do-drop-ok');row.classList.remove('do-drop-no');
-      try{
-        var data=JSON.parse(e.dataTransfer.getData('text/plain'));
-        if(data.driver===undefined)return; // not a driver drag
-        var nx=getNextPick();
-        if(!nx||nx.ownerIdx!==parseInt(row.dataset.idx))return; // only the on-clock owner
-        var dIdx=parseInt(data.didx);
-        if(!doDrivers[dIdx]||doDrivers[dIdx].owner)return;
-        doMakePick(nx.ownerIdx,dIdx,data.driver);
-      }catch(ex){}
-    });
-  });
 }
 
 function renderDriverTable(){
@@ -1198,7 +1165,8 @@ function renderDriverTable(){
     html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888;padding-left:8px">'+d.pos+'</td>';
     var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.outerHTML=\'<span style=&quot;font-family:Oswald,sans-serif;font-weight:700;color:#f5c842;margin-right:4px&quot;>#'+d.num+'</span>\'"> ':'';
-    html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+'</div></td>';
+    var pickBtn=(!picked&&getNextPick())?'<button class="do-pick-btn" onclick="doPickDriver('+i+')">Pick</button>':'';
+    html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+pickBtn+'</div></td>';
     html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;font-size:.78rem;color:'+(picked?'#f5c842':'#333')+';padding-left:6px">'+( d.owner||'')+'</td>';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:'+(pickNum?'#f39c12':'#333')+';padding-left:2px;padding-right:8px">'+pickNum+'</td>';
     html+='</tr>';
@@ -1206,33 +1174,15 @@ function renderDriverTable(){
   html+='</tbody></table>';
   document.getElementById('do-drivers-table').innerHTML=html;
   renderComputedOrder();
-  document.querySelectorAll('.do-dtbl tbody tr:not(.do-driver-picked)').forEach(function(tr){
-    tr.addEventListener('dragover',function(e){
-      if(window._doDragDriver)return; // driver-on-driver: not a target
-      e.preventDefault();tr.classList.add('do-driver-dragover');
-    });
-    tr.addEventListener('dragleave',function(){tr.classList.remove('do-driver-dragover')});
-    tr.addEventListener('drop',function(e){
-      e.preventDefault();tr.classList.remove('do-driver-dragover');
-      try{
-        var data=JSON.parse(e.dataTransfer.getData('text/plain'));
-        if(data.ownerIdx===undefined)return; // only owner-name drags land on drivers
-        var driverName=tr.dataset.driver;var dIdx=parseInt(tr.dataset.didx);
-        if(!driverName||doDrivers[dIdx].owner)return;
-        doMakePick(data.ownerIdx,dIdx,driverName);
-      }catch(ex){}
-    });
-    // Reverse direction: drivers are draggable onto an owner row
-    tr.setAttribute('draggable','true');
-    tr.addEventListener('dragstart',function(e){
-      window._doDragDriver=true;
-      e.dataTransfer.setData('text/plain',JSON.stringify({driver:tr.dataset.driver,didx:parseInt(tr.dataset.didx)}));
-    });
-    tr.addEventListener('dragend',function(){
-      window._doDragDriver=false;
-      document.querySelectorAll('.do-owner-row').forEach(function(r){r.classList.remove('do-drop-ok');r.classList.remove('do-drop-no')});
-    });
-  });
+}
+
+// Tap-to-pick: assigns the driver to whoever is on the clock
+function doPickDriver(dIdx){
+  var next=getNextPick();
+  if(!next)return;
+  var d=doDrivers[dIdx];
+  if(!d||d.owner)return;
+  doMakePick(next.ownerIdx,dIdx,d.name);
 }
 
 function doMakePick(ownerIdx,driverIdx,driverName){
