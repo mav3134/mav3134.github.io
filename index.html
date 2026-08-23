@@ -329,7 +329,6 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     </div>
     <div class="dr-player-panel" style="flex:1;max-width:480px">
       <div class="dr-panel-head">Live Scoring</div>
-      <div id="do-src" style="font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:#555;padding:4px 10px 2px">Checking source...</div>
       <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
     </div>
     <div class="dr-order-panel" style="width:230px">
@@ -967,7 +966,6 @@ function computeOwnerOrder(){
 }
 
 // ─── CURRENT DRAFT ORDER PANEL (right of Live Scoring) ───
-var doPrevOrder=[],doOrderDeltas={};
 function renderComputedOrder(){
   var el=document.getElementById('do-draft-order-list');
   if(!el)return;
@@ -975,22 +973,10 @@ function renderComputedOrder(){
   var order=computeOwnerOrder();
   var pickedSet={};
   doDrivers.forEach(function(d){if(d.owner)pickedSet[d.owner]=true});
-  // arrows show movement since the order last changed (survive routine re-renders)
-  if(doPrevOrder.length&&order.join('|')!==doPrevOrder.join('|')){
-    doOrderDeltas={};
-    order.forEach(function(o,i){
-      var pi=doPrevOrder.indexOf(o);
-      if(pi>=0&&pi!==i)doOrderDeltas[o]=pi-i; // positive = moved up
-    });
-  }
-  if(order.join('|')!==doPrevOrder.join('|'))doPrevOrder=order.slice();
   var html='';
   order.forEach(function(o,i){
-    var d=doOrderDeltas[o]||0;
-    var arrow=d>0?'<span style="color:#2ecc71;font-size:.68rem;font-weight:700">▲'+d+'</span>'
-      :(d<0?'<span style="color:#e05555;font-size:.68rem;font-weight:700">▼'+(-d)+'</span>':'');
     html+='<div class="do-ord-row'+(pickedSet[o]?'':' do-ord-pending')+'">'+
-      '<span class="do-ord-num">'+(i+1)+'</span><span class="do-ord-name">'+o+'</span>'+arrow+'</div>';
+      '<span class="do-ord-num">'+(i+1)+'</span><span class="do-ord-name">'+o+'</span></div>';
   });
   html+='<div class="do-ord-note">Order = each player’s first driver reading down the live scoring. Greyed players haven’t picked yet.</div>';
   el.innerHTML=html;
