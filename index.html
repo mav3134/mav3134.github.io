@@ -329,6 +329,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     </div>
     <div class="dr-player-panel" style="flex:1;max-width:480px">
       <div class="dr-panel-head">Live Scoring</div>
+      <div id="do-src" style="font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:1px;text-transform:uppercase;color:#555;padding:4px 10px 2px">Checking source...</div>
       <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
     </div>
     <div class="dr-order-panel" style="width:230px">
@@ -1016,18 +1017,16 @@ function updateLockBtn(){
 }
 
 var LIVE_RACE_SHEET='1NwK1C-Mvv1iVcvS6uw30EiqtHKsLtDMDgQ9YrmdNIm8';
+function doSetSource(msg,ok){
+  var el=document.getElementById('do-src');
+  if(el){el.textContent=msg+' • '+new Date().toLocaleTimeString();el.style.color=ok?'#5dde8e':'#e0a555'}
+}
 function buildDriverList(){
-  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results';
+  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results&t='+Date.now();
   fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
     try{
       var data=parseGviz(text);
       var rows=data.table.rows||[];
-      var firstCell='';
-      if(rows.length>0){firstCell=cellVal((rows[0].c||[])[0]).trim()}
-      if(!firstCell||firstCell==='Name'||firstCell==='Driver'){
-        loadDriverGroups();
-        return;
-      }
       var drivers=[];
       for(var i=0;i<rows.length;i++){
         var r=rows[i].c||[];
@@ -1046,15 +1045,17 @@ function buildDriverList(){
         applyPicksToDrivers();
         renderOwnerSlots();renderDriverTable();
         loadDOFromServer();
+        doSetSource('LIVE: Results sheet ('+drivers.length+' drivers)',true);
         return;
       }
+      doSetSource('Results tab empty — using static list',false);
       loadDriverGroups();
-    }catch(e){loadDriverGroups()}
-  }).catch(function(){loadDriverGroups()});
+    }catch(e){doSetSource('Results tab unreadable — using static list',false);loadDriverGroups()}
+  }).catch(function(){doSetSource('Live sheet unreachable — using static list',false);loadDriverGroups()});
 }
 
 function loadDriverGroups(){
-  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups';
+  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups&t='+Date.now();
   fetch(url).then(function(r){return r.text()}).then(function(text){
     try{
       var data=parseGviz(text);
