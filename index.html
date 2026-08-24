@@ -1002,11 +1002,6 @@ function updateLockBtn(){
   }
 }
 
-var LIVE_RACE_SHEET='1NwK1C-Mvv1iVcvS6uw30EiqtHKsLtDMDgQ9YrmdNIm8';
-function doSetSource(msg,ok){
-  var el=document.getElementById('do-src');
-  if(el){el.textContent=msg+' • '+new Date().toLocaleTimeString();el.style.color=ok?'#5dde8e':'#e0a555'}
-}
 
 // Primary live source: column N of the Results tab in the NASCAR Live Scoring
 // workbook — car numbers in running order (header in N1, numbers from N2).
@@ -1045,52 +1040,18 @@ function buildDriverList(){
     }catch(e){}
     if(nums.length>0){
       fetchDriverGroupsMap(function(map){
-        if(!map){legacyBuildDriverList();return}
+        if(!map){loadDriverGroups();return}
         doDrivers=nums.map(function(n,i){
           return {name:map[n]||('Car #'+n),num:String(n),pos:i+1,owner:''};
         });
         applyPicksToDrivers();
         renderOwnerSlots();renderDriverTable();
         loadDOFromServer();
-        doSetSource('LIVE: running order N:N ('+nums.length+' cars)',true);
       });
       return;
     }
-    legacyBuildDriverList();
-  }).catch(function(){legacyBuildDriverList()});
-}
-
-function legacyBuildDriverList(){
-  var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results&t='+Date.now();
-  fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
-    try{
-      var data=parseGviz(text);
-      var rows=data.table.rows||[];
-      var drivers=[];
-      for(var i=0;i<rows.length;i++){
-        var r=rows[i].c||[];
-        var name=cellVal(r[0]).replace(/^\*+\s*/,'').replace(/\s*\#+$/,'').replace(/\(i\)/g,'').trim();
-        var num=cellVal(r[1]).trim();
-        if(name&&name!=='Name'&&name!=='Driver'){
-          if(!num){
-            var NUM_FIX2={'austin hill':'33','corey heim':'67'};
-            num=NUM_FIX2[name.toLowerCase()]||'';
-          }
-          drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
-        }
-      }
-      if(drivers.length>0){
-        doDrivers=drivers;
-        applyPicksToDrivers();
-        renderOwnerSlots();renderDriverTable();
-        loadDOFromServer();
-        doSetSource('LIVE: Results sheet ('+drivers.length+' drivers)',true);
-        return;
-      }
-      doSetSource('Results tab empty — using static list',false);
-      loadDriverGroups();
-    }catch(e){doSetSource('Results tab unreadable — using static list',false);loadDriverGroups()}
-  }).catch(function(){doSetSource('Live sheet unreachable — using static list',false);loadDriverGroups()});
+    loadDriverGroups();
+  }).catch(function(){loadDriverGroups()});
 }
 
 function loadDriverGroups(){
