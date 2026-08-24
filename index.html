@@ -1007,7 +1007,60 @@ function doSetSource(msg,ok){
   var el=document.getElementById('do-src');
   if(el){el.textContent=msg+' • '+new Date().toLocaleTimeString();el.style.color=ok?'#5dde8e':'#e0a555'}
 }
+
+// Primary live source: column N of the Results tab in the NASCAR Live Scoring
+// workbook — car numbers in running order (header in N1, numbers from N2).
+// Names come from the DriverGroups list (car number -> driver name).
+// If N:N is blank after the header, fall back to the legacy chain unchanged.
+var LIVE_SCORING_SHEET='1ysN3tYb8tD0o0HhArXlKQB7D0ayFTp4RoKGKSxpCqzE';
+var dgMapCache=null;
+function fetchDriverGroupsMap(cb){
+  if(dgMapCache){cb(dgMapCache);return}
+  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups&t='+Date.now();
+  fetch(url).then(function(r){return r.text()}).then(function(text){
+    try{
+      var rows=parseGviz(text).table.rows||[];
+      var map={};
+      for(var i=0;i<rows.length;i++){
+        var r=rows[i].c||[];
+        var num=parseInt(cellVal(r[1]).trim());
+        var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
+        if(!isNaN(num)&&num>0&&name&&name!=='Name'&&name!=='Driver')map[num]=name;
+      }
+      if(Object.keys(map).length>0){dgMapCache=map;cb(map)}else cb(null);
+    }catch(e){cb(null)}
+  }).catch(function(){cb(null)});
+}
 function buildDriverList(){
+  var nUrl='https://docs.google.com/spreadsheets/d/'+LIVE_SCORING_SHEET+'/gviz/tq?tqx=out:json&sheet=Results&range=N%3AN&t='+Date.now();
+  fetch(nUrl).then(function(r){return r.text()}).then(function(text){
+    var nums=[],seen={};
+    try{
+      var rows=parseGviz(text).table.rows||[];
+      for(var i=0;i<rows.length;i++){
+        var v=cellVal((rows[i].c||[])[0]).trim();
+        var num=parseInt(v);
+        if(/^\d+(\.0+)?$/.test(v)&&!isNaN(num)&&num>0&&!seen[num]){seen[num]=1;nums.push(num)}
+      }
+    }catch(e){}
+    if(nums.length>0){
+      fetchDriverGroupsMap(function(map){
+        if(!map){legacyBuildDriverList();return}
+        doDrivers=nums.map(function(n,i){
+          return {name:map[n]||('Car #'+n),num:String(n),pos:i+1,owner:''};
+        });
+        applyPicksToDrivers();
+        renderOwnerSlots();renderDriverTable();
+        loadDOFromServer();
+        doSetSource('LIVE: running order N:N ('+nums.length+' cars)',true);
+      });
+      return;
+    }
+    legacyBuildDriverList();
+  }).catch(function(){legacyBuildDriverList()});
+}
+
+function legacyBuildDriverList(){
   var liveUrl='https://docs.google.com/spreadsheets/d/'+LIVE_RACE_SHEET+'/gviz/tq?tqx=out:json&sheet=Results&t='+Date.now();
   fetch(liveUrl).then(function(r){return r.text()}).then(function(text){
     try{
