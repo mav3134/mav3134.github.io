@@ -138,6 +138,35 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .do-ord-name{color:#ccc;font-weight:600;text-transform:uppercase;letter-spacing:.3px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .do-ord-row.do-ord-pending{opacity:.4}
 .do-ord-note{font-size:.68rem;color:#555;padding:8px 4px;line-height:1.5;font-family:'Roboto Condensed',sans-serif}
+/* ═══ DRAFT ORDER MOBILE: three shrunken columns, slight horizontal scroll,
+   page scrolls vertically — no internal panel scrollboxes ═══ */
+@media(max-width:700px){
+  .do-wrap{padding:12px 6px}
+  #do-panels{flex-wrap:nowrap!important;overflow-x:auto;-webkit-overflow-scrolling:touch;min-height:0!important;gap:8px!important;align-items:flex-start}
+  #do-owners-panel,#do-live-panel,#do-order-panel{max-height:none!important;flex-shrink:0!important;overflow:visible}
+  #do-owners-panel{width:212px!important}
+  #do-live-panel{width:258px!important;max-width:none!important;flex:none!important}
+  #do-order-panel{width:142px!important}
+  #do-panels .dr-order-list,#do-panels .dr-player-table{overflow:visible;flex:none}
+  .do-owner-row{padding:2px 3px;gap:3px;margin:2px 0}
+  .do-finish-badge{font-size:.5rem;padding:1px 3px}
+  .do-owner-name{min-width:58px;max-width:58px;font-size:.55rem;padding:2px 3px;letter-spacing:0}
+  .do-slots{gap:2px}
+  .do-slot{width:23px;min-width:23px;max-width:23px;min-height:17px;padding:1px;font-size:.48rem}
+  .do-slot .car-num{height:13px;width:auto}
+  .do-dtbl{font-size:.62rem}
+  .do-dtbl th{padding:4px 3px;font-size:.5rem;letter-spacing:.5px}
+  .do-dtbl td{padding:2px 3px;font-size:.62rem;white-space:nowrap}
+  .do-driver{gap:3px}
+  .do-dtbl .car-num{width:18px;height:13px}
+  .do-pick-btn{padding:3px 7px;font-size:.55rem;letter-spacing:.5px}
+  .do-ord-row{padding:3px 5px;gap:4px;font-size:.58rem;margin:2px 0}
+  .do-ord-num{width:13px}
+  .do-ord-note{font-size:.55rem}
+  #do-clock-name{font-size:1rem!important;padding:3px 10px!important}
+  .do-header h2{font-size:1.2rem}
+  #do-lock-btn{position:static!important;margin-top:6px}
+}
 .do-loading{text-align:center;padding:60px 20px;color:#555;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px}
 .do-error{text-align:center;padding:40px 20px;color:#e05555;font-size:.9rem;line-height:1.6}
 /* ═══ LEAGUE STATS / LEGACY POOL ═══ */
@@ -322,16 +351,16 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     </div>
     <div class="dr-clock-pick" id="do-clock-info">Loading...</div>
   </div>
-  <div style="display:flex;gap:12px;min-height:500px;flex-wrap:wrap">
+  <div id="do-panels" style="display:flex;gap:12px;min-height:500px;flex-wrap:wrap">
     <div class="dr-order-panel" style="width:340px" id="do-owners-panel">
       <div class="dr-panel-head">Team Owners</div>
       <div id="do-owners-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
     </div>
-    <div class="dr-player-panel" style="flex:1;max-width:480px">
+    <div class="dr-player-panel" style="flex:1;max-width:480px" id="do-live-panel">
       <div class="dr-panel-head">Live Scoring</div>
       <div id="do-drivers-table" class="dr-player-table"><div class="do-loading">Loading...</div></div>
     </div>
-    <div class="dr-order-panel" style="width:230px">
+    <div class="dr-order-panel" style="width:230px" id="do-order-panel">
       <div class="dr-panel-head">Current Draft Order</div>
       <div id="do-draft-order-list" class="dr-order-list"><div class="do-loading">Loading...</div></div>
     </div>
