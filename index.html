@@ -541,7 +541,24 @@ function parseGviz(text){
 function cellVal(cell){if(!cell)return '';return cell.f||String(cell.v==null?'':cell.v)}
 
 var TC={"That's What Cheesehead":"#d4a012","Poutine Powerhouse":"#c0392b","Days of Thunder":"#e67e22","Cruzin' USA":"#2980b9","Team America":"#1a2744","Sloppy Toppies":"#d35400","Out of Luck Forever":"#555","Son of Pintang":"#6c3483","Bramsels in Distress":"#5d6d7e","Doom Crew":"#1a1a2e","Fancy Like Applebees":"#922b21","Always Open":"#1a7a42"};
-var DR={"Ja'Marr Chase":1,"Bijan Robinson":1,"Jahmyr Gibbs":1,"Saquon Barkley":1,"Christian McCaffrey":1,"CeeDee Lamb":1,"Josh Jacobs":1,"Justin Jefferson":1,"Malik Nabers":1,"Amon-Ra St. Brown":1,"Ashton Jeanty":1,"Derrick Henry":1,"Drake London":2,"A.J. Brown":2,"Kyren Williams":2,"Josh Allen":2,"Omarion Hampton":2,"Tee Higgins":2,"James Cook III":2,"Kenneth Walker III":2,"Davante Adams":2,"James Conner":2,"Lamar Jackson":2,"Alvin Kamara":2,"Jayden Daniels":3,"Mike Evans":3,"Terry McLaurin":3,"TreVeyon Henderson":3,"Jalen Hurts":3,"Breece Hall":3,"David Montgomery":3,"RJ Harvey":3,"Tony Pollard":3,"D'Andre Swift":3,"Garrett Wilson":3,"George Kittle":3,"Jonathan Taylor":4,"Joe Burrow":4,"Tyreek Hill":4,"Isiah Pacheco":4,"Marvin Harrison Jr.":4,"Kyle Pitts Sr.":4,"DeVonta Smith":4,"Calvin Ridley":4,"Tetairoa McMillan":4,"DJ Moore":4,"Courtland Sutton":4,"Aaron Jones Sr.":4,"DK Metcalf":5,"Xavier Worthy":5,"Jakobi Meyers":5,"Jaylen Warren":5,"George Pickens":5,"Zay Flowers":5,"Patrick Mahomes":5,"Ladd McConkey":5,"Ricky Pearsall":5,"Bo Nix":5,"Sam LaPorta":5,"Jameson Williams":5,"Rashee Rice":6,"Rome Odunze":6,"Jaxon Smith-Njigba":6,"Brock Bowers":6,"Kyler Murray":6,"Jaylen Waddle":6,"J.K. Dobbins":6,"Emeka Egbuka":6,"Matthew Golden":6,"Stefon Diggs":6,"Zach Charbonnet":6,"Joe Mixon":6,"Jauan Jennings":7,"Chris Olave":7,"Chuba Hubbard":7,"Travis Hunter":7,"Jacory Croskey-Merritt":7,"Tucker Kraft":7,"Travis Etienne Jr.":7,"Quinshon Judkins":7,"Braelon Allen":7,"Austin Ekeler":7,"Chase Brown":7,"Tank Bigsby":7,"Deebo Samuel":8,"Javonte Williams":8,"Rhamondre Stevenson":8,"Brian Thomas Jr.":8,"Khalil Shakir":8,"Jordan Addison":8,"Rashid Shaheed":8,"David Njoku":8,"Cam Skattebo":8,"Evan Engram":8,"Jared Goff":8,"Nico Collins":8,"Jake Ferguson":9,"T.J. Hockenson":9,"Travis Kelce":9,"Tyler Warren":9,"Jerome Ford":9,"Keon Coleman":9,"Cooper Kupp":9,"Dalton Kincaid":9,"Brian Robinson":9,"Michael Pittman Jr.":9,"Bhayshul Tuten":9,"Chris Godwin":9,"Jaydon Blue":10,"Rashod Bateman":10,"Ray Davis":10,"Marvin Mims Jr.":10,"Caleb Williams":10,"Darnell Mooney":10,"Kaleb Johnson":10,"Isaac Guerendo":10,"Mark Andrews":10,"Justin Herbert":10,"Jayden Reed":10,"Dylan Sampson":10,"Keenan Allen":11,"Bucky Irving":11,"Rachaad White":11,"Dak Prescott":11,"Christian Kirk":11,"Brock Purdy":11,"Dallas Goedert":11,"Trey Benson":11,"Colston Loveland":11,"Kyle Williams":11,"Jayden Higgins":11,"Nick Chubb":11,"Brandon Aiyuk":12,"Cameron Dicker":12,"Steelers DEF":12,"Ollie Gordon II":12,"Brandon Aubrey":12,"Eagles DEF":12,"Woody Marks":12,"Broncos DEF":12,"De'Von Achane":12,"Vikings DEF":12,"Chiefs DEF":12,"Chris Boswell":12,"Packers DEF":13,"Jake Bates":13,"Puka Nacua":13,"Chase McLaughlin":13,"Josh Downs":13,"C.J. Stroud":13,"Cedric Tillman":13,"Ravens DEF":13,"Tyler Bass":13,"Trey McBride":13,"Texans DEF":13,"Joshua Palmer":13,"Baker Mayfield":14,"Jerry Jeudy":14,"Jake Elliott":14,"Lions DEF":14,"Tyrone Tracy Jr.":14,"Wil Lutz":14,"Chargers DEF":14,"Jordan Mason":14,"Seahawks DEF":14,"Ka'imi Fairbairn":14,"J.J. McCarthy":14,"Xavier Legette":14};
+var DRAFT_BOARD=[
+/*R1 */["Ja'Marr Chase","Bijan Robinson","Jahmyr Gibbs","Saquon Barkley","Christian McCaffrey","CeeDee Lamb","Josh Jacobs","Justin Jefferson","Malik Nabers","Amon-Ra St. Brown","Ashton Jeanty","Derrick Henry"],
+/*R2 */["Drake London","A.J. Brown","Kyren Williams","Josh Allen","Omarion Hampton","Tee Higgins","James Cook III","Kenneth Walker III","Davante Adams","James Conner","Lamar Jackson","Alvin Kamara"],
+/*R3 */["Jayden Daniels","Mike Evans","Terry McLaurin","TreVeyon Henderson","Jalen Hurts","Breece Hall","David Montgomery","RJ Harvey","Tony Pollard","D'Andre Swift","Garrett Wilson","George Kittle"],
+/*R4 */["Jonathan Taylor","Joe Burrow","Tyreek Hill","Isiah Pacheco","Marvin Harrison Jr.","Kyle Pitts Sr.","DeVonta Smith","Calvin Ridley","Tetairoa McMillan","DJ Moore","Courtland Sutton","Aaron Jones Sr."],
+/*R5 */["DK Metcalf","Xavier Worthy","Jakobi Meyers","Jaylen Warren","George Pickens","Zay Flowers","Patrick Mahomes","Ladd McConkey","Ricky Pearsall","Bo Nix","Sam LaPorta","Jameson Williams"],
+/*R6 */["Rashee Rice","Rome Odunze","Jaxon Smith-Njigba","Brock Bowers","Kyler Murray","Jaylen Waddle","J.K. Dobbins","Emeka Egbuka","Matthew Golden","Stefon Diggs","Zach Charbonnet","Joe Mixon"],
+/*R7 */["Jauan Jennings","Chris Olave","Chuba Hubbard","Travis Hunter","Jacory Croskey-Merritt","Tucker Kraft","Travis Etienne Jr.","Quinshon Judkins","Braelon Allen","Austin Ekeler","Chase Brown","Tank Bigsby"],
+/*R8 */["Deebo Samuel","Javonte Williams","Rhamondre Stevenson","Brian Thomas Jr.","Khalil Shakir","Jordan Addison","Rashid Shaheed","David Njoku","Cam Skattebo","Evan Engram","Jared Goff","Nico Collins"],
+/*R9 */["Jake Ferguson","T.J. Hockenson","Travis Kelce","Tyler Warren","Jerome Ford","Keon Coleman","Cooper Kupp","Dalton Kincaid","Brian Robinson","Michael Pittman Jr.","Bhayshul Tuten","Chris Godwin"],
+/*R10*/["Jaydon Blue","Rashod Bateman","Ray Davis","Marvin Mims Jr.","Caleb Williams","Darnell Mooney","Kaleb Johnson","Isaac Guerendo","Mark Andrews","Justin Herbert","Jayden Reed","Dylan Sampson"],
+/*R11*/["Keenan Allen","Bucky Irving","Rachaad White","Dak Prescott","Christian Kirk","Brock Purdy","Dallas Goedert","Trey Benson","Colston Loveland","Kyle Williams","Jayden Higgins","Nick Chubb"],
+/*R12*/["Brandon Aiyuk","Cameron Dicker","Steelers DEF","Ollie Gordon II","Brandon Aubrey","Eagles DEF","Woody Marks","Broncos DEF","De'Von Achane","Vikings DEF","Chiefs DEF","Chris Boswell"],
+/*R13*/["Packers DEF","Jake Bates","Puka Nacua","Chase McLaughlin","Josh Downs","C.J. Stroud","Cedric Tillman","Ravens DEF","Tyler Bass","Trey McBride","Texans DEF","Joshua Palmer"],
+/*R14*/["Baker Mayfield","Jerry Jeudy","Jake Elliott","Lions DEF","Tyrone Tracy Jr.","Wil Lutz","Chargers DEF","Jordan Mason","Seahawks DEF","Ka'imi Fairbairn","J.J. McCarthy","Xavier Legette"]
+];
+// DR (player -> round) is derived so the two can never drift apart.
+var DR={};DRAFT_BOARD.forEach(function(rnd,i){rnd.forEach(function(p){DR[p]=i+1})});
 var K25=new Set(["Kyle Pitts Sr.","Ladd McConkey","Jaxon Smith-Njigba","Brock Bowers","Chuba Hubbard","Chase Brown","Brian Thomas Jr.","T.J. Hockenson","Bucky Irving","Josh Downs","Baker Mayfield","Jordan Mason","Tyrone Tracy Jr.","Jerry Jeudy","Jonathan Taylor","Nico Collins","De'Von Achane","Trey McBride","Puka Nacua","C.J. Stroud"]);
 var K2=new Set(["Jonathan Taylor","Nico Collins","De'Von Achane","C.J. Stroud","Puka Nacua","Trey McBride"]);
 var TM=[
@@ -889,61 +906,22 @@ function showActiveBtn(){
 var DRAFT_ORD=["Cruzin' USA","Team America","Son of Pintang","Days of Thunder","Doom Crew","Sloppy Toppies","Always Open","Fancy Like Applebees","Poutine Powerhouse","Out of Luck Forever","Bramsels in Distress","That's What Cheesehead"];
 
 // Map every drafted player to their current team
-var playerTeamMap={};
-TM.forEach(function(t){t.p.forEach(function(pn){playerTeamMap[pn]=t.n})});
 
-// Build draft board: for each round, find picks in snake order
-var allDrafted={};
-for(var pn in DR){allDrafted[pn]=DR[pn]}
+// Render the 2025 draft board from the recorded picks. The team for each pick
+// comes from the snake order, NOT from who rosters the player today — rosters
+// change all season via trades, drops and waiver adds.
 var ks2=new Set();K25.forEach(function(k){ks2.add(k)});K2.forEach(function(k){ks2.add(k)});
-
-// Group players by round, then by current team
-var roundPlayers={};
-for(var pn in allDrafted){
-  var rd=allDrafted[pn];
-  if(!roundPlayers[rd])roundPlayers[rd]={};
-  var tm=playerTeamMap[pn]||'_unrostered';
-  roundPlayers[rd][tm]=pn;
-}
-
 var dd=document.getElementById("D");
 var pickNum=0;
-var rounds=Object.keys(roundPlayers).map(Number).sort(function(a,b){return a-b});
-rounds.forEach(function(rd){
+DRAFT_BOARD.forEach(function(players,idx){
+  var rd=idx+1;
   var order=rd%2===1?DRAFT_ORD.slice():DRAFT_ORD.slice().reverse();
-  var teamPick=roundPlayers[rd]||{};
-  // Collect unrostered players for this round
-  var unrostered=teamPick['_unrostered']?[teamPick['_unrostered']]:[];
-  // Some teams may have multiple players from same round (traded for), collect extras
-  var assigned={};var extras=[];
-  for(var tm in teamPick){
-    if(tm==='_unrostered')continue;
-    assigned[tm]=teamPick[tm];
-  }
-  // For multi-player same round on one team, only keep one per slot
-  var allPlayersThisRound=[];
-  for(var pn in allDrafted){if(allDrafted[pn]===rd)allPlayersThisRound.push(pn)}
-
   var div=document.createElement("div");div.className="drd";
   var html='<h3>Round '+rd+'</h3>';
-  order.forEach(function(teamName){
+  players.forEach(function(player,i){
     pickNum++;
-    var player=assigned[teamName]||unrostered.shift()||'';
-    if(!player){
-      // Find any unassigned player from this round
-      for(var i=0;i<allPlayersThisRound.length;i++){
-        var candidate=allPlayersThisRound[i];
-        var candidateTeam=playerTeamMap[candidate]||'';
-        // If this candidate's current team already has a pick assigned, it might be a trade acquisition
-        var alreadyUsed=false;
-        for(var t in assigned){if(assigned[t]===candidate){alreadyUsed=true;break}}
-        if(!alreadyUsed&&!candidateTeam){player=candidate;allPlayersThisRound.splice(i,1);break}
-      }
-    }
-    if(!player)return;
     var isK=ks2.has(player);
-    var displayTeam=playerTeamMap[player]||teamName;
-    html+='<div class="dp"><span><span style="color:#555;font-family:Oswald,sans-serif;font-size:.7rem;margin-right:6px">'+pickNum+'.</span><span class="dp-p">'+player+'</span>'+(isK?'<span class="dp-k"> K</span>':'')+'</span><span class="dp-t">'+displayTeam+'</span></div>';
+    html+='<div class="dp"><span><span style="color:#555;font-family:Oswald,sans-serif;font-size:.7rem;margin-right:6px">'+pickNum+'.</span><span class="dp-p">'+player+'</span>'+(isK?'<span class="dp-k"> K</span>':'')+'</span><span class="dp-t">'+(order[i]||'')+'</span></div>';
   });
   div.innerHTML=html;
   dd.appendChild(div);
