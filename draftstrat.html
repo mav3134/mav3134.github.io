@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+/* Never serve stale data: force every fetch() to bypass the HTTP cache
+   (explicit cache options still win). Images/fonts keep normal caching. */
+(function(){var _f=window.fetch;window.fetch=function(u,o){o=o||{};if(!o.cache)o.cache='no-store';return _f.call(window,u,o)}})();
+</script>
 <meta name="robots" content="noindex,nofollow">
 <title>Draft Strategy Lab</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;700&family=Anton&display=swap" rel="stylesheet">
@@ -507,6 +515,72 @@ function switchTab(id){
 }
 run10();run12();renderProj();
 pollDraft();setInterval(pollDraft,5000);
+</script>
+<script>
+/* ═══ AUTO-REFRESH ON NEW DEPLOY ═══
+   GitHub Pages caches HTML for ~10 min, so a visitor can be looking at an old
+   copy. On load (and every 60s, and whenever the tab regains focus) re-fetch
+   this page with no-store and compare:
+     1. the server's Last-Modified vs the copy we're running
+     2. a hash of the served HTML vs the first one we saw
+   Either mismatch means new content is live. Reload — unless the user is in
+   the middle of something (typing, a modal, unsaved keeper picks, a pending
+   save), in which case show a tap-to-refresh banner instead. */
+(function(){
+  var firstHash=null, mine=Date.parse(document.lastModified)||0;
+  function hash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h*33)^s.charCodeAt(i))|0}return h}
+  function busy(){
+    try{
+      var m=document.getElementById('modal');
+      if(m&&m.classList.contains('show'))return true;
+      var a=document.activeElement;
+      if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return true;
+      if(typeof saveTimer!=='undefined'&&saveTimer)return true;
+      if(typeof selections!=='undefined'&&typeof savedKeepers!=='undefined'){
+        for(var tn in selections){
+          var cur=(selections[tn]||[]).map(function(s){return s.name}).sort().join('|');
+          var sav=(savedKeepers[tn]||[]).map(function(s){return s.name}).sort().join('|');
+          if(cur!==sav)return true;
+        }
+      }
+    }catch(e){}
+    return false;
+  }
+  function banner(){
+    if(document.getElementById('upd-banner'))return;
+    var d=document.createElement('div');
+    d.id='upd-banner';d.textContent='↻ New version — tap to refresh';
+    d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:99999;'+
+      'background:linear-gradient(135deg,#f39c12,#e67e22);color:#fff;font-family:Oswald,sans-serif;'+
+      'font-size:.78rem;letter-spacing:1px;text-transform:uppercase;padding:10px 18px;border-radius:6px;'+
+      'box-shadow:0 4px 16px rgba(0,0,0,.5);cursor:pointer';
+    d.onclick=function(){go(true)};
+    document.body.appendChild(d);
+  }
+  function go(force){
+    var n=0;try{n=parseInt(sessionStorage.getItem('updTries')||'0',10)||0}catch(e){}
+    if(n>=2&&!force){banner();return}          // never loop on a stubborn cache
+    try{sessionStorage.setItem('updTries',String(n+1))}catch(e){}
+    // refresh the HTTP cache entry first so the reload can't re-serve the old copy
+    fetch(location.pathname,{cache:'reload'}).catch(function(){}).then(function(){location.reload()});
+  }
+  function check(){
+    fetch(location.pathname+(location.search?'&':'?')+'_cb='+Date.now(),{cache:'no-store'})
+      .then(function(r){
+        var lm=Date.parse(r.headers.get('Last-Modified')||'')||0;
+        return r.text().then(function(t){return{lm:lm,h:hash(t)}});
+      })
+      .then(function(o){
+        if(firstHash===null)firstHash=o.h;
+        var newer=(o.lm&&mine&&o.lm>mine+2000)||(o.h!==firstHash);
+        if(newer){ busy()?banner():go(false); }
+        else { try{sessionStorage.removeItem('updTries')}catch(e){} }
+      }).catch(function(){});
+  }
+  check();
+  setInterval(check,60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)check()});
+})();
 </script>
 </body>
 </html>
