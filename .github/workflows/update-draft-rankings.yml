@@ -23,6 +23,24 @@ jobs:
         with:
           node-version: '20'
 
+      # Diagnostic: prints the NAMES of the Actions secrets this job can see.
+      # Values are masked by the runner, so nothing sensitive is exposed.
+      - name: Check the API key secret is visible
+        env:
+          FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY }}
+        run: |
+          echo "Actions secrets visible to this job (values masked):"
+          echo '${{ toJSON(secrets) }}' | tr ',' '\n' | sed 's/[{}"]//g'
+          echo
+          if [ -z "$FANTASYPROS_API_KEY" ]; then
+            echo "::error::FANTASYPROS_API_KEY is empty. It must be an *Actions* repository secret."
+            echo "If the name above is missing or spelled differently, the secret was likely saved"
+            echo "under the Dependabot or Codespaces tab, saved as a Variable, or scoped to an"
+            echo "Environment. Settings > Secrets and variables > Actions > Secrets tab."
+            exit 1
+          fi
+          echo "Key is present (${#FANTASYPROS_API_KEY} characters)."
+
       - name: Refresh rankings from FantasyPros
         env:
           FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY }}
