@@ -27,7 +27,8 @@ jobs:
       # Values are masked by the runner, so nothing sensitive is exposed.
       - name: Check the API key secret is visible
         env:
-          FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY }}
+          # Accept common name variants so a small naming slip isn't a silent failure.
+          FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY || secrets.FANTASY_PROS_API_KEY || secrets.FP_API_KEY || secrets.FANTASYPROS_KEY || secrets.FANTASYPROS }}
         run: |
           echo "Actions secrets visible to this job (values masked):"
           echo '${{ toJSON(secrets) }}' | tr ',' '\n' | sed 's/[{}"]//g'
@@ -43,7 +44,8 @@ jobs:
 
       - name: Refresh rankings from FantasyPros
         env:
-          FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY }}
+          # Accept common name variants so a small naming slip isn't a silent failure.
+          FANTASYPROS_API_KEY: ${{ secrets.FANTASYPROS_API_KEY || secrets.FANTASY_PROS_API_KEY || secrets.FP_API_KEY || secrets.FANTASYPROS_KEY || secrets.FANTASYPROS }}
         run: node scripts/update-draft-rankings.mjs
 
       - name: Commit if anything changed
