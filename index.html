@@ -1838,6 +1838,71 @@ function startPolling(){
 
 function abbrevName(n){if(!n)return'';var p=n.replace(/ DEF$/,' D/ST').split(' ');if(p.length<2)return n;return p[0][0]+'. '+p.slice(1).join(' ')}
 
+/* ═══ DRAFT ROOM RANKINGS (live from the league sheet's "Rankings" tab) ═══
+   Column C holds the player blob ("Jahmyr GibbsVideo Forecast…Det - RB …") and
+   column H the ranking. The tab repeats its header mid-table and lists some
+   players twice, so header rows are skipped and duplicates collapse to the
+   best (lowest) rank. Anything unexpected leaves the built-in order alone. */
+function rankSheetName(blob){
+  if(!blob)return '';
+  var s=String(blob).replace(/[-]/g,'').trim();       // Yahoo icon glyphs
+  s=s.split(/Video Forecast|No new player Notes|New Player Notes?|Player Note/)[0];
+  // injury tag stuck to the name ("Ja'Marr ChaseQ", "Kenneth Walker IIIQ")
+  s=s.replace(/([A-Za-z.'])(Q|O|D|IR|SUSP|PUP|NA|GTD)$/,'$1');
+  return s.trim();
+}
+function applyRankingsTable(table){
+  var rows=(table&&table.rows)||[];
+  if(!rows.length)return false;
+  // locate the columns by header text, falling back to C and H
+  var nameCol=2,rankCol=7;
+  for(var i=0;i<Math.min(rows.length,12);i++){
+    var c=rows[i].c||[];
+    for(var j=0;j<c.length;j++){
+      var v=cellVal(c[j]).replace(/[-]/g,'').trim().toLowerCase();
+      if(v==='offense')nameCol=j;
+      if(v==='pre-season')rankCol=j;
+    }
+  }
+  var best={};                                   // normalised name -> rank
+  for(var r=0;r<rows.length;r++){
+    var cells=rows[r].c||[];
+    var nm=rankSheetName(cellVal(cells[nameCol]));
+    var rk=parseInt(String(cellVal(cells[rankCol])).replace(/[^0-9]/g,''),10);
+    if(!nm||!rk||isNaN(rk))continue;
+    if(/^(offense|roster status|player|rank)$/i.test(nm))continue;   // repeated header
+    var key=drNorm(nm);
+    if(best[key]===undefined||rk<best[key])best[key]=rk;             // dedupe: keep best
+  }
+  var count=Object.keys(best).length;
+  if(count<20){console.warn('Rankings tab: only '+count+' players parsed — keeping built-in order');return false}
+
+  var hit=0;
+  DRAFT_DB.forEach(function(p){
+    var rk=best[drNorm(p[1])];
+    if(rk){p[0]=rk;p._rk=rk;hit++}else{p._rk=null}
+  });
+  // ranked first (ascending), everything else after in its existing order
+  var pos={};DRAFT_DB.forEach(function(p,i){pos[i]=i});
+  var idx=new Map();DRAFT_DB.forEach(function(p,i){idx.set(p,i)});
+  DRAFT_DB.sort(function(a,b){
+    var ar=a._rk!==null&&a._rk!==undefined?a._rk:100000+idx.get(a);
+    var br=b._rk!==null&&b._rk!==undefined?b._rk:100000+idx.get(b);
+    return ar-br;
+  });
+  console.log('Draft room rankings: '+count+' players from the sheet, '+hit+' matched');
+  return true;
+}
+function drNorm(n){
+  return String(n).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\.?$/,'').replace(/[^a-z]/g,'');
+}
+function loadDraftRankings(){
+  fetchSheet('Rankings',function(err,table){
+    if(err||!table){console.warn('Rankings tab unavailable — keeping built-in order');return}
+    if(applyRankingsTable(table))renderLocalPlayers(drCurrentSub||'ALL');
+  });
+}
+
 function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
@@ -1846,6 +1911,7 @@ function initDraftRoom(){
     loadDraftFromServer();
   });
   renderLocalPlayers('ALL');
+  loadDraftRankings();
   startPolling();
 }
 
