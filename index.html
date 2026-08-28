@@ -2271,13 +2271,13 @@ function guessPosition(name){
 // ═══════════════════════════════════════
 // ROSTER PROJECTIONS
 // ═══════════════════════════════════════
-var PROJ={}; // populated live from draftstrat.html's projections; falls back to
+var PROJ={}; // populated live from draftstrat.html's RAW FantasyPros baseline
+             // (no manual stat edits — those are Draft Strat-only). Falls back to
              // each player's DRAFT_DB points column (rpLookup) until loaded / if unavailable
 var projLoaded=false,projLoading=false;
 function calcProjPts(s){
   return s.paY*0.04+s.paTD*4-s.int+s.ruY*0.1+s.ruTD*6+s.rec*0.5+s.reY*0.1+s.reTD*6-s.fl*2;
 }
-function projNormName(n){return String(n).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\.?$/,'').replace(/[^a-z]/g,'')}
 function loadLiveProjections(cb){
   if(projLoading){return}
   projLoading=true;
@@ -2285,18 +2285,11 @@ function loadLiveProjections(cb){
     var m=/var PLAYERS_RAW=(\[\[[\s\S]*?\]\]);/.exec(text);
     if(!m)throw new Error('PLAYERS_RAW not found in draftstrat.html');
     var rows=JSON.parse(m[1]);
-    return fetch(DRAFT_API,{cache:'no-store'}).then(function(r2){return r2.json()}).catch(function(){return null}).then(function(data){
-      var edits=(data&&data.draftstratEdits)||{};
-      rows.forEach(function(r){
-        var name=r[0];
-        var s={paY:r[4],paTD:r[5],int:r[6],ruA:r[7],ruY:r[8],ruTD:r[9],rec:r[10],reY:r[11],reTD:r[12],fl:r[13]};
-        var e=edits[projNormName(name)];
-        if(e)for(var k in e)s[k]=e[k];
-        PROJ[name]=calcProjPts(s);
-      });
-      window._projNorm=null; // rpLookup's normalized-name cache — force it to rebuild from the new PROJ
-      projLoaded=true;
+    rows.forEach(function(r){
+      PROJ[r[0]]=calcProjPts({paY:r[4],paTD:r[5],int:r[6],ruA:r[7],ruY:r[8],ruTD:r[9],rec:r[10],reY:r[11],reTD:r[12],fl:r[13]});
     });
+    window._projNorm=null; // rpLookup's normalized-name cache — force it to rebuild from the new PROJ
+    projLoaded=true;
   }).catch(function(e){console.warn('Live projections unavailable, falling back to DRAFT_DB points:',e)})
     .then(function(){projLoading=false;if(cb)cb()});
 }
