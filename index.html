@@ -2361,13 +2361,25 @@ function renderRosterProjections(){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     rpBusy=false;
     var picks=(data&&data.picks)||[];
+    var keepersByTeam=(data&&data.keepers)||{};
     // Group players by owner
     var byOwner={};
-    picks.forEach(function(p){
-      if(!p||!p.player)return;
-      if(!byOwner[p.owner])byOwner[p.owner]=[];
-      var info=rpLookup(p.player);
-      byOwner[p.owner].push({name:p.player,pos:info.pos,pts:info.pts,keeper:p.keeper||false});
+    function addPlayer(owner,name,isKeeper){
+      if(!owner||!name)return;
+      if(!byOwner[owner])byOwner[owner]=[];
+      if(byOwner[owner].some(function(x){return x.name===name}))return; // avoid dupes
+      var info=rpLookup(name);
+      byOwner[owner].push({name:name,pos:info.pos,pts:info.pts,keeper:isKeeper||false});
+    }
+    picks.forEach(function(p){if(p&&p.player)addPlayer(p.owner,p.player,p.keeper||false)});
+    // Keepers saved on the Keepers tab live in data.keepers (keyed by TEAM name)
+    // and only reach data.picks as a side effect of opening the Draft Room with
+    // the season's draft order loaded. Read them directly so they always show
+    // here regardless of whether that's happened.
+    TM.forEach(function(t){
+      var ks=keepersByTeam[t.n];
+      if(!ks)return;
+      ks.forEach(function(k){if(k&&k.name)addPlayer(t.o,k.name,true)});
     });
     // Build team results for all 12 TM teams
     var teams=[];
