@@ -1877,6 +1877,13 @@ function loadDraftRankings(){
 function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
+  // The live-standings order only gets recomputed/pushed to the shared store
+  // from the Draft Order tab itself (on load, and every 30s while someone has
+  // it open). If nobody currently has that tab open, Draft Room would just
+  // poll whatever was last written — possibly from the actual NASCAR picking
+  // session. Force a fresh computation here too, so opening Draft Room always
+  // triggers an up-to-date push, independent of the other tab.
+  fetchDraftOrder();
   fetchSheet('Draft Order',function(err,table){
     if(!err&&table)buildDraftOrder(table);
     loadDraftFromServer();
