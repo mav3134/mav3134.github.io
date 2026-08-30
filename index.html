@@ -1013,11 +1013,19 @@ function renderComputedOrder(){
   // else writes computedDraftOrder — push it here instead, whenever it
   // actually changes, so the Draft Room's snake order stays in sync with the
   // live standings shown on this page.
+  //
+  // Once someone locks the draft order (password-protected), it must be
+  // permanent — no browser, however many tabs are open or how stale their
+  // local state is, should ever be able to overwrite it again. The local
+  // `doLocked` var isn't reliable for this: it may not have loaded yet in
+  // whichever tab is about to write. So check the SERVER's live lock flag
+  // immediately before every write, not the local variable.
   var sig=order.join('|');
   if(sig!==doLastSavedOrderSig&&order.length>=12){
-    doLastSavedOrderSig=sig;
     fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
       data=data||{};
+      if(data.draftOrderLocked){doLastSavedOrderSig=sig;return} // locked: never touch it
+      doLastSavedOrderSig=sig;
       data.computedDraftOrder=order;
       return fetch(DO_NPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     }).catch(function(){doLastSavedOrderSig='';}); // let it retry on the next refresh
@@ -1026,11 +1034,17 @@ function renderComputedOrder(){
 var doLastSavedOrderSig='';
 
 function lockDraftOrder(){
-  var pw=prompt(doLocked?'Enter password to UNLOCK draft order:':'Enter password to LOCK draft order:');
-  if(pw!=='3134'){if(pw!==null)alert('Wrong password.');return}
-  doLocked=!doLocked;
-  updateLockBtn();
-  saveDOToServer();
+  // Check the server's actual current lock state first — a stale local
+  // doLocked (this tab hasn't refreshed since someone else locked/unlocked
+  // it elsewhere) would otherwise toggle in the wrong direction.
+  fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
+    var serverLocked=!!(data&&data.draftOrderLocked);
+    var pw=prompt(serverLocked?'Enter password to UNLOCK draft order:':'Enter password to LOCK draft order:');
+    if(pw!=='3134'){if(pw!==null)alert('Wrong password.');return}
+    doLocked=!serverLocked;
+    updateLockBtn();
+    saveDOToServer();
+  }).catch(function(){alert('Could not reach the draft order store — try again.')});
 }
 
 function updateLockBtn(){
