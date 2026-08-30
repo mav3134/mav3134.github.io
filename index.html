@@ -1008,7 +1008,22 @@ function renderComputedOrder(){
   });
   html+='<div class="do-ord-note">Order = each player’s first driver reading down the live scoring. Greyed players haven’t picked yet.</div>';
   el.innerHTML=html;
+  // This order used to reach the Fantasy Draft Room only as a side effect of
+  // saveDOToServer() running on every pick. Now that picks are frozen, nothing
+  // else writes computedDraftOrder — push it here instead, whenever it
+  // actually changes, so the Draft Room's snake order stays in sync with the
+  // live standings shown on this page.
+  var sig=order.join('|');
+  if(sig!==doLastSavedOrderSig&&order.length>=12){
+    doLastSavedOrderSig=sig;
+    fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
+      data=data||{};
+      data.computedDraftOrder=order;
+      return fetch(DO_NPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+    }).catch(function(){doLastSavedOrderSig='';}); // let it retry on the next refresh
+  }
 }
+var doLastSavedOrderSig='';
 
 function lockDraftOrder(){
   var pw=prompt(doLocked?'Enter password to UNLOCK draft order:':'Enter password to LOCK draft order:');
