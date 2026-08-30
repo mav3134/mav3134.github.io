@@ -1051,7 +1051,7 @@ function fetchDriverGroupsMap(cb){
         if(!isNaN(num)&&num>0&&name&&name!=='Name'&&name!=='Driver')map[num]=name;
       }
       // Manual overrides for car numbers missing or wrong in the DriverGroups sheet
-      var NUM_TO_NAME={67:'Corey Heim',44:'Joey Gase',78:'Daniel Dye',62:'Casey Mears'};
+      var NUM_TO_NAME={67:'Corey Heim',44:'Joey Gase',78:'Daniel Dye',62:'Casey Mears',33:'Austin Hill'};
       for(var n in NUM_TO_NAME)map[n]=NUM_TO_NAME[n];
       if(Object.keys(map).length>0){dgMapCache=map;cb(map)}else cb(null);
     }catch(e){cb(null)}
