@@ -367,12 +367,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <button class="dr-undo" id="do-lock-btn" onclick="lockDraftOrder()" style="position:absolute;right:0;top:8px;border-color:#c8102e;color:#e05555">🔒 Lock Draft Order</button>
   </div>
   <div class="dr-clock" id="do-clock" style="margin:0 0 12px;padding:10px 16px">
-    <div class="dr-clock-label">On the Clock</div>
-    <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap">
-      <div class="dr-clock-name" id="do-clock-name" style="font-size:1.3rem;padding:3px 16px">—</div>
-      <button class="dr-undo" id="do-undo-btn" onclick="doUndo()" disabled>↩ Undo</button>
-    </div>
-    <div class="dr-clock-pick" id="do-clock-info">Loading...</div>
+    <div class="dr-clock-label">Draft Order Selection</div>
+    <div class="dr-clock-name" style="font-size:1.3rem;padding:3px 16px">Locked In</div>
+    <div class="dr-clock-pick" id="do-clock-info">All picks made prior to today are final.</div>
   </div>
   <div id="do-swipe-hint">swipe for owners &amp; draft order &rarr;</div>
   <div id="do-panels" style="display:flex;gap:12px;min-height:500px">
@@ -1053,6 +1050,9 @@ function fetchDriverGroupsMap(cb){
         var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
         if(!isNaN(num)&&num>0&&name&&name!=='Name'&&name!=='Driver')map[num]=name;
       }
+      // Manual overrides for car numbers missing or wrong in the DriverGroups sheet
+      var NUM_TO_NAME={67:'Corey Heim',44:'Joey Gase',78:'Daniel Dye',62:'Casey Mears'};
+      for(var n in NUM_TO_NAME)map[n]=NUM_TO_NAME[n];
       if(Object.keys(map).length>0){dgMapCache=map;cb(map)}else cb(null);
     }catch(e){cb(null)}
   }).catch(function(){cb(null)});
@@ -1136,21 +1136,14 @@ function applyPicksToDrivers(){
   doPicks=valid;
 }
 
-function getNextPick(){
-  var picked=doPicks.length;
-  if(picked>=doPickOrder.length)return null;
-  return doPickOrder[picked];
-}
-
 function renderOwnerSlots(){
   if(!doOwners.length)return;
-  var html='';var next=getNextPick();
+  var html='';
   doOwners.forEach(function(o,idx){
     html+='<div class="do-owner-row" data-idx="'+idx+'">';
     html+='<span class="do-finish-badge">'+ordinal(o.finish)+'</span>';
-    var isOnClock=next&&next.ownerIdx===idx;
     var allFilled=o.picks.length>=o.totalSlots;
-    var cls='do-owner-name'+(isOnClock?' do-on-clock':'')+(allFilled?' do-done':'');
+    var cls='do-owner-name'+(allFilled?' do-done':'');
     html+='<span class="'+cls+'" data-owner="'+o.owner.replace(/"/g,'&quot;')+'" data-idx="'+idx+'">'+o.owner+'</span>';
     html+='<div class="do-slots">';
     for(var s=0;s<o.totalSlots;s++){
@@ -1166,15 +1159,6 @@ function renderOwnerSlots(){
     html+='</div></div>';
   });
   document.getElementById('do-owners-list').innerHTML=html;
-  var cn=document.getElementById('do-clock-name'),ci=document.getElementById('do-clock-info');
-  if(next){
-    cn.textContent=next.owner;
-    ci.textContent='Selection '+(doPicks.length+1)+' of '+doPickOrder.length;
-  }else{
-    cn.textContent='Complete';
-    cn.style.borderColor='#27ae60';ci.textContent='All drivers selected!';
-  }
-  document.getElementById('do-undo-btn').disabled=doPicks.length===0;
 }
 
 function renderDriverTable(){
@@ -1197,8 +1181,7 @@ function renderDriverTable(){
     html+='<tr class="'+cls+'" data-driver="'+d.name.replace(/"/g,'&quot;')+'" data-didx="'+i+'">';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:#888;padding-left:8px">'+d.pos+'</td>';
     var badge=d.num?'<img class="car-num" src="https://cf.nascar.com/data/images/carbadges/1/'+d.num+'.png" alt="#'+d.num+'" onerror="this.outerHTML=\'<span style=&quot;font-family:Oswald,sans-serif;font-weight:700;color:#f5c842;margin-right:4px&quot;>#'+d.num+'</span>\'"> ':'';
-    var pickBtn=(!picked&&getNextPick())?'<button class="do-pick-btn" onclick="doPickDriver('+i+')">Pick</button>':'';
-    html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+pickBtn+'</div></td>';
+    html+='<td style="padding-left:6px"><div class="do-driver">'+badge+d.name+'</div></td>';
     html+='<td class="do-driver-owner" style="font-family:Oswald,sans-serif;font-weight:600;font-size:.78rem;color:'+(picked?'#f5c842':'#333')+';padding-left:6px">'+( d.owner||'')+'</td>';
     html+='<td style="text-align:center;font-family:Oswald,sans-serif;font-weight:700;color:'+(pickNum?'#f39c12':'#333')+';padding-left:2px;padding-right:8px">'+pickNum+'</td>';
     html+='</tr>';
@@ -1208,36 +1191,9 @@ function renderDriverTable(){
   renderComputedOrder();
 }
 
-// Tap-to-pick: assigns the driver to whoever is on the clock
-function doPickDriver(dIdx){
-  var next=getNextPick();
-  if(!next)return;
-  var d=doDrivers[dIdx];
-  if(!d||d.owner)return;
-  doMakePick(next.ownerIdx,dIdx,d.name);
-}
-
-function doMakePick(ownerIdx,driverIdx,driverName){
-  var owner=doOwners[ownerIdx];
-  owner.picks.push({name:driverName,num:doDrivers[driverIdx].num||''});
-  doDrivers[driverIdx].owner=owner.owner;
-  doPicks.push({ownerIdx:ownerIdx,driverIdx:driverIdx,driverName:driverName,owner:owner.owner});
-  saveDOToServer();
-  renderOwnerSlots();renderDriverTable();
-}
-
-function doUndo(){
-  if(!doPicks.length)return;
-  var last=doPicks.pop();
-  if(doOwners[last.ownerIdx])doOwners[last.ownerIdx].picks.pop();
-  // Find driver by name to clear
-  for(var i=0;i<doDrivers.length;i++){
-    if(doDrivers[i].name.toLowerCase()===last.driverName.toLowerCase()){doDrivers[i].owner='';break}
-  }
-  saveDOToServer();
-  renderOwnerSlots();renderDriverTable();
-}
-
+// The draft is closed: no more picks or undos. Every pick already on record
+// is final and permanently locked in — this is now read-only history. Lock
+// state (below) is a separate, unrelated flag for the draft ORDER itself.
 function saveDOToServer(){
   fetch(DO_NPOINT).then(function(r){return r.json()}).then(function(data){
     data=data||{};
