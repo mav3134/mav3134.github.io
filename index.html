@@ -1060,89 +1060,31 @@ function updateLockBtn(){
 }
 
 
-// Primary live source: column N of the Results tab in the NASCAR Live Scoring
-// workbook — car numbers in running order (header in N1, numbers from N2).
-// Names come from the DriverGroups list (car number -> driver name).
-// If N:N is blank after the header, fall back to the legacy chain unchanged.
-var LIVE_SCORING_SHEET='1ysN3tYb8tD0o0HhArXlKQB7D0ayFTp4RoKGKSxpCqzE';
-var dgMapCache=null;
-function fetchDriverGroupsMap(cb){
-  if(dgMapCache){cb(dgMapCache);return}
-  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups&t='+Date.now();
-  fetch(url).then(function(r){return r.text()}).then(function(text){
-    try{
-      var rows=parseGviz(text).table.rows||[];
-      var map={};
-      for(var i=0;i<rows.length;i++){
-        var r=rows[i].c||[];
-        var num=parseInt(cellVal(r[1]).trim());
-        var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
-        if(!isNaN(num)&&num>0&&name&&name!=='Name'&&name!=='Driver')map[num]=name;
-      }
-      // Manual overrides for car numbers missing or wrong in the DriverGroups sheet
-      var NUM_TO_NAME={67:'Corey Heim',44:'Joey Gase',78:'Daniel Dye',62:'Casey Mears',33:'Austin Hill'};
-      for(var n in NUM_TO_NAME)map[n]=NUM_TO_NAME[n];
-      if(Object.keys(map).length>0){dgMapCache=map;cb(map)}else cb(null);
-    }catch(e){cb(null)}
-  }).catch(function(){cb(null)});
-}
+// Running order is LOCKED PERMANENTLY to the final running order from the
+// NASCAR Live Scoring workbook (Results tab, column B), captured 2026-09-01.
+// This is no longer connected to any Google Sheet (Results or DriverGroups) —
+// it stays this exact order/name list forever, including the manual name
+// overrides that were previously applied on top of the live DriverGroups feed
+// (Corey Heim, Joey Gase, Daniel Dye, Casey Mears, Austin Hill).
+var LOCKED_DRIVER_ORDER=[
+  [60,'Ryan Preece'],[7,'Daniel Suárez'],[45,'Tyler Reddick'],[71,'Michael McDowell'],
+  [47,'Ricky Stenhouse'],[2,'Austin Cindric'],[3,'Austin Dillon'],[48,'Alex Bowman'],
+  [21,'Josh Berry'],[41,'Cole Custer'],[11,'Denny Hamlin'],[35,'Riley Herbst'],
+  [19,'Chase Briscoe'],[6,'Brad Keselowski'],[42,'John H. Nemechek'],[67,'Corey Heim'],
+  [20,'Christopher Bell'],[22,'Joey Logano'],[34,'Todd Gilliland'],[23,'Bubba Wallace'],
+  [10,'Ty Dillon'],[24,'William Byron'],[9,'Chase Elliott'],[1,'Ross Chastain'],
+  [88,'Connor Zilisch'],[4,'Noah Gragson'],[33,'Austin Hill'],[97,'Shane Van Gisbergen'],
+  [78,'Daniel Dye'],[16,'AJ Allmendinger'],[5,'Kyle Larson'],[38,'Zane Smith'],
+  [12,'Ryan Blaney'],[54,'Ty Gibbs'],[51,'Cody Ware'],[44,'Joey Gase'],
+  [62,'Casey Mears'],[77,'Carson Hocevar'],[43,'Erik Jones'],[17,'Chris Buescher']
+];
 function buildDriverList(){
-  var nUrl='https://docs.google.com/spreadsheets/d/'+LIVE_SCORING_SHEET+'/gviz/tq?tqx=out:json&sheet=Results&range=N%3AN&t='+Date.now();
-  fetch(nUrl).then(function(r){return r.text()}).then(function(text){
-    var nums=[],seen={};
-    try{
-      var rows=parseGviz(text).table.rows||[];
-      for(var i=0;i<rows.length;i++){
-        var v=cellVal((rows[i].c||[])[0]).trim();
-        var num=parseInt(v);
-        if(/^\d+(\.0+)?$/.test(v)&&!isNaN(num)&&num>0&&!seen[num]){seen[num]=1;nums.push(num)}
-      }
-    }catch(e){}
-    if(nums.length>0){
-      fetchDriverGroupsMap(function(map){
-        if(!map){loadDriverGroups();return}
-        doDrivers=nums.map(function(n,i){
-          return {name:map[n]||('Car #'+n),num:String(n),pos:i+1,owner:''};
-        });
-        applyPicksToDrivers();
-        renderOwnerSlots();renderDriverTable();
-        loadDOFromServer();
-      });
-      return;
-    }
-    loadDriverGroups();
-  }).catch(function(){loadDriverGroups()});
-}
-
-function loadDriverGroups(){
-  var url='https://docs.google.com/spreadsheets/d/1l98KNdh0qx9TPKB8anv-wfnfui0dJMsamP_nFjMYYPk/gviz/tq?tqx=out:json&sheet=DriverGroups&t='+Date.now();
-  fetch(url).then(function(r){return r.text()}).then(function(text){
-    try{
-      var data=parseGviz(text);
-      var rows=data.table.rows||[];
-      var drivers=[];
-      for(var i=0;i<rows.length;i++){
-        var r=rows[i].c||[];
-        var num=cellVal(r[1]).trim();
-        var name=cellVal(r[2]).trim().replace(/^\d+\s*-\s*/,'').trim();
-        if(name&&name!=='Name'&&name!=='Driver'){
-          if(!num){
-            var NUM_FIX={'austin hill':'33','corey heim':'67'};
-            num=NUM_FIX[name.toLowerCase()]||'';
-          }
-          drivers.push({name:name,num:num,pos:drivers.length+1,owner:''});
-        }
-      }
-      doDrivers=drivers;
-      applyPicksToDrivers();
-      renderOwnerSlots();renderDriverTable();
-      loadDOFromServer();
-    }catch(e){
-      document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
-    }
-  }).catch(function(){
-    document.getElementById('do-drivers-table').innerHTML='<div class="do-error">Could not load driver list.</div>';
+  doDrivers=LOCKED_DRIVER_ORDER.map(function(d,i){
+    return {name:d[1],num:String(d[0]),pos:i+1,owner:''};
   });
+  applyPicksToDrivers();
+  renderOwnerSlots();renderDriverTable();
+  loadDOFromServer();
 }
 
 // Re-apply saved picks onto the (possibly re-ordered) driver list by NAME
