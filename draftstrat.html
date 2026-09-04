@@ -94,6 +94,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .keeper-meta{font-family:'Oswald',sans-serif;font-size:.65rem;color:#777;letter-spacing:.5px;text-transform:uppercase}
 .keeper-pts{font-family:'Oswald',sans-serif;font-weight:600;color:#f5c842;font-size:.78rem;flex:none}
 .keeper-note{font-size:.7rem;color:#666;line-height:1.5;margin-top:10px}
+.lineup-box{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;padding:14px;margin-bottom:20px}
+.lineup-box .total-box{padding:10px 0 0}
+.lineup-box .stbl{margin-top:8px}
 .slot-tag.bench{color:#e05555}
 tr.bench-row td{opacity:.55}
 </style>
@@ -124,6 +127,11 @@ tr.bench-row td{opacity:.55}
   </div>
   <div class="wrap wrap-12">
     <div class="plan-col">
+      <div class="lineup-box">
+        <div class="keeper-hdr">Optimal Lineup</div>
+        <table class="stbl"><thead><tr><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="lineup-body"></tbody></table>
+        <div class="total-box"><div class="total-num" id="lineup-total">&mdash;</div><div class="total-lbl">Optimal Starting Lineup Points</div></div>
+      </div>
       <div class="total-box"><div class="total-num" id="total-12">&mdash;</div><div class="total-lbl">Projected Points (Drafted + Optimal Remaining)</div></div>
       <table class="stbl"><thead><tr><th>Rd</th><th>Pick</th><th>Slot</th><th>Player</th><th>Team</th><th>Pos</th><th>Rank</th><th style="text-align:right">Proj Pts</th></tr></thead><tbody id="plan-12"></tbody></table>
       <div class="note" id="offboard" style="display:none;text-align:left;background:#0d1019;border:1px solid #1e2330;border-radius:6px;margin-top:12px"></div>
@@ -133,7 +141,7 @@ tr.bench-row td{opacity:.55}
       <div class="keeper-box">
         <div class="keeper-hdr">My Keepers <span class="keeper-sub">(what-if &mdash; doesn't touch the real Keepers tab)</span></div>
         <div id="keeper-list"></div>
-        <div class="keeper-note">Pick up to 2 from your actual roster. Each keeper occupies its real keeper round (Rd 1&ndash;7); anything valued Rd 8 or later goes in a single 8+ slot. Selections are saved in this browser only.</div>
+        <div class="keeper-note">Pick up to 2 from your actual roster. Each keeper occupies its real keeper round (Rd 1&ndash;7); anything valued Rd 8 or later shows up as a bench player in the Optimal Lineup below. Selections are saved in this browser only.</div>
         <button class="tool-btn" id="keeper-clear" onclick="clearMyKeepers()" style="margin-top:8px;width:100%">Clear Selections</button>
       </div>
     </div>
@@ -301,6 +309,23 @@ function renderPlan(tbodyId,totalId,rows,total){
   document.getElementById(tbodyId).innerHTML=html;
   document.getElementById(totalId).textContent=total.toFixed(1);
 }
+// Optimal Lineup panel: QB/WR1/WR2/RB1/RB2/TE/FLEX, then any bench players
+// (shown with their projection, excluded from the total).
+function renderOptimalLineup(opt){
+  var html='';
+  labelStarters(opt.starters).forEach(function(e){
+    var p=e.item.player;
+    html+='<tr><td><span class="slot-tag">'+e.label+'</span></td><td style="font-weight:700">'+p.name+'</td>'+
+      '<td style="color:#888">'+p.team+'</td><td>'+posTag(p.pos)+'</td><td class="pts-cell">'+p.pts.toFixed(1)+'</td></tr>';
+  });
+  opt.bench.forEach(function(it,i){
+    var p=it.player,lbl=opt.bench.length>1?'BENCH '+(i+1):'BENCH';
+    html+='<tr class="bench-row"><td><span class="slot-tag bench">'+lbl+'</span></td><td style="font-weight:700">'+p.name+'</td>'+
+      '<td style="color:#888">'+p.team+'</td><td>'+posTag(p.pos)+'</td><td class="pts-cell">'+p.pts.toFixed(1)+'</td></tr>';
+  });
+  document.getElementById('lineup-body').innerHTML=html;
+  document.getElementById('lineup-total').textContent=opt.total.toFixed(1);
+}
 function run10(){
   buildSlotBtns('slots-10',10,slot10,function(v){slot10=v;run10()});
   var myPicks=mySnakePicks(10,slot10,7);
@@ -337,9 +362,6 @@ function toggleMyKeeper(name){
   var r=MY_ROSTER.find(function(x){return x.name===name});
   if(!r)return;
   if(myKeeperPicks.length>=2){alert('Max 2 keepers.');return}
-  if(r.kr>=8&&myKeeperPicks.some(function(n){var m=MY_ROSTER.find(function(x){return x.name===n});return m&&m.kr>=8})){
-    alert('Only one Rd 8+ keeper allowed — deselect the other one first.');return;
-  }
   myKeeperPicks.push(name);saveMyKeepers();renderKeeperPicker();run12();
 }
 function clearMyKeepers(){myKeeperPicks=[];saveMyKeepers();renderKeeperPicker();run12();}
@@ -359,35 +381,55 @@ function renderKeeperPicker(){
   });
   el.innerHTML=html;
 }
-// pick the single best (highest-pts) selected Rd8+ player, if any, plus all Rd1-7 picks
+// all Rd1-7 keeper picks, plus every selected Rd8+ ("extra") player — any
+// number of extras are allowed now, each becomes its own bench candidate.
 function myKeeperEntries(){
-  var normal=[],extra=null,extraPts=-Infinity;
+  var normal=[],extras=[];
   myKeeperPicks.forEach(function(name){
     var r=MY_ROSTER.find(function(x){return x.name===name});if(!r)return;
     var p=BY_NORM[normName(r.name)];if(!p)return;
     if(r.kr>=1&&r.kr<=7)normal.push({player:p,round:r.kr});
-    else if(p.pts>extraPts){extraPts=p.pts;extra=p;}
+    else extras.push(p);
   });
-  return {normal:normal,extra:extra};
+  return {normal:normal,extras:extras};
 }
-// given up to 8 starters-eligible players (QB/RB/WR/TE), pick the best 7 that
-// satisfy QB1/RB2/WR2/TE1/FLEX1 by total points; the 8th (if any) sits.
+function combosChooseK(arr,k){
+  var out=[];
+  (function rec(start,combo){
+    if(combo.length===k){out.push(combo.slice());return}
+    for(var i=start;i<arr.length;i++){combo.push(arr[i]);rec(i+1,combo);combo.pop();}
+  })(0,[]);
+  return out;
+}
+// given any pool of QB/RB/WR/TE players, pick the best 7 that satisfy
+// QB1/RB2/WR2/TE1/FLEX1 by total points; everyone left over sits (any number).
 function optimalLineup(items){ // items: [{round,pick,player,keeper}]
-  if(items.length<=7)return {starters:items.slice(),bench:null};
-  var bestBench=null,bestStarters=null,bestTotal=-Infinity;
-  for(var i=0;i<items.length;i++){
-    var rest=items.slice(0,i).concat(items.slice(i+1));
+  var k=Math.min(7,items.length);
+  var best=null;
+  combosChooseK(items,k).forEach(function(combo){
     var cnt={QB:0,RB:0,WR:0,TE:0};
-    rest.forEach(function(it){cnt[it.player.pos]=(cnt[it.player.pos]||0)+1});
-    if(cnt.QB!==1||cnt.RB<2||cnt.WR<2||cnt.TE<1)continue;
-    var total=rest.reduce(function(s,it){return s+it.player.pts},0);
-    if(total>bestTotal){bestTotal=total;bestBench=items[i];bestStarters=rest;}
+    combo.forEach(function(it){cnt[it.player.pos]=(cnt[it.player.pos]||0)+1});
+    if(k===7&&(cnt.QB!==1||cnt.RB<2||cnt.WR<2||cnt.TE<1))return;
+    var total=combo.reduce(function(s,it){return s+it.player.pts},0);
+    if(!best||total>best.total)best={starters:combo,total:total};
+  });
+  if(!best){
+    var sorted=items.slice().sort(function(a,b){return b.player.pts-a.player.pts});
+    best={starters:sorted.slice(0,k),total:sorted.slice(0,k).reduce(function(s,it){return s+it.player.pts},0)};
   }
-  if(!bestStarters){
-    var sorted=items.slice().sort(function(a,b){return a.player.pts-b.player.pts});
-    bestBench=sorted[0];bestStarters=items.filter(function(it){return it!==bestBench});
-  }
-  return {starters:bestStarters,bench:bestBench};
+  var bench=items.filter(function(it){return best.starters.indexOf(it)<0});
+  return {starters:best.starters,bench:bench,total:best.total};
+}
+// assign QB/WR1/WR2/RB1/RB2/TE/FLEX labels to a set of exactly-feasible starters
+function labelStarters(starters){
+  var byPos={QB:[],RB:[],WR:[],TE:[]};
+  starters.forEach(function(it){byPos[it.player.pos].push(it)});
+  var out=[];
+  function take(pos,label){var it=byPos[pos].shift();if(it)out.push({label:label,item:it})}
+  take('QB','QB');take('WR','WR1');take('WR','WR2');take('RB','RB1');take('RB','RB2');take('TE','TE');
+  var flex=byPos.RB[0]||byPos.WR[0]||byPos.TE[0];
+  if(flex)out.push({label:'FLEX',item:flex});
+  return out;
 }
 function run12(){
   buildSlotBtns('slots-12',12,slot12,function(v){slot12=v;run12()});
@@ -402,7 +444,7 @@ function run12(){
   // are ignored entirely and replaced by the local selections below —
   // nothing here touches the real Keepers tab / server data.
   var useWhatIf=myKeeperPicks.length>0;
-  var whatIfExtra=null;
+  var whatIfExtras=[];
 
   // 1) keepers from data.keepers (exist even before the draft order is set)
   for(var tn in liveKeepers){
@@ -425,7 +467,7 @@ function run12(){
       mineEntries.push({player:e.player,round:e.round,keeper:true});
       taken.add(e.player.id);keeperCount++;
     });
-    if(mk.extra){whatIfExtra=mk.extra;taken.add(mk.extra.id);keeperCount++;}
+    mk.extras.forEach(function(p){whatIfExtras.push(p);taken.add(p.id);keeperCount++;});
   }
   // 2) real picks from the draft room
   livePicks.forEach(function(pk){
@@ -465,53 +507,39 @@ function run12(){
   if(futureMy.length>slotsNeeded)futureMy=futureMy.slice(0,slotsNeeded);
   var best=futureMy.length?simulate(12,taken,maxPick+1,futureMy,need,blocked,roundSkips):{total:0,picks:[]};
 
+  // ── Draft picks table: round order, greedy slot labels. Rounds 1-7 (my
+  // keepers/picks + simulated fills) are combined into ONE round-ordered
+  // list so the greedy labeling accounts for everyone's slot before any
+  // Rd8+ what-if keepers are appended after round 7 (they inherit whatever
+  // slots are actually still open — usually BENCH, since rounds 1-7 already
+  // filled the lineup).
+  var combined=mineEntries.map(function(m){
+    return {round:m.round,pick:m.pickNum||allMy[m.round-1],player:m.player,keeper:!!m.keeper};
+  });
+  if(best&&best.picks)best.picks.forEach(function(p,i){
+    combined.push({round:Math.ceil(futureMy[i]/12),pick:futureMy[i],player:p,keeper:false});
+  });
+  combined.sort(function(a,b){return a.round-b.round});
+  var clsAll=classifyMine(combined.map(function(c){return c.player}).concat(whatIfExtras));
   var rows=[],total=0;
-  if(useWhatIf){
-    // Points-optimal lineup: gather all 7 round picks (keepers + simulated),
-    // plus the single Rd8+ keeper if selected, then choose the best 7 of up
-    // to 8 to start (QB/RB/RB/WR/WR/TE/FLEX) — the leftover one sits (shown,
-    // not counted in the total).
-    var poolItems=mineEntries.map(function(m){
-      return {round:m.round,pick:m.pickNum||allMy[m.round-1],player:m.player,keeper:!!m.keeper};
-    });
-    if(best&&best.picks)best.picks.forEach(function(p,i){
-      poolItems.push({round:Math.ceil(futureMy[i]/12),pick:futureMy[i],player:p,keeper:false});
-    });
-    if(whatIfExtra)poolItems.push({round:'8+',pick:null,player:whatIfExtra,keeper:true});
-    var opt=optimalLineup(poolItems);
-    var labels=(function(){
-      var used={QB:0,RB:0,WR:0,TE:0},cap={QB:1,RB:2,WR:2,TE:1};
-      return opt.starters.map(function(it){
-        var pos=it.player.pos;
-        if(used[pos]<cap[pos]){used[pos]++;return pos==='QB'||pos==='TE'?pos:pos+used[pos];}
-        return 'FLEX';
-      });
-    })();
-    opt.starters.forEach(function(it,i){
-      rows.push({round:it.round,pick:it.pick,slot:labels[i]+(it.keeper?' • K':''),player:it.player,mine:true});
-      total+=it.player.pts;
-    });
-    if(opt.bench){
-      rows.push({round:opt.bench.round,pick:opt.bench.pick,slot:'BENCH'+(opt.bench.keeper?' • K':''),player:opt.bench.player,mine:true,bench:true});
-    }
-    rows.sort(function(a,b){return slotOrderRank(a.slot)-slotOrderRank(b.slot)});
-  } else {
-    mineEntries.forEach(function(m,i){
-      rows.push({round:m.round,pick:m.pickNum||allMy[m.round-1],
-        slot:cls.labels[i]+(m.keeper?' • K':''),player:m.player,mine:true});
-      if(cls.labels[i]!=='BENCH')total+=m.player.pts;
-    });
-    if(best){
-      var futFilled={QB:cls.filled.QB,RB:cls.filled.RB,WR:cls.filled.WR,TE:cls.filled.TE,FLEX:cls.filled.FLEX};
-      var labels2=slotLabels(best.picks.map(function(p){return p.pos}),futFilled);
-      best.picks.forEach(function(p,i){
-        rows.push({round:Math.ceil(futureMy[i]/12),pick:futureMy[i],slot:labels2[i],player:p});
-      });
-      total+=best.total;
-    }
-    rows.sort(function(a,b){return slotOrderRank(a.slot)-slotOrderRank(b.slot)});
-  }
+  combined.forEach(function(c,i){
+    var lbl=clsAll.labels[i];
+    rows.push({round:c.round,pick:c.pick,slot:lbl+(c.keeper?' • K':''),player:c.player,mine:true});
+    if(lbl!=='BENCH')total+=c.player.pts;
+  });
+  whatIfExtras.forEach(function(p,j){
+    var lbl=clsAll.labels[combined.length+j];
+    rows.push({round:'8+',pick:null,slot:lbl+' • K',player:p,mine:true});
+    if(lbl!=='BENCH')total+=p.pts;
+  });
   renderPlan('plan-12','total-12',rows,total);
+
+  // ── Optimal Lineup panel: separate from the round-ordered table above.
+  // Same pool (every draft selection + any Rd8+ what-if keepers), but pick
+  // the points-optimal 7 starters regardless of round order.
+  var poolItems=combined.concat(whatIfExtras.map(function(p){return {round:'8+',pick:null,player:p,keeper:true}}));
+  var opt=optimalLineup(poolItems);
+  renderOptimalLineup(opt);
   renderKeeperPicker();
   var bits=[];
   if(keeperCount)bits.push(keeperCount+' keeper'+(keeperCount>1?'s':'')+' off the board');
