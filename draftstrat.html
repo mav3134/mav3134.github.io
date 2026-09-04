@@ -283,6 +283,12 @@ function buildSlotBtns(containerId,n,cur,fn){
   }
 }
 function posTag(pos){return '<span class="pos-tag pos-'+pos+'">'+pos+'</span>'}
+// display order for the 12-team lineup: QB, WR, WR, RB, RB, TE, FLEX, then Bench
+var SLOT_ORDER={QB:0,WR1:1,WR2:2,RB1:3,RB2:4,TE:5,FLEX:6,BENCH:7};
+function slotOrderRank(slot){
+  var base=(slot||'').split(' ')[0];
+  return SLOT_ORDER[base]!==undefined?SLOT_ORDER[base]:99;
+}
 function renderPlan(tbodyId,totalId,rows,total){
   var html='';
   rows.forEach(function(r){
@@ -488,7 +494,7 @@ function run12(){
     if(opt.bench){
       rows.push({round:opt.bench.round,pick:opt.bench.pick,slot:'BENCH'+(opt.bench.keeper?' • K':''),player:opt.bench.player,mine:true,bench:true});
     }
-    rows.sort(function(a,b){return (a.round==='8+'?99:a.round)-(b.round==='8+'?99:b.round)});
+    rows.sort(function(a,b){return slotOrderRank(a.slot)-slotOrderRank(b.slot)});
   } else {
     mineEntries.forEach(function(m,i){
       rows.push({round:m.round,pick:m.pickNum||allMy[m.round-1],
@@ -503,7 +509,7 @@ function run12(){
       });
       total+=best.total;
     }
-    rows.sort(function(a,b){return a.round-b.round});
+    rows.sort(function(a,b){return slotOrderRank(a.slot)-slotOrderRank(b.slot)});
   }
   renderPlan('plan-12','total-12',rows,total);
   renderKeeperPicker();
