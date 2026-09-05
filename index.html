@@ -353,7 +353,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <!-- ═══ KEEPERS TAB ═══ -->
 <div class="tab-panel active" id="tab-keepers">
 <div class="legend"><div class="legend-item"><div class="leg-sw sw-r"></div> Ineligible</div><div class="legend-item"><div class="leg-sw sw-g"></div> 1 More Year</div><div class="legend-item"><div class="leg-sw sw-e"></div> Eligible</div><div class="legend-item"><div class="leg-sw sw-sel"></div> Selected</div></div>
-<div style="text-align:center;padding:8px;font-family:'Oswald',sans-serif;font-size:.78rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px">Click eligible players to select keepers &bull; Hover for scouting report</div>
+<div style="text-align:center;padding:8px;font-family:'Oswald',sans-serif;font-size:.78rem;color:#f39c12;text-transform:uppercase;letter-spacing:1px">Keepers are locked for the 2026 season &mdash; no changes can be made &bull; Hover for scouting report</div>
 <div class="grid" id="G"></div>
 <div class="sect"><div class="sect-h">2025 Draft Results</div><div class="dgrid" id="D"></div></div>
 </div>
@@ -502,7 +502,7 @@ function switchTab(id){
   location.hash=id;
   // Show picker on keepers tab if no team selected, hide on other tabs
   if(id==='keepers'){
-    if(!activeTeam){document.getElementById('picker').classList.remove('hide')}
+    if(!activeTeam&&!KEEPERS_LOCKED){document.getElementById('picker').classList.remove('hide')}
     // Re-apply keeper highlights
     for(var tn in savedKeepers){applyHighlights(tn)}
   }
@@ -823,8 +823,13 @@ document.querySelectorAll(".pn[data-blurb]").forEach(function(el){
 });
 
 // ═══ KEEPER SELECTION ═══
+// Locked permanently as of 2026-09-05: no new keepers, no changes to saved
+// ones. The board still displays who's already kept (via savedKeepers /
+// applyHighlights below), it just can't be edited anymore.
+var KEEPERS_LOCKED=true;
 document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
   tr.addEventListener("click",function(){
+    if(KEEPERS_LOCKED)return;
     if(!activeTeam)return;
     var card=tr.closest(".card"),teamName=card.querySelector(".card-name").textContent;
     if(teamName!==activeTeam)return;
@@ -843,7 +848,7 @@ var savedKeepers={};
 function openModal(tn){var sel=selections[tn]||[];document.getElementById("modal-team").textContent=tn;var ph=document.getElementById("modal-players");ph.innerHTML="";if(sel.length===0){ph.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers selected</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";ph.appendChild(d)})}document.getElementById("modal-form").style.display="block";document.getElementById("modal-sent").style.display="none";document.getElementById("modal").classList.add("show");window._submitTeam=tn}
 function closeModal(){document.getElementById("modal").classList.remove("show")}
 function cancelModal(){closeModal();activeTeam=null;document.querySelectorAll('.submit-btn').forEach(function(b){b.classList.remove('visible')});document.querySelectorAll('.card').forEach(function(c){c.style.border='';c.style.boxShadow=''});document.getElementById("picker").classList.remove("hide")}
-function saveKeepers(){var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn);saveKeepersToServer()}
+function saveKeepers(){if(KEEPERS_LOCKED)return;var tn=window._submitTeam;var sel=selections[tn]||[];savedKeepers[tn]=sel.slice();var quips=["Bold strategy, Cotton. Let's see if it pays off.","These keepers are either genius or proof you've been drinking.","Saved. Your league-mates are already laughing.","Lock it in. Fantasy gods are watching... and judging.","Done deal. Try not to regret this by August."];document.getElementById("modal-form").style.display="none";var sent=document.getElementById("modal-sent");sent.style.display="block";var cp=document.getElementById("modal-confirm-players");cp.innerHTML="";if(sel.length===0){cp.innerHTML='<div style="text-align:center;color:#888;font-family:Oswald,sans-serif;padding:8px">No keepers saved</div>'}else{sel.forEach(function(s){var d=document.createElement("div");d.className="modal-player";d.innerHTML="<span>"+s.name+"</span><span>Keeper Rd "+s.kr+"</span>";cp.appendChild(d)})}document.getElementById("modal-quip").textContent=quips[Math.floor(Math.random()*quips.length)];applyHighlights(tn);saveKeepersToServer()}
 function applyHighlights(tn){var grid=document.getElementById("G");var cards=grid.querySelectorAll(".card");cards.forEach(function(card){var name=card.querySelector(".card-name");if(!name)return;var teamName=name.textContent;var saved=savedKeepers[teamName]||[];var rows=card.querySelectorAll(".rtbl tr.selectable");rows.forEach(function(tr){var pn=tr.getAttribute("data-player");var isSaved=saved.some(function(s){return s.name===pn});if(isSaved){tr.classList.add("selected")}else if(teamName!==activeTeam){tr.classList.remove("selected")}})})}
 
 // ═══ TEAM PICKER (always shows on keepers tab load) ═══
@@ -852,6 +857,7 @@ TM.forEach(function(t){var b=document.createElement("button");b.className="pick-
 
 function showActiveBtn(){
   document.querySelectorAll('.submit-btn').forEach(function(btn){btn.classList.remove('visible')});
+  if(KEEPERS_LOCKED)return;
   if(!activeTeam)return;
   var id="btn-"+activeTeam.replace(/[^a-zA-Z]/g,"");
   var btn=document.getElementById(id);
@@ -881,6 +887,7 @@ function showActiveBtn(){
 
 // ═══ PAGE LOAD: restore tab, load keepers from server ═══
 (function(){
+  if(KEEPERS_LOCKED)document.getElementById('picker').classList.add('hide');
   fetch('https://api.npoint.io/9643622df799b5dd5e7f').then(function(r){return r.json()}).then(function(data){
     if(data&&data.keepers){
       for(var tn in data.keepers){
@@ -895,7 +902,7 @@ function showActiveBtn(){
   var hash=(location.hash||'').replace('#','');
   if(hash&&document.getElementById('tab-'+hash)){
     switchTab(hash);
-    if(hash==='keepers'){document.getElementById('picker').classList.remove('hide')}
+    if(hash==='keepers'&&!KEEPERS_LOCKED){document.getElementById('picker').classList.remove('hide')}
   }
 })();
 
