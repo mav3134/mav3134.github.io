@@ -283,17 +283,18 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dr-clock-name:active{cursor:grabbing}
 .dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
 /* clock header: selected player (left) · on the clock (center) · pick button (right) */
-.dr-clock-row{display:flex;align-items:center;gap:14px}
+.dr-clock-row{display:flex;align-items:center;gap:14px;position:relative}
+.dr-pick-wrap.abs .dr-pick-btn{position:absolute;top:50%;transform:translateY(-50%);margin:0}
 .dr-clock-row .dr-clock-mid{flex:0 0 auto;margin:0 auto}
-.dr-sel-wrap{flex:1;display:flex;align-items:center;gap:10px;min-width:0;text-align:left}
-.dr-sel-photo{width:52px;height:52px;flex:none;border-radius:50%;overflow:hidden;background:#12161f;border:2px solid #2a2f3e;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.dr-sel-wrap{flex:1;display:flex;align-items:center;gap:16px;min-width:0;text-align:left}
+.dr-sel-photo{width:118px;height:118px;flex:none;border-radius:50%;overflow:hidden;background:#12161f;border:3px solid #2a2f3e;display:flex;align-items:center;justify-content:center;font-size:2.8rem}
 .dr-sel-photo img{width:100%;height:100%;object-fit:cover}
 .dr-sel-info{min-width:0}
-.dr-sel-label{font-family:'Oswald',sans-serif;font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:1.5px}
-.dr-sel-name{font-family:'Oswald',sans-serif;font-size:.95rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dr-sel-meta{font-family:'Oswald',sans-serif;font-size:.65rem;color:#777;letter-spacing:1px}
-.dr-sel-wrap.empty .dr-sel-name{color:#555;font-weight:400;font-style:italic}
-.dr-pick-wrap{flex:1;display:flex;justify-content:flex-end}
+.dr-sel-label{font-family:'Oswald',sans-serif;font-size:.62rem;color:#888;text-transform:uppercase;letter-spacing:2px}
+.dr-sel-name{font-family:'Anton',sans-serif;font-size:2.1rem;line-height:1.05;text-transform:uppercase;letter-spacing:1px;color:#fff;overflow:hidden}
+.dr-sel-meta{font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;color:#888;letter-spacing:1.5px;margin-top:2px}
+.dr-sel-wrap.empty .dr-sel-name{font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:400;font-style:italic;text-transform:none;color:#555}
+.dr-pick-wrap{flex:1;display:flex;justify-content:center}
 .dr-pick-btn{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:2px;color:#fff;padding:12px 34px;border:none;border-radius:6px;background:linear-gradient(135deg,#27ae60,#1e8449);cursor:pointer;box-shadow:0 3px 12px rgba(39,174,96,.3);transition:all .15s}
 .dr-pick-btn:hover:not(:disabled){transform:scale(1.04);box-shadow:0 4px 18px rgba(39,174,96,.45)}
 .dr-pick-btn:disabled{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);color:#555;cursor:not-allowed;box-shadow:none}
@@ -356,11 +357,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 /* Team Roster Panel */
 .dr-team-select{font-family:'Oswald',sans-serif;font-size:.75rem;padding:5px 10px;border-radius:4px;border:1px solid #444;background:#1a1f2e;color:#ccc;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
 .dr-team-select option{background:#1a1f2e;color:#ccc}
-.dr-roster-panel{width:260px;flex-shrink:0;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;display:none;flex-direction:column}
-.dr-roster-panel.open{display:flex}
-.dr-roster-head{padding:8px 12px;font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:#f39c12;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.dr-roster-close{background:none;border:none;color:#888;font-size:1.1rem;cursor:pointer;padding:0 4px}
-.dr-roster-close:hover{color:#fff}
+.dr-roster-panel{width:260px;flex-shrink:0;background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.dr-roster-head{padding:6px 8px;background:rgba(255,255,255,.02);border-bottom:1px solid #1a1f2e;flex-shrink:0}
+.dr-roster-head .dr-team-select{width:100%;color:#f39c12;border-color:#3a3f4e}
 .dr-roster-body{overflow-y:auto;flex:1;padding:6px}
 .dr-slot{padding:5px 8px;margin:2px 0;border-radius:4px;font-size:.78rem;border:1px dashed #2a2d3a;background:rgba(255,255,255,.01);min-height:28px;display:flex;align-items:center;gap:6px}
 .dr-slot-label{font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;color:#ddd;text-transform:uppercase;letter-spacing:1px;min-width:36px}
@@ -470,9 +469,6 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
     <div class="dr-title">Draft Room</div>
     <button class="dr-undo" id="dr-undo" onclick="draftUndo()" disabled>↩ Undo</button>
     <button class="dr-undo" id="dr-live-btn" onclick="toggleLiveDraft()" style="border-color:#27ae60;color:#27ae60">⚡ Live Draft: OFF</button>
-    <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
-      <option value="">View Team Roster...</option>
-    </select>
     <span class="dr-pick-count" id="dr-pick-count">Pick 0 / 0</span>
   </div>
   <div class="dr-subtabs" id="dr-subtabs">
@@ -497,7 +493,11 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
       <div id="dr-player-table" class="dr-player-table"><div class="do-loading">Loading players...</div></div>
     </div>
     <div class="dr-roster-panel" id="dr-roster-panel">
-      <div class="dr-roster-head"><span id="dr-roster-team-name">Team</span><button class="dr-roster-close" onclick="closeTeamRoster()">✕</button></div>
+      <div class="dr-roster-head">
+        <select class="dr-team-select" id="dr-team-select" onchange="openTeamRoster(this.value)">
+          <option value="">View Team Roster...</option>
+        </select>
+      </div>
       <div class="dr-roster-body" id="dr-roster-body"></div>
     </div>
   </div>
@@ -1893,6 +1893,7 @@ function loadDraftRankings(){
 function initDraftRoom(){
   var sel=document.getElementById('dr-team-select');
   TM.forEach(function(t){var opt=document.createElement('option');opt.value=t.n;opt.textContent=t.n+' ('+t.o+')';sel.appendChild(opt)});
+  renderTeamRoster(''); // start on an empty roster until a team is picked
   // The live-standings order only gets recomputed/pushed to the shared store
   // from the Draft Order tab itself (on load, and every 30s while someone has
   // it open). If nobody currently has that tab open, Draft Room would just
@@ -2269,10 +2270,33 @@ function renderSelectedPlayer(){
   meta.textContent=row?(row[3]+' · '+row[2]):'';
   drHeadshot(drSelectedPlayer,function(url){
     photo.innerHTML=url?'<img src="'+url+'" onerror="this.parentNode.innerHTML=\'\\uD83C\\uDFC8\'">':'🏈';
+    positionPickBtn();
   });
   btn.disabled=!onClock;
   btn.textContent=onClock?'Pick':'Draft Over';
+  positionPickBtn();
+  // re-measure once the new name/photo have actually laid out
+  requestAnimationFrame(positionPickBtn);
 }
+// Sit the Pick button midway between the player's name and the header's right
+// edge, clamped so it never crowds the on-the-clock block.
+function positionPickBtn(){
+  var row=document.querySelector('.dr-clock-row'),hdr=document.getElementById('dr-clock'),
+      wrap=document.querySelector('.dr-pick-wrap'),nameEl=document.getElementById('dr-sel-name'),
+      btn=document.getElementById('dr-pick-btn'),mid=document.querySelector('.dr-clock-mid');
+  if(!row||!hdr||!wrap||!btn||!nameEl||!mid)return;
+  if(window.innerWidth<=760){wrap.classList.remove('abs');btn.style.left='';return} // stacked: leave in flow
+  wrap.classList.add('abs');                   // out of flow so it can't shift the row
+  var r=row.getBoundingClientRect(),h=hdr.getBoundingClientRect(),n=nameEl.getBoundingClientRect(),
+      m=mid.getBoundingClientRect(),b=btn.getBoundingClientRect();
+  var target=(n.right+h.right)/2;
+  var minCenter=m.right+b.width/2+14;          // never crowd the clock block
+  var maxCenter=h.right-16-b.width/2;
+  if(target<minCenter)target=minCenter;
+  if(target>maxCenter)target=maxCenter;
+  btn.style.left=Math.round(target-r.left-b.width/2)+'px';
+}
+window.addEventListener('resize',function(){positionPickBtn()});
 /* ═══ 2-MINUTE PICK CLOCK ═══ */
 var DR_CLOCK_SECONDS=120;
 var drClockLeft=DR_CLOCK_SECONDS,drClockInt=null,drAudioCtx=null,drBuzzOscs=[],drBuzzGain=null;
@@ -2344,13 +2368,10 @@ function pickSelectedPlayer(){
   draftPick(idx+1,drOrder[idx].name,player);
 }
 
+// The panel is always up; picking "View Team Roster..." (empty) just blanks it.
 function openTeamRoster(val){
-  if(!val){closeTeamRoster();return}
-  drActiveRosterTeam=val;document.getElementById('dr-roster-team-name').textContent=val;
-  document.getElementById('dr-roster-panel').classList.add('open');renderTeamRoster(val);
-}
-function closeTeamRoster(){
-  drActiveRosterTeam='';document.getElementById('dr-roster-panel').classList.remove('open');document.getElementById('dr-team-select').value='';
+  drActiveRosterTeam=val||'';
+  renderTeamRoster(drActiveRosterTeam);
 }
 function renderTeamRoster(teamName){
   var team=TM.find(function(t){return t.n===teamName});var ownerName=team?team.o:'';
