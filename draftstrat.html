@@ -81,6 +81,28 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .wrap-12 .plan-col{flex:1 1 640px;min-width:0}
 .wrap-12 .keeper-col{flex:0 0 300px;position:sticky;top:16px}
 @media(max-width:1150px){.wrap-12{flex-direction:column}.wrap-12 .lineup-col,.wrap-12 .keeper-col{flex:1 1 auto;width:100%;position:static}}
+/* draft board */
+.board-wrap{overflow-x:auto;padding:12px 16px 6px;-webkit-overflow-scrolling:touch}
+.btbl{border-collapse:separate;border-spacing:3px;margin:0 auto}
+.btbl th{font-family:'Oswald',sans-serif;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#aaa;padding:5px 4px;background:#12161f;border:1px solid #222;border-radius:4px;width:104px;max-width:104px;vertical-align:middle;line-height:1.25}
+.btbl th .bt-owner{display:block;font-size:.56rem;color:#666;font-weight:400;letter-spacing:0}
+.btbl th.bt-rd{width:34px;min-width:34px;background:none;border:none;color:#555}
+.btbl td.bt-rd{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;color:#555;text-align:center;width:34px;min-width:34px}
+.bt-cell{width:104px;max-width:104px;height:46px;border-radius:4px;border:1px solid #1e2330;background:#0d1019;padding:4px 5px;vertical-align:middle;overflow:hidden}
+.bt-cell.empty{background:repeating-linear-gradient(45deg,#0b0e15,#0b0e15 6px,#0d1019 6px,#0d1019 12px)}
+.bt-num{font-family:'Oswald',sans-serif;font-size:.55rem;color:#3a4050;line-height:1}
+.bt-name{font-family:'Roboto Condensed',sans-serif;font-size:.76rem;font-weight:700;line-height:1.15;margin-top:2px;word-break:break-word}
+.bt-k{font-family:'Oswald',sans-serif;font-size:.52rem;color:#e05555;letter-spacing:1px}
+/* position colors — identical hues to the Draft Room */
+.bt-QB{background:rgba(241,196,15,.16);border-color:rgba(241,196,15,.45)}.bt-QB .bt-name{color:#f1c40f}
+.bt-RB{background:rgba(52,152,219,.16);border-color:rgba(52,152,219,.45)}.bt-RB .bt-name{color:#3498db}
+.bt-WR{background:rgba(39,174,96,.16);border-color:rgba(39,174,96,.45)}.bt-WR .bt-name{color:#27ae60}
+.bt-TE{background:rgba(230,126,34,.16);border-color:rgba(230,126,34,.45)}.bt-TE .bt-name{color:#e67e22}
+.bt-K{background:rgba(136,136,136,.14);border-color:rgba(136,136,136,.4)}.bt-K .bt-name{color:#999}
+.bt-DEF{background:rgba(155,89,182,.16);border-color:rgba(155,89,182,.45)}.bt-DEF .bt-name{color:#9b59b6}
+.bt-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;padding:4px 16px 0;font-family:'Oswald',sans-serif;font-size:.66rem;letter-spacing:1px;text-transform:uppercase}
+.bt-legend span i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle;font-style:normal}
+@media(max-width:640px){.btbl th,.bt-cell{width:82px;max-width:82px}.bt-name{font-size:.68rem}}
 .keeper-box{background:linear-gradient(180deg,#141822,#0d1019);border:1px solid #222;border-radius:6px;padding:14px}
 .keeper-hdr{font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#eee;margin-bottom:2px}
 .keeper-sub{font-family:'Roboto Condensed',sans-serif;font-size:.68rem;font-weight:400;text-transform:none;letter-spacing:0;color:#666;display:block;margin-top:2px}
@@ -108,7 +130,14 @@ tr.bench-row td{opacity:.55}
 <div class="tab-bar">
   <button class="tab-btn active" id="tb-t10" onclick="switchTab('t10')">10 Team</button>
   <button class="tab-btn" id="tb-t12" onclick="switchTab('t12')">12 Team<span class="live-dot"></span></button>
+  <button class="tab-btn" id="tb-board" onclick="switchTab('board')">Draft Board<span class="live-dot"></span></button>
   <button class="tab-btn" id="tb-proj" onclick="switchTab('proj')">Projections</button>
+</div>
+
+<div class="tab-panel" id="tab-board">
+  <div class="status-bar"><span id="board-status">Draft room: connecting&hellip;</span><span id="board-info"></span></div>
+  <div class="board-wrap"><div id="board-grid"><div class="note">Loading draft board&hellip;</div></div></div>
+  <div class="note">Live from the league Draft Room &mdash; picks appear here as they're made. K = keeper already locked in. Squares are colored by position, matching the Draft Room.</div>
 </div>
 
 <div class="tab-panel active" id="tab-t10">
@@ -568,15 +597,127 @@ function pollDraft(){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     livePicks=(data&&data.picks)||[];
     liveKeepers=(data&&data.keepers)||{};
+    liveOrder=(data&&data.computedDraftOrder)||[];
     liveOk=true;
     var st=document.getElementById('live-status');
     st.textContent='Draft room: connected';st.className='status-ok';
     if(document.getElementById('tab-t12').classList.contains('active'))run12();
+    if(document.getElementById('tab-board').classList.contains('active'))renderDraftBoard();
     applyRemoteEdits((data&&data.draftstratEdits)||{});
   }).catch(function(){
+    liveOk=false;
     var st=document.getElementById('live-status');
     st.textContent='Draft room: offline (retrying)';st.className='status-err';
+    if(document.getElementById('tab-board').classList.contains('active'))renderDraftBoard();
   });
+}
+
+/* ═══════════ DRAFT BOARD TAB ═══════════ */
+// Keepers are stored by TEAM name; the draft order runs on OWNER names.
+var TEAM_OWNERS=[
+  ["That's What Cheesehead",'Brent Brevak'],['Poutine Powerhouse','Jason Balmer'],
+  ['Days of Thunder','Brandon Cepelnik'],["Cruzin' USA",'Jeramie Ryan'],
+  ['Team America','Chris Cook'],['Sloppy Toppies','Chuck Bush'],
+  ['Out of Luck Forever','Will Yeager'],['Son of Pintang','Matt Strickert'],
+  ['Bramsels in Distress','Jeremy Bramley'],['Doom Crew','Willie Brown'],
+  ['Fancy Like Applebees','Justin Beatty'],['Always Open','Nick Duncan']
+];
+var BT_KICKERS=['Blake Grupe','Eddy Pineiro','Chase McLaughlin','Evan McPherson','Tyler Loop',
+  'Jason Myers','Jake Bates',"Ka'imi Fairbairn",'Cameron Dicker','Chris Boswell','Brandon Aubrey','Jake Elliott'];
+var liveOrder=[];
+function boardPos(name){
+  var p=BY_NORM[normName(name)];
+  if(p)return p.pos;
+  if(/ DEF$/.test(name))return 'DEF';
+  if(BT_KICKERS.indexOf(name)>=0)return 'K';
+  return '';
+}
+function btAbbrev(n){
+  if(/ DEF$/.test(n))return n.replace(/ DEF$/,' D/ST');
+  if(n.length<=14)return n;
+  var parts=n.split(' ');
+  return parts.length<2?n:parts[0].charAt(0)+'. '+parts.slice(1).join(' ');
+}
+// Snake order, 14 rounds x 12 teams — same construction as the Draft Room.
+function buildBoardOrder(order){
+  var out=[];
+  for(var rd=0;rd<14;rd++){
+    var o=rd%2===0?order.slice():order.slice().reverse();
+    o.forEach(function(name,i){out.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:name})});
+  }
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  PICK_TRADES.forEach(function(t){
+    for(var p=0;p<out.length;p++){if(out[p].round===t.round&&out[p].name===t.from){out[p].name=t.to;break}}
+  });
+  return out;
+}
+function renderDraftBoard(){
+  var st=document.getElementById('board-status');
+  if(st){st.textContent=liveOk?'Draft room: connected':'Draft room: offline (retrying)';
+         st.className=liveOk?'status-ok':'status-err'}
+  var grid=document.getElementById('board-grid');
+  if(!grid)return;
+  if(!liveOrder||liveOrder.length<12){
+    grid.innerHTML='<div class="note">Waiting on the draft order from the Draft Room&hellip;</div>';
+    document.getElementById('board-info').textContent='';
+    return;
+  }
+  var order=liveOrder.slice(0,12),slots=buildBoardOrder(order);
+  var byPick={}; // pick # -> {player, keeper}
+  (livePicks||[]).forEach(function(p){
+    if(p&&p.player&&p.pick)byPick[p.pick]={player:p.player,keeper:!!p.keeper};
+  });
+  // Keepers locked in on the Keepers tab, placed at their keeper round
+  var kept=0;
+  for(var tn in liveKeepers){
+    var owner=null;
+    for(var i=0;i<TEAM_OWNERS.length;i++){if(TEAM_OWNERS[i][0]===tn){owner=TEAM_OWNERS[i][1];break}}
+    if(!owner)continue;
+    (liveKeepers[tn]||[]).forEach(function(k){
+      if(!k||!k.name)return;
+      kept++;
+      var kr=parseInt(k.kr);
+      if(isNaN(kr)||kr<1||kr>14)return;
+      for(var s=0;s<slots.length;s++){
+        if(slots[s].round===kr&&slots[s].name===owner){
+          if(!byPick[slots[s].pick])byPick[slots[s].pick]={player:k.name,keeper:true};
+          break;
+        }
+      }
+    });
+  }
+  var html='<table class="btbl"><thead><tr><th class="bt-rd"></th>';
+  order.forEach(function(ownerName){
+    var team='';
+    for(var i=0;i<TEAM_OWNERS.length;i++){if(TEAM_OWNERS[i][1]===ownerName){team=TEAM_OWNERS[i][0];break}}
+    html+='<th>'+(team||ownerName)+'<span class="bt-owner">'+ownerName+'</span></th>';
+  });
+  html+='</tr></thead><tbody>';
+  var made=0;
+  for(var rd=1;rd<=14;rd++){
+    html+='<tr><td class="bt-rd">'+rd+'</td>';
+    for(var c=0;c<12;c++){
+      // snake: even rounds run right-to-left, so a team keeps its column
+      var pickInRound=(rd%2===1)?c+1:12-c;
+      var pickNum=(rd-1)*12+pickInRound;
+      var e=byPick[pickNum];
+      if(e){
+        made++;
+        var pos=boardPos(e.player);
+        html+='<td class="bt-cell'+(pos?' bt-'+pos:'')+'"><div class="bt-num">'+pickNum+
+          (e.keeper?' <span class="bt-k">K</span>':'')+'</div><div class="bt-name">'+btAbbrev(e.player)+'</div></td>';
+      } else {
+        html+='<td class="bt-cell empty"><div class="bt-num">'+pickNum+'</div></td>';
+      }
+    }
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  html+='<div class="bt-legend">'+['QB','RB','WR','TE','K','DEF'].map(function(p){
+    return '<span class="bt-'+p+'" style="background:none;border:none"><i class="bt-'+p+'" style="border-width:1px;border-style:solid"></i>'+p+'</span>';
+  }).join('')+'</div>';
+  grid.innerHTML=html;
+  document.getElementById('board-info').textContent=made+' of '+slots.length+' picks in'+(kept?' · '+kept+' keeper'+(kept>1?'s':''):'');
 }
 
 /* ═══════════ PROJECTIONS TAB ═══════════ */
@@ -697,11 +838,12 @@ function resetEdits(){
 
 /* ═══════════ TABS + INIT ═══════════ */
 function switchTab(id){
-  ['t10','t12','proj'].forEach(function(t){
+  ['t10','t12','board','proj'].forEach(function(t){
     document.getElementById('tab-'+t).classList.toggle('active',t===id);
     document.getElementById('tb-'+t).classList.toggle('active',t===id);
   });
   if(id==='t12')run12();
+  if(id==='board')renderDraftBoard();
 }
 run10();run12();renderProj();
 pollDraft();setInterval(pollDraft,5000);
