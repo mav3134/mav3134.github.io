@@ -297,6 +297,15 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dr-pick-btn{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:2px;color:#fff;padding:12px 34px;border:none;border-radius:6px;background:linear-gradient(135deg,#27ae60,#1e8449);cursor:pointer;box-shadow:0 3px 12px rgba(39,174,96,.3);transition:all .15s}
 .dr-pick-btn:hover:not(:disabled){transform:scale(1.04);box-shadow:0 4px 18px rgba(39,174,96,.45)}
 .dr-pick-btn:disabled{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);color:#555;cursor:not-allowed;box-shadow:none}
+.dr-timer-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.dr-clock-btn{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ccc;padding:7px 16px;border-radius:4px;border:1px solid #444;background:#12161f;cursor:pointer;transition:all .15s}
+.dr-clock-btn:hover{border-color:#f39c12;color:#fff}
+.dr-clock-btn.running{border-color:#c8102e;color:#e05555}
+.dr-timer{font-family:'Anton',sans-serif;font-size:1.5rem;letter-spacing:2px;color:#ccc;min-width:78px;text-align:center;line-height:1}
+.dr-timer.warn{color:#f39c12}
+.dr-timer.danger{color:#e05555}
+.dr-timer.expired{color:#e05555;animation:drFlash .5s steps(1) infinite}
+@keyframes drFlash{0%,49%{opacity:1}50%,100%{opacity:.25}}
 .dr-ptbl tbody tr{cursor:pointer}
 .dr-ptbl tbody tr.dr-drafted{cursor:default}
 .dr-ptbl tr.dr-selected td{background:rgba(39,174,96,.22)!important;box-shadow:inset 3px 0 0 #27ae60}
@@ -447,6 +456,10 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
         <div class="dr-clock-label">On the Clock</div>
         <div class="dr-clock-name" id="dr-clock-name">—</div>
         <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
+        <div class="dr-timer-row">
+          <button class="dr-clock-btn" id="dr-clock-btn" onclick="toggleDraftClock()">Start the Clock</button>
+          <span class="dr-timer" id="dr-timer">2:00</span>
+        </div>
       </div>
       <div class="dr-pick-wrap">
         <button class="dr-pick-btn" id="dr-pick-btn" onclick="pickSelectedPlayer()" disabled>Pick</button>
@@ -2259,6 +2272,68 @@ function renderSelectedPlayer(){
   });
   btn.disabled=!onClock;
   btn.textContent=onClock?'Pick':'Draft Over';
+}
+/* ═══ 2-MINUTE PICK CLOCK ═══ */
+var DR_CLOCK_SECONDS=120;
+var drClockLeft=DR_CLOCK_SECONDS,drClockInt=null,drAudioCtx=null,drBuzzOscs=[],drBuzzGain=null;
+function drFmtClock(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
+function renderDraftClock(){
+  var t=document.getElementById('dr-timer'),b=document.getElementById('dr-clock-btn');
+  if(!t||!b)return;
+  t.textContent=drFmtClock(drClockLeft);
+  t.className='dr-timer'+(drClockLeft===0?' expired':drClockLeft<=15?' danger':drClockLeft<=30?' warn':'');
+  var started=drClockInt!==null||drClockLeft<DR_CLOCK_SECONDS;
+  b.textContent=started?'Reset the Clock':'Start the Clock';
+  b.classList.toggle('running',started);
+}
+function toggleDraftClock(){
+  if(drClockInt!==null||drClockLeft<DR_CLOCK_SECONDS){resetDraftClock();return}
+  // The click is the user gesture that lets us make noise later
+  try{
+    if(!drAudioCtx)drAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(drAudioCtx.state==='suspended')drAudioCtx.resume();
+  }catch(e){}
+  var endAt=Date.now()+DR_CLOCK_SECONDS*1000;
+  drClockInt=setInterval(function(){
+    drClockLeft=Math.max(0,Math.round((endAt-Date.now())/1000));
+    if(drClockLeft===0){clearInterval(drClockInt);drClockInt=null;drPlayBuzzer()}
+    renderDraftClock();
+  },250);
+  drClockLeft=DR_CLOCK_SECONDS;
+  renderDraftClock();
+}
+function resetDraftClock(){
+  if(drClockInt!==null){clearInterval(drClockInt);drClockInt=null}
+  drStopBuzzer();
+  drClockLeft=DR_CLOCK_SECONDS;
+  renderDraftClock();
+}
+function drPlayBuzzer(){
+  try{
+    if(!drAudioCtx)drAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(drAudioCtx.state==='suspended')drAudioCtx.resume();
+    var ctx=drAudioCtx,t0=ctx.currentTime;
+    drStopBuzzer();
+    var master=ctx.createGain();master.gain.value=0.85;master.connect(ctx.destination);
+    drBuzzGain=master;
+    [0,1,2].forEach(function(off){           // three harsh blasts
+      var g=ctx.createGain();g.connect(master);
+      g.gain.setValueAtTime(0,t0+off);
+      g.gain.linearRampToValueAtTime(1,t0+off+0.02);
+      g.gain.setValueAtTime(1,t0+off+0.72);
+      g.gain.linearRampToValueAtTime(0,t0+off+0.78);
+      [110,113.5,220].forEach(function(f){    // detuned squares = buzzer rasp
+        var o=ctx.createOscillator();o.type='square';o.frequency.value=f;
+        o.connect(g);o.start(t0+off);o.stop(t0+off+0.8);
+        drBuzzOscs.push(o);
+      });
+    });
+  }catch(e){}
+}
+function drStopBuzzer(){
+  drBuzzOscs.forEach(function(o){try{o.stop()}catch(e){}});
+  drBuzzOscs=[];
+  if(drBuzzGain){try{drBuzzGain.disconnect()}catch(e){}drBuzzGain=null}
 }
 function pickSelectedPlayer(){
   if(!drSelectedPlayer||drDrafted.has(drSelectedPlayer))return;
