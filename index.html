@@ -282,6 +282,31 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dr-clock-name:hover{background:rgba(243,156,18,.2);transform:scale(1.02)}
 .dr-clock-name:active{cursor:grabbing}
 .dr-clock-pick{font-family:'Oswald',sans-serif;font-size:.75rem;color:#666;margin-top:2px}
+/* clock header: selected player (left) · on the clock (center) · pick button (right) */
+.dr-clock-row{display:flex;align-items:center;gap:14px}
+.dr-clock-row .dr-clock-mid{flex:0 0 auto;margin:0 auto}
+.dr-sel-wrap{flex:1;display:flex;align-items:center;gap:10px;min-width:0;text-align:left}
+.dr-sel-photo{width:52px;height:52px;flex:none;border-radius:50%;overflow:hidden;background:#12161f;border:2px solid #2a2f3e;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.dr-sel-photo img{width:100%;height:100%;object-fit:cover}
+.dr-sel-info{min-width:0}
+.dr-sel-label{font-family:'Oswald',sans-serif;font-size:.6rem;color:#888;text-transform:uppercase;letter-spacing:1.5px}
+.dr-sel-name{font-family:'Oswald',sans-serif;font-size:.95rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr-sel-meta{font-family:'Oswald',sans-serif;font-size:.65rem;color:#777;letter-spacing:1px}
+.dr-sel-wrap.empty .dr-sel-name{color:#555;font-weight:400;font-style:italic}
+.dr-pick-wrap{flex:1;display:flex;justify-content:flex-end}
+.dr-pick-btn{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:2px;color:#fff;padding:12px 34px;border:none;border-radius:6px;background:linear-gradient(135deg,#27ae60,#1e8449);cursor:pointer;box-shadow:0 3px 12px rgba(39,174,96,.3);transition:all .15s}
+.dr-pick-btn:hover:not(:disabled){transform:scale(1.04);box-shadow:0 4px 18px rgba(39,174,96,.45)}
+.dr-pick-btn:disabled{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);color:#555;cursor:not-allowed;box-shadow:none}
+.dr-ptbl tbody tr{cursor:pointer}
+.dr-ptbl tbody tr.dr-drafted{cursor:default}
+.dr-ptbl tr.dr-selected td{background:rgba(39,174,96,.22)!important;box-shadow:inset 3px 0 0 #27ae60}
+@media(max-width:760px){
+  .dr-clock-row{flex-wrap:wrap;justify-content:center}
+  .dr-clock-row .dr-clock-mid{order:1;flex:1 1 100%;margin:0}
+  .dr-sel-wrap{order:2;flex:1 1 auto}
+  .dr-pick-wrap{order:3;flex:0 0 auto}
+  .dr-pick-btn{font-size:1.05rem;padding:10px 26px}
+}
 .dr-toolbar{display:flex;align-items:center;gap:16px;margin-bottom:10px}
 .dr-title{font-family:'Anton',sans-serif;font-size:1.4rem;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(180deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .dr-undo{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:6px 14px;border-radius:4px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;cursor:pointer;transition:all .15s}
@@ -409,9 +434,24 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 <div class="tab-panel" id="tab-draft-room">
 <div class="dr-wrap">
   <div class="dr-clock" id="dr-clock">
-    <div class="dr-clock-label">On the Clock</div>
-    <div class="dr-clock-name" id="dr-clock-name">—</div>
-    <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
+    <div class="dr-clock-row">
+      <div class="dr-sel-wrap empty" id="dr-sel-wrap">
+        <div class="dr-sel-photo" id="dr-sel-photo">🏈</div>
+        <div class="dr-sel-info">
+          <div class="dr-sel-label">Selected</div>
+          <div class="dr-sel-name" id="dr-sel-name">Tap a player</div>
+          <div class="dr-sel-meta" id="dr-sel-meta"></div>
+        </div>
+      </div>
+      <div class="dr-clock-mid">
+        <div class="dr-clock-label">On the Clock</div>
+        <div class="dr-clock-name" id="dr-clock-name">—</div>
+        <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
+      </div>
+      <div class="dr-pick-wrap">
+        <button class="dr-pick-btn" id="dr-pick-btn" onclick="pickSelectedPlayer()" disabled>Pick</button>
+      </div>
+    </div>
   </div>
   <div class="dr-toolbar">
     <div class="dr-title">Draft Room</div>
@@ -1736,7 +1776,7 @@ var DRAFT_DB=[
 [411,"Ryan Fitzgerald","CAR","K",111.0,0,0,0,0,0,0,0,0,0],
 [412,"Matt Prater","BUF","K",108.0,0,0,0,0,0,0,0,0,0]
 ];var STAT_HEADERS=["Rank","Player","Team","Pos","Pts","Pass Yds","Pass TD","INT","Rush Yds","Rush TD","Rec","Rec Yds","Rec TD","FumL"];
-var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='';
+var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='',drSelectedPlayer='';
 var drLoading=false;
 var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
 var ROW_COLORS={QB:'row-qb',RB:'row-rb',WR:'row-wr',TE:'row-te',K:'row-k',DEF:'row-def'};
@@ -2122,8 +2162,12 @@ function renderLocalPlayers(posFilter){
   });
   html+='</tbody></table>';
   document.getElementById('dr-player-table').innerHTML=html;
-  // Attach drop events
+  // A selected player who got drafted (here or by someone else) is no longer selectable
+  if(drSelectedPlayer&&drDrafted.has(drSelectedPlayer))drSelectedPlayer='';
+  // Attach click-to-select + drop events
   document.querySelectorAll('.dr-ptbl tbody tr:not(.dr-drafted)').forEach(function(tr){
+    if(tr.dataset.player===drSelectedPlayer)tr.classList.add('dr-selected');
+    tr.addEventListener('click',function(){selectDraftPlayer(tr.dataset.player)});
     tr.addEventListener('dragover',function(e){e.preventDefault();tr.classList.add('dr-dragover')});
     tr.addEventListener('dragleave',function(){tr.classList.remove('dr-dragover')});
     tr.addEventListener('drop',function(e){
@@ -2132,6 +2176,7 @@ function renderLocalPlayers(posFilter){
       if(!pn||drDrafted.has(pn))return;draftPick(parseInt(data.pick),data.name,pn)}catch(ex){}
     });
   });
+  renderSelectedPlayer();
 }
 
 function switchDraftSub(name){
@@ -2159,6 +2204,69 @@ function draftUndo(){
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
   saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+}
+
+/* ═══ CLICK-TO-SELECT + PICK BUTTON ═══ */
+function drNextPickIdx(){
+  for(var i=0;i<drOrder.length;i++){if(!drPicks[i])return i}
+  return -1;
+}
+// Resolve a headshot URL (team logo for DEF), reusing the scouting-report cache.
+function drHeadshot(name,cb){
+  if(/ DEF$/.test(name)){
+    var ab=DEF_LOGOS[name.replace(/ DEF$/,'')]||'nfl';
+    cb('https://a.espncdn.com/i/teamlogos/nfl/500/'+ab+'.png');return;
+  }
+  if(hsCache[name]){cb(hsCache[name]);return}
+  cb(null);
+  fetch('https://site.web.api.espn.com/apis/common/v3/search?query='+encodeURIComponent(name)+'&limit=1&type=player&sport=football&league=nfl')
+    .then(function(r){return r.json()}).then(function(d){
+      var items=d.items||d.results||[];if(!items.length)return;
+      var it=items[0],m=it.$ref&&it.$ref.match(/athletes\/(\d+)/);
+      var id=it.id||(m&&m[1]);
+      if(!id)return;
+      hsCache[name]='https://a.espncdn.com/i/headshots/nfl/players/full/'+id+'.png';
+      if(drSelectedPlayer===name)renderSelectedPlayer();
+    }).catch(function(){});
+}
+function selectDraftPlayer(name){
+  if(!name||drDrafted.has(name))return;
+  drSelectedPlayer=(drSelectedPlayer===name)?'':name; // tap again to deselect
+  renderSelectedPlayer();
+  document.querySelectorAll('.dr-ptbl tbody tr').forEach(function(tr){
+    tr.classList.toggle('dr-selected',!!drSelectedPlayer&&tr.dataset.player===drSelectedPlayer);
+  });
+}
+function renderSelectedPlayer(){
+  var wrap=document.getElementById('dr-sel-wrap');
+  if(!wrap)return;
+  var photo=document.getElementById('dr-sel-photo'),nm=document.getElementById('dr-sel-name'),
+      meta=document.getElementById('dr-sel-meta'),btn=document.getElementById('dr-pick-btn');
+  var onClock=drNextPickIdx()>=0;
+  if(!drSelectedPlayer){
+    wrap.classList.add('empty');photo.innerHTML='🏈';
+    nm.textContent='Tap a player';meta.textContent='';
+    btn.disabled=true;btn.textContent='Pick';
+    return;
+  }
+  wrap.classList.remove('empty');
+  nm.textContent=drSelectedPlayer;
+  var row=null;
+  for(var i=0;i<DRAFT_DB.length;i++){if(DRAFT_DB[i][1]===drSelectedPlayer){row=DRAFT_DB[i];break}}
+  meta.textContent=row?(row[3]+' · '+row[2]):'';
+  drHeadshot(drSelectedPlayer,function(url){
+    photo.innerHTML=url?'<img src="'+url+'" onerror="this.parentNode.innerHTML=\'\\uD83C\\uDFC8\'">':'🏈';
+  });
+  btn.disabled=!onClock;
+  btn.textContent=onClock?'Pick':'Draft Over';
+}
+function pickSelectedPlayer(){
+  if(!drSelectedPlayer||drDrafted.has(drSelectedPlayer))return;
+  var idx=drNextPickIdx();
+  if(idx<0)return;
+  var player=drSelectedPlayer;
+  drSelectedPlayer='';
+  draftPick(idx+1,drOrder[idx].name,player);
 }
 
 function openTeamRoster(val){
