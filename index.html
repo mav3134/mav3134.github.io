@@ -296,7 +296,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .dr-sel-wrap.empty .dr-sel-name{font-family:'Oswald',sans-serif;font-size:1.1rem;font-weight:400;font-style:italic;text-transform:none;color:#555}
 .dr-pick-wrap{flex:1;display:flex;justify-content:center}
 .dr-pick-btn{font-family:'Anton',sans-serif;font-size:1.25rem;text-transform:uppercase;letter-spacing:2px;color:#fff;padding:12px 34px;border:none;border-radius:6px;background:linear-gradient(135deg,#27ae60,#1e8449);cursor:pointer;box-shadow:0 3px 12px rgba(39,174,96,.3);transition:all .15s}
-.dr-pick-btn:hover:not(:disabled){transform:scale(1.04);box-shadow:0 4px 18px rgba(39,174,96,.45)}
+.dr-pick-btn:hover:not(:disabled){filter:brightness(1.12);box-shadow:0 4px 18px rgba(39,174,96,.45)}
 .dr-pick-btn:disabled{background:linear-gradient(135deg,#2a2f3e,#1a1f2e);color:#555;cursor:not-allowed;box-shadow:none}
 .dr-timer-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
 .dr-clock-btn{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:#ccc;padding:7px 16px;border-radius:4px;border:1px solid #444;background:#12161f;cursor:pointer;transition:all .15s}
@@ -952,11 +952,18 @@ function showActiveBtn(){
       if(activeTeam)updateBtn(activeTeam);
     }
   }).catch(function(){});
-  var hash=(location.hash||'').replace('#','');
-  if(hash&&document.getElementById('tab-'+hash)){
-    switchTab(hash);
-    if(hash==='keepers'&&!KEEPERS_LOCKED){document.getElementById('picker').classList.remove('hide')}
+  // Restore the tab only once every script block has run — switchTab can call
+  // a tab's init (e.g. initDraftRoom), and those live in later blocks whose
+  // state isn't defined yet at this point in the document.
+  function restoreTab(){
+    var hash=(location.hash||'').replace('#','');
+    if(hash&&document.getElementById('tab-'+hash)){
+      switchTab(hash);
+      if(hash==='keepers'&&!KEEPERS_LOCKED){document.getElementById('picker').classList.remove('hide')}
+    }
   }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreTab);
+  else restoreTab();
 })();
 
 // ═══ DRAFT RESULTS (actual snake draft order) ═══
@@ -1950,7 +1957,7 @@ function rebuildFromComputed(order){
     var o=rd%2===0?order.slice():order.slice().reverse();
     o.forEach(function(name,i){drOrder.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:name})});
   }
-  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'},{round:10,from:'Brandon Cepelnik',to:'Chuck Bush'}];
   PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
 }
 
@@ -2077,7 +2084,7 @@ function buildDraftOrder(table){
     });
   }
   // Traded picks: override owner name for specific rounds
-  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'},{round:10,from:'Brandon Cepelnik',to:'Chuck Bush'}];
   PICK_TRADES.forEach(function(t){for(var p=0;p<drOrder.length;p++){if(drOrder[p].round===t.round&&drOrder[p].name===t.from){drOrder[p].name=t.to;break}}});
   for(var tn in savedKeepers){var keepers=savedKeepers[tn];if(!keepers||!keepers.length)continue;
     var team=TM.find(function(t){return t.n===tn});if(!team)continue;
@@ -2299,7 +2306,20 @@ function positionPickBtn(){
 window.addEventListener('resize',function(){positionPickBtn()});
 /* ═══ 2-MINUTE PICK CLOCK ═══ */
 var DR_CLOCK_SECONDS=120;
-var drClockLeft=DR_CLOCK_SECONDS,drClockInt=null,drAudioCtx=null,drBuzzOscs=[],drBuzzGain=null;
+// Clips play in order, one per expiry, looping back to the first after the
+// last. The position survives reloads so a refresh doesn't restart the list.
+var DR_SOUNDS=['sounds/1-im-an-idiot.wav','sounds/2-ya-jackass.wav','sounds/3-hey-you-idiot.wav',
+  'sounds/4-you-are-so-dumb.wav','sounds/5-mario-dead.wav','sounds/6-price-is-right-horn.mp3'];
+var drClockLeft=DR_CLOCK_SECONDS,drClockInt=null,drSoundEls=[],drNowPlaying=null;
+function drSoundIdx(){var n=parseInt(localStorage.getItem('drSoundIdx')||'0',10);return isNaN(n)?0:n%DR_SOUNDS.length}
+function drPreloadSounds(){
+  if(drSoundEls.length)return;
+  DR_SOUNDS.forEach(function(src){
+    var a=new Audio(src);a.preload='auto';a.volume=1;
+    try{a.load()}catch(e){}
+    drSoundEls.push(a);
+  });
+}
 function drFmtClock(s){return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2)}
 function renderDraftClock(){
   var t=document.getElementById('dr-timer'),b=document.getElementById('dr-clock-btn');
@@ -2312,11 +2332,7 @@ function renderDraftClock(){
 }
 function toggleDraftClock(){
   if(drClockInt!==null||drClockLeft<DR_CLOCK_SECONDS){resetDraftClock();return}
-  // The click is the user gesture that lets us make noise later
-  try{
-    if(!drAudioCtx)drAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    if(drAudioCtx.state==='suspended')drAudioCtx.resume();
-  }catch(e){}
+  drPreloadSounds(); // this click is the gesture that lets us make noise later
   var endAt=Date.now()+DR_CLOCK_SECONDS*1000;
   drClockInt=setInterval(function(){
     drClockLeft=Math.max(0,Math.round((endAt-Date.now())/1000));
@@ -2333,31 +2349,20 @@ function resetDraftClock(){
   renderDraftClock();
 }
 function drPlayBuzzer(){
-  try{
-    if(!drAudioCtx)drAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
-    if(drAudioCtx.state==='suspended')drAudioCtx.resume();
-    var ctx=drAudioCtx,t0=ctx.currentTime;
-    drStopBuzzer();
-    var master=ctx.createGain();master.gain.value=0.85;master.connect(ctx.destination);
-    drBuzzGain=master;
-    [0,1,2].forEach(function(off){           // three harsh blasts
-      var g=ctx.createGain();g.connect(master);
-      g.gain.setValueAtTime(0,t0+off);
-      g.gain.linearRampToValueAtTime(1,t0+off+0.02);
-      g.gain.setValueAtTime(1,t0+off+0.72);
-      g.gain.linearRampToValueAtTime(0,t0+off+0.78);
-      [110,113.5,220].forEach(function(f){    // detuned squares = buzzer rasp
-        var o=ctx.createOscillator();o.type='square';o.frequency.value=f;
-        o.connect(g);o.start(t0+off);o.stop(t0+off+0.8);
-        drBuzzOscs.push(o);
-      });
-    });
-  }catch(e){}
+  drStopBuzzer();
+  drPreloadSounds();
+  var i=drSoundIdx();
+  try{localStorage.setItem('drSoundIdx',String((i+1)%DR_SOUNDS.length))}catch(e){}
+  var a=drSoundEls[i]||new Audio(DR_SOUNDS[i]);
+  drNowPlaying=a;
+  try{a.currentTime=0}catch(e){}
+  var p=a.play();
+  if(p&&p.catch)p.catch(function(){});
 }
 function drStopBuzzer(){
-  drBuzzOscs.forEach(function(o){try{o.stop()}catch(e){}});
-  drBuzzOscs=[];
-  if(drBuzzGain){try{drBuzzGain.disconnect()}catch(e){}drBuzzGain=null}
+  if(!drNowPlaying)return;
+  try{drNowPlaying.pause();drNowPlaying.currentTime=0}catch(e){}
+  drNowPlaying=null;
 }
 function pickSelectedPlayer(){
   if(!drSelectedPlayer||drDrafted.has(drSelectedPlayer))return;
@@ -2375,8 +2380,11 @@ function openTeamRoster(val){
 }
 function renderTeamRoster(teamName){
   var team=TM.find(function(t){return t.n===teamName});var ownerName=team?team.o:'';
+  // May be called before the Draft Room's own state is declared (landing
+  // straight on #draft-room), so don't assume drPicks/drOrder exist yet.
+  var picks=(typeof drPicks!=='undefined'&&drPicks)||[],ord=(typeof drOrder!=='undefined'&&drOrder)||[];
   var teamPlayers=[];
-  drPicks.forEach(function(p,idx){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,round:drOrder[idx]?drOrder[idx].round:0,keeper:p.keeper||false})});
+  picks.forEach(function(p,idx){if(p&&p.owner===ownerName)teamPlayers.push({player:p.player,pick:p.pick,round:ord[idx]?ord[idx].round:0,keeper:p.keeper||false})});
   teamPlayers.forEach(function(tp){tp.pos=guessPosition(tp.player)});
   var slots=[{label:'QB',pos:'QB'},{label:'WR',pos:'WR'},{label:'WR',pos:'WR'},{label:'RB',pos:'RB'},{label:'RB',pos:'RB'},{label:'TE',pos:'TE'},{label:'FLEX',pos:'FLEX'},{label:'K',pos:'K'},{label:'DEF',pos:'DEF'}];
   var assigned=[],html='<div class="dr-slot-sep">Starters</div>';
