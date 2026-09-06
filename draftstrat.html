@@ -66,6 +66,9 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .ptbl input:focus{border-color:#c8102e;background:#12161f;color:#fff}
 .ptbl input.edited{color:#f5c842;font-weight:700}
 .ptbl .fp{font-family:'Oswald',sans-serif;font-weight:600;color:#f5c842}
+.ptbl tr.proj-drafted td{opacity:.4}
+.ptbl tr.proj-drafted .pl{text-decoration:line-through}
+.proj-drafted-by{display:inline-block;margin-left:8px;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-decoration:none;color:#f5c842;letter-spacing:.5px}
 .proj-tools{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px;flex-wrap:wrap}
 .proj-tools input[type=text]{font-family:'Roboto Condensed',sans-serif;font-size:.85rem;padding:6px 12px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#ccc;width:210px;outline:none}
 .proj-tools input[type=text]:focus{border-color:#c8102e}
@@ -605,6 +608,7 @@ function pollDraft(){
     st.textContent='Draft room: connected';st.className='status-ok';
     if(document.getElementById('tab-t12').classList.contains('active'))run12();
     if(document.getElementById('tab-board').classList.contains('active'))renderDraftBoard();
+    if(document.getElementById('tab-proj').classList.contains('active'))renderProj();
     applyRemoteEdits((data&&data.draftstratEdits)||{});
   }).catch(function(){
     liveOk=false;
@@ -750,6 +754,82 @@ function renderDraftBoard(){
   document.getElementById('board-info').textContent=made+' of '+slots.length+' picks in'+(kept?' · '+kept+' keeper'+(kept>1?'s':''):'');
 }
 
+/* ═══ DRAFT ROOM RANK SYNC ═══
+   Keep the Projections tab's Rk column (and RANKED, which the 10/12-team
+   optimizers draft off of) matched to whatever rank the Draft Room is
+   actually showing: DRAFT_DB's baseline rank, overlaid by the live
+   "Rankings" Google Sheet tab exactly like the Draft Room does it. Only the
+   rank field is ever touched here — stat edits (the `edits` object below)
+   are completely separate and untouched. */
+var SHEET_ID='1dqt9-QHx3q6eGI1K_mEZ5uxW1f1_7qlgBuDMQBOuG4s';
+function sheetUrl(name){return 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)}
+function parseGviz(text){
+  var j=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
+  if(!j)j=text.match(/\{[\s\S]*"table"[\s\S]*\}/);
+  if(!j)throw new Error('Cannot parse response');
+  var str=j[1]||j[0];
+  str=str.replace(/\bundefined\b/g,'null');
+  return JSON.parse(str);
+}
+function fetchSheet(sheetName,callback){
+  fetch(sheetUrl(sheetName)).then(function(r){return r.text()}).then(function(text){
+    try{callback(null,parseGviz(text).table)}catch(e){callback(e,null)}
+  }).catch(function(e){callback(e,null)});
+}
+function rankSheetName(blob){
+  if(!blob)return '';
+  var s=String(blob).replace(/[-]/g,'').trim();
+  s=s.split(/Video Forecast|No new player Notes|New Player Notes?|Player Note/)[0];
+  s=s.replace(/([A-Za-z.'])(Q|O|D|IR|SUSP|PUP|NA|GTD)$/,'$1');
+  return s.trim();
+}
+function applyDraftRoomRanks(baseline,sheetTable){
+  var best=Object.assign({},baseline);          // normName -> rank
+  var rows=(sheetTable&&sheetTable.rows)||[];
+  if(rows.length){
+    var nameCol=2,rankCol=7;
+    for(var i=0;i<Math.min(rows.length,12);i++){
+      var c=rows[i].c||[];
+      for(var j=0;j<c.length;j++){
+        var v=cellVal(c[j]).replace(/[-]/g,'').trim().toLowerCase();
+        if(v==='offense')nameCol=j;
+        if(v==='pre-season')rankCol=j;
+      }
+    }
+    var fromSheet={};
+    for(var r=0;r<rows.length;r++){
+      var cells=rows[r].c||[];
+      var nm=rankSheetName(cellVal(cells[nameCol]));
+      var rk=parseInt(String(cellVal(cells[rankCol])).replace(/[^0-9]/g,''),10);
+      if(!nm||!rk||isNaN(rk))continue;
+      if(/^(offense|roster status|player|rank)$/i.test(nm))continue;
+      var key=normName(nm);
+      if(fromSheet[key]===undefined||rk<fromSheet[key])fromSheet[key]=rk;
+    }
+    if(Object.keys(fromSheet).length>=20)Object.assign(best,fromSheet);
+  }
+  var hit=0;
+  PLAYERS.forEach(function(p){
+    var rk=best[normName(p.name)];
+    if(rk){p.rank=rk;hit++}
+  });
+  RANKED=PLAYERS.filter(function(p){return p.rank}).sort(function(a,b){return a.rank-b.rank});
+  console.log('Draft room rank sync: '+hit+' players matched');
+  renderProj();run10();run12();
+}
+function loadDraftRoomRanks(){
+  fetch('index.html',{cache:'no-store'}).then(function(r){return r.text()}).then(function(text){
+    var m=/var DRAFT_DB=(\[[\s\S]*?\n\]);/.exec(text);
+    if(!m)throw new Error('DRAFT_DB not found');
+    var rows=JSON.parse(m[1].replace(/,\s*\]$/,']'));
+    var baseline={};
+    rows.forEach(function(r){if(r&&r[1]&&r[0])baseline[normName(r[1])]=r[0]});
+    fetchSheet('Rankings',function(err,table){
+      applyDraftRoomRanks(baseline,err?null:table);
+    });
+  }).catch(function(e){console.warn('Draft room rank sync unavailable:',e)});
+}
+
 /* ═══════════ PROJECTIONS TAB ═══════════ */
 var edits={};// normName -> {field:value}
 var editsLoaded=false;
@@ -781,9 +861,26 @@ function buildPosFilter(){
     el.appendChild(b);
   });
 }
+// normName -> {owner, keeper} for every player off the board — real picks
+// from the Draft Room plus keepers already locked in on the Keepers tab.
+function projDraftedMap(){
+  var m={};
+  (livePicks||[]).forEach(function(pk){
+    if(pk&&pk.player)m[normName(pk.player)]={owner:pk.owner||'',keeper:!!pk.keeper};
+  });
+  for(var tn in (liveKeepers||{})){
+    var owner=tn;
+    for(var i=0;i<TEAM_OWNERS.length;i++){if(TEAM_OWNERS[i][0]===tn){owner=TEAM_OWNERS[i][1];break}}
+    (liveKeepers[tn]||[]).forEach(function(k){
+      if(k&&k.name)m[normName(k.name)]={owner:owner,keeper:true};
+    });
+  }
+  return m;
+}
 function renderProj(){
   buildProjHead();buildPosFilter();
   var q=(document.getElementById('proj-search').value||'').toLowerCase();
+  var drafted=projDraftedMap();
   var list=PLAYERS.filter(function(p){
     if(posFilter!=='ALL'&&p.pos!==posFilter)return false;
     if(q&&p.name.toLowerCase().indexOf(q)<0&&p.team.toLowerCase().indexOf(q)<0)return false;
@@ -798,7 +895,9 @@ function renderProj(){
   var html='';
   list.forEach(function(p){
     var nn=normName(p.name),ed=edits[nn]||{};
-    html+='<tr><td style="color:#666">'+(p.rank||'')+'</td><td class="pl">'+p.name+'</td>'+
+    var d=drafted[nn];
+    html+='<tr'+(d?' class="proj-drafted"':'')+'><td style="color:#666">'+(p.rank||'')+'</td>'+
+      '<td class="pl">'+p.name+(d?'<span class="proj-drafted-by">'+(d.keeper?'K: ':'')+d.owner+'</span>':'')+'</td>'+
       '<td style="color:#888">'+p.team+'</td><td>'+posTag(p.pos)+'</td>'+
       '<td class="fp" id="fp-'+p.id+'">'+p.pts.toFixed(1)+'</td>';
     COLS.forEach(function(c){
@@ -876,6 +975,7 @@ function switchTab(id){
   if(id==='board')renderDraftBoard();
 }
 run10();run12();renderProj();
+loadDraftRoomRanks();setInterval(loadDraftRoomRanks,300000);
 pollDraft();setInterval(pollDraft,5000);
 </script>
 <script>
