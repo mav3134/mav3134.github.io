@@ -726,7 +726,10 @@ function myUpcomingPicks(){
   if(!placements.slots.length)return [];
   var mine=[];
   placements.slots.forEach(function(s){
-    if(s.name===MY_OWNER&&!placements.byPick[s.pick])mine.push(s.pick);
+    if(s.name!==MY_OWNER)return;
+    var filled=placements.byPick[s.pick];
+    if(filled&&!filled.keeper)return; // a real pick already happened here — skip
+    mine.push(s.pick);               // still open, or held by my own keeper
   });
   return mine;
 }
@@ -943,7 +946,8 @@ function renderProj(){
   var myPicks=showPickLines?myUpcomingPicks():[];
   var pickPtr=0;
   function pickLineRow(n,pickNum){
-    return '<tr class="proj-pickline"><td colspan="'+COLS.length+'">&#9660; Your '+ordinal(n)+' pick &mdash; Pick '+pickNum+'</td></tr>';
+    var rd=Math.ceil(pickNum/12);
+    return '<tr class="proj-pickline"><td colspan="'+COLS.length+'">&#9660; Your '+ordinal(n)+' pick &mdash; Round '+rd+'</td></tr>';
   }
   var html='';
   list.forEach(function(p){
