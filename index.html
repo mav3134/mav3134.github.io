@@ -880,7 +880,7 @@ document.querySelectorAll(".pn[data-blurb]").forEach(function(el){
 // Locked permanently as of 2026-09-05: no new keepers, no changes to saved
 // ones. The board still displays who's already kept (via savedKeepers /
 // applyHighlights below), it just can't be edited anymore.
-var KEEPERS_LOCKED=true;
+var KEEPERS_LOCKED=false; // TEMPORARILY unlocked to fix Nick Duncan's Mahomes keeper — re-lock right after
 document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
   tr.addEventListener("click",function(){
     if(KEEPERS_LOCKED)return;
