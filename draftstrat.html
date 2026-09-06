@@ -794,70 +794,19 @@ function renderDraftBoard(){
    "Rankings" Google Sheet tab exactly like the Draft Room does it. Only the
    rank field is ever touched here — stat edits (the `edits` object below)
    are completely separate and untouched. */
-var SHEET_ID='1dqt9-QHx3q6eGI1K_mEZ5uxW1f1_7qlgBuDMQBOuG4s';
-function sheetUrl(name){return 'https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(name)}
-function parseGviz(text){
-  var j=text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/);
-  if(!j)j=text.match(/\{[\s\S]*"table"[\s\S]*\}/);
-  if(!j)throw new Error('Cannot parse response');
-  var str=j[1]||j[0];
-  str=str.replace(/\bundefined\b/g,'null');
-  return JSON.parse(str);
-}
-function fetchSheet(sheetName,callback){
-  fetch(sheetUrl(sheetName)).then(function(r){return r.text()}).then(function(text){
-    try{callback(null,parseGviz(text).table)}catch(e){callback(e,null)}
-  }).catch(function(e){callback(e,null)});
-}
-function rankSheetName(blob){
-  if(!blob)return '';
-  var s=String(blob).replace(/[-]/g,'').trim();
-  s=s.split(/Video Forecast|No new player Notes|New Player Notes?|Player Note/)[0];
-  s=s.replace(/([A-Za-z.'])(Q|O|D|IR|SUSP|PUP|NA|GTD)$/,'$1');
-  return s.trim();
-}
-function applyDraftRoomRanks(baselineRows,sheetTable){
-  var rows=(sheetTable&&sheetTable.rows)||[];
-  var fromSheet={};
-  if(rows.length){
-    var nameCol=2,rankCol=7;
-    for(var i=0;i<Math.min(rows.length,12);i++){
-      var c=rows[i].c||[];
-      for(var j=0;j<c.length;j++){
-        var v=cellVal(c[j]).replace(/[-]/g,'').trim().toLowerCase();
-        if(v==='offense')nameCol=j;
-        if(v==='pre-season')rankCol=j;
-      }
-    }
-    for(var r=0;r<rows.length;r++){
-      var cells=rows[r].c||[];
-      var nm=rankSheetName(cellVal(cells[nameCol]));
-      var rk=parseInt(String(cellVal(cells[rankCol])).replace(/[^0-9]/g,''),10);
-      if(!nm||!rk||isNaN(rk))continue;
-      if(/^(offense|roster status|player|rank)$/i.test(nm))continue;
-      var key=normName(nm);
-      if(fromSheet[key]===undefined||rk<fromSheet[key])fromSheet[key]=rk;
-    }
-    if(Object.keys(fromSheet).length<20)fromSheet={};
-  }
-  // Same renumbering the Draft Room itself does: sheet-matched players first
-  // (by the sheet's own rank), then everyone else in their existing baseline
-  // order, renumbered into one clean 1..N sequence — so no two players ever
-  // share a rank and there's no gap anywhere in the sequence. This is purely
-  // the base ranking; it doesn't touch the keeper pick-number display/sort
-  // built on top of it further down.
-  var matchedNames=Object.keys(fromSheet).sort(function(a,b){return fromSheet[a]-fromSheet[b]});
-  var matchedSet={};matchedNames.forEach(function(n){matchedSet[n]=true});
-  var restNames=baselineRows.filter(function(r){return r&&r[1]}).map(function(r){return normName(r[1])})
-    .filter(function(n){return !matchedSet[n]});
-  var coreOrdered=matchedNames.concat(restNames);
+function applyDraftRoomRanks(baselineRows){
+  // Renumber into one clean 1..N sequence, matching the Draft Room's own
+  // baseline order exactly — no live sheet involved on either side. This is
+  // purely the base ranking; it doesn't touch the keeper pick-number
+  // display/sort built on top of it further down.
+  var coreOrdered=baselineRows.filter(function(r){return r&&r[1]}).map(function(r){return normName(r[1])});
   var coreSet={};coreOrdered.forEach(function(n){coreSet[n]=true});
   // Projections tracks ~200 more players than the Draft Room's 327 (deep
   // bench, nickname mismatches like "Kenny" vs "Kenneth" Gainwell). Those
-  // never matched the Draft Room, so their OLD static rank would otherwise
-  // survive untouched and could collide with a freshly-renumbered player.
-  // Append them after the Draft Room's own order instead, by their original
-  // rank, continuing the same clean sequence.
+  // never matched the Draft Room, so their OLD static rank could survive
+  // untouched and collide with a freshly-renumbered player. Append them
+  // after the Draft Room's own order instead, by their original rank,
+  // continuing the same clean sequence.
   var leftover=PLAYERS.filter(function(p){return p.origRank&&!coreSet[normName(p.name)]})
     .sort(function(a,b){return a.origRank-b.origRank})
     .map(function(p){return normName(p.name)});
@@ -878,9 +827,7 @@ function loadDraftRoomRanks(){
     var m=/var DRAFT_DB=(\[[\s\S]*?\n\]);/.exec(text);
     if(!m)throw new Error('DRAFT_DB not found');
     var rows=JSON.parse(m[1].replace(/,\s*\]$/,']'));
-    fetchSheet('Rankings',function(err,table){
-      applyDraftRoomRanks(rows,err?null:table);
-    });
+    applyDraftRoomRanks(rows);
   }).catch(function(e){console.warn('Draft room rank sync unavailable:',e)});
 }
 
