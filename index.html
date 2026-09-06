@@ -1807,7 +1807,7 @@ var drPollInterval=null,drLiveMode=false;
 function toggleLiveDraft(){
   drLiveMode=!drLiveMode;
   updateLiveBtn();
-  saveDraftToServer();
+  saveDraftToServer({type:'none'});
   startPolling();
 }
 
@@ -1922,21 +1922,112 @@ function initDraftRoom(){
 }
 
 var drSaveBusy=false;
-function saveDraftToServer(){
-  // MERGE with existing server data — never wipe draft order picks or other keys
-  if(drSaveBusy)return;
+// Applying a pick/undo used to mean "send my whole local drPicks array" —
+// but that array can be stale by up to a full poll interval (5s, or 1.5s in
+// live mode), so if two people picked within that window, whoever saved
+// second would silently erase the other's pick with their own stale
+// snapshot. On top of that, a save already in flight caused the NEXT
+// pick's save to be dropped outright (drSaveBusy just no-op'd it), so it
+// only reached the server if some later save happened to still include it.
+// Both together explain picks reverting to an earlier point in the draft.
+//
+// Fixed by making every save (a) start from a freshly-fetched server
+// snapshot rather than local memory, (b) apply only the one specific
+// change being made (upsert this pick / remove the last non-keeper pick)
+// on top of that snapshot, and (c) queue — rather than drop — a change
+// that arrives while a save is still in flight.
+var drSaveQueue=[];
+function drApplyChangeToPicks(serverPicks,change){
+  if(change.type==='pick'){
+    var idx=-1;
+    for(var i=0;i<serverPicks.length;i++){if(serverPicks[i].pick===change.pick){idx=i;break}}
+    var entry={pick:change.pick,owner:change.owner,player:change.player,keeper:change.keeper||false};
+    if(idx>=0)serverPicks[idx]=entry;else serverPicks.push(entry);
+  } else if(change.type==='undo'){
+    var maxPick=-1,maxIdx=-1;
+    for(var j=0;j<serverPicks.length;j++){
+      if(serverPicks[j]&&!serverPicks[j].keeper&&serverPicks[j].pick>maxPick){maxPick=serverPicks[j].pick;maxIdx=j}
+    }
+    if(maxIdx>=0){serverPicks.splice(maxIdx,1);change.removedPick=maxPick}
+  } else if(change.type==='keepers'){
+    // Rebuilding keeper placement from savedKeepers — replace only the
+    // keeper-flagged entries, leave every real (non-keeper) pick untouched.
+    var kept=serverPicks.filter(function(p){return !p.keeper});
+    serverPicks.length=0;
+    Array.prototype.push.apply(serverPicks,kept.concat(change.entries));
+  }
+  // change.type==='none' (or unset): no picks change, just re-save liveMode/keepers
+}
+// Additive only — fills in anything the server has that this client doesn't
+// (e.g. another client's pick made since our last poll), but never removes
+// or overwrites a slot we already have locally. A full rebuild here would
+// use this save's own GET snapshot, which is already stale the moment a
+// later pick gets queued behind it (rapid clicking, or another client
+// saving in the same window) — clobbering that newer local pick before its
+// own save even runs. The periodic poll (loadDraftFromServer) still does a
+// full rebuild on its own steady cadence, which is fine since it's not
+// interleaved with a burst of local optimistic writes the way this is.
+function drAdoptServerPicks(serverPicks){
+  serverPicks.forEach(function(sp){
+    var idx=sp.pick-1;
+    if(idx>=0&&idx<drOrder.length&&!drPicks[idx]){
+      drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
+      drDrafted.add(sp.player);
+    }
+  });
+  renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+}
+// npoint.io has no compare-and-swap — two clients can both GET, both apply
+// their own change, and whoever POSTs last wins, silently discarding the
+// other's write even though it started from a fresh fetch. So every save
+// re-fetches after POSTing to confirm OUR change actually stuck; if a
+// concurrent write raced past us, we reapply on top of that newer truth and
+// try again, instead of ever just accepting a lost pick.
+var DR_SAVE_MAX_RETRIES=8;
+function saveDraftToServer(change){
+  change=change||{type:'none'};
+  if(drSaveBusy){drSaveQueue.push(change);return}
   drSaveBusy=true;
+  drAttemptSave(change,0);
+}
+function drAttemptSave(change,attempt){
   fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
     data=data||{};
-    var picksToSave=[];
-    drPicks.forEach(function(p){if(p)picksToSave.push({pick:p.pick,owner:p.owner,player:p.player,keeper:p.keeper||false})});
-    data.picks=picksToSave;
+    var serverPicks=(data.picks||[]).slice();
+    drApplyChangeToPicks(serverPicks,change);
+    data.picks=serverPicks;
     data.liveMode=drLiveMode;
     data.keepers=savedKeepers;
     // draftOrderPicks, computedDraftOrder, draftOrderLocked are preserved untouched
-    fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-      .then(function(){drSaveBusy=false}).catch(function(){drSaveBusy=false});
-  }).catch(function(){drSaveBusy=false});
+    return fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(drVerifySaved.bind(null,change))
+      .then(function(ok){
+        if(!ok&&attempt<DR_SAVE_MAX_RETRIES){drAttemptSave(change,attempt+1);return}
+        drAdoptServerPicks(serverPicks);
+        drFinishSave();
+      });
+  }).catch(function(){drFinishSave()});
+}
+function drFinishSave(){
+  drSaveBusy=false;
+  if(drSaveQueue.length)saveDraftToServer(drSaveQueue.shift());
+}
+function drVerifySaved(change){
+  if(change.type==='none')return Promise.resolve(true);
+  return fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    var picks=(data&&data.picks)||[];
+    if(change.type==='pick'){
+      var e=picks.filter(function(p){return p.pick===change.pick})[0];
+      return !!e&&e.player===change.player&&e.owner===change.owner;
+    }
+    if(change.type==='undo'){
+      return change.removedPick===undefined||!picks.some(function(p){return p.pick===change.removedPick});
+    }
+    if(change.type==='keepers'){
+      return change.entries.every(function(e){return picks.some(function(p){return p.pick===e.pick&&p.player===e.player&&p.keeper});});
+    }
+    return true;
+  }).catch(function(){return true}); // can't verify — accept rather than retry forever
 }
 
 function saveKeepersToServer(){
@@ -2058,7 +2149,7 @@ function refreshKeepers(){
       });
     }
     if(newKeepers.length){
-      saveDraftToServer();
+      saveDraftToServer({type:'keepers',entries:newKeepers.map(function(k){return {pick:k.pick,owner:k.owner,player:k.player,keeper:true}})});
     }
     // Clean trailing undefineds
     while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
@@ -2220,16 +2311,19 @@ function filterDraftPlayers(){
 }
 
 function draftPick(pickNum,ownerName,playerName){
+  // Optimistic local update so the UI feels instant; saveDraftToServer will
+  // reconcile against the server's actual current state right after, which
+  // also picks up anyone else's picks this client hadn't polled yet.
   drPicks[pickNum-1]={pick:pickNum,owner:ownerName,player:playerName};
   drDrafted.add(playerName);
-  saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+  saveDraftToServer({type:'pick',pick:pickNum,owner:ownerName,player:playerName});
 }
 function draftUndo(){
   for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
-  saveDraftToServer();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
+  saveDraftToServer({type:'undo'});
 }
 
 /* ═══ CLICK-TO-SELECT + PICK BUTTON ═══ */
