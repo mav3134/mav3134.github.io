@@ -2520,18 +2520,30 @@ function renderTeamRoster(teamName){
     var filled=match.length?match[0]:null;if(filled)assigned.push(filled.player);
     var cls='dr-slot'+(filled?' filled':'')+(filled&&filled.keeper?' keeper':'');
     var pcls=filled?POS_COLORS[filled.pos]||'':'';
-    var rdLabel=filled?'<span style="margin-left:auto;font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif">Rd '+filled.round+(filled.keeper?' K':'')+'</span>':'';
-    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player '+pcls+'">'+(filled?filled.player:'\u2014')+'</span>'+rdLabel+'</div>';
+    var bye=filled?guessBye(filled.player):null;
+    var byeLabel=bye?'<span style="font-size:.6rem;color:#888;font-family:Oswald,sans-serif;margin-left:auto">Bye '+bye+'</span>':'';
+    var rdLabel=filled?'<span style="'+(bye?'':'margin-left:auto;')+'font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif;padding-left:6px">Rd '+filled.round+(filled.keeper?' K':'')+'</span>':'';
+    html+='<div class="'+cls+'"><span class="dr-slot-label">'+slot.label+'</span><span class="dr-slot-player '+pcls+'">'+(filled?filled.player:'\u2014')+'</span>'+byeLabel+rdLabel+'</div>';
   });
   var bench=teamPlayers.filter(function(tp){return assigned.indexOf(tp.player)<0});
   html+='<div class="dr-slot-sep">Bench</div>';
   bench.forEach(function(tp){
     var pcls=POS_COLORS[tp.pos]||'';
-    var rdLabel='<span style="margin-left:auto;font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
-    html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+rdLabel+'</div>';
+    var bye=guessBye(tp.player);
+    var byeLabel=bye?'<span style="font-size:.6rem;color:#888;font-family:Oswald,sans-serif;margin-left:auto">Bye '+bye+'</span>':'';
+    var rdLabel='<span style="'+(bye?'':'margin-left:auto;')+'font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif;padding-left:6px">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
+    html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+byeLabel+rdLabel+'</div>';
   });
   for(var b=0;b<Math.max(0,4-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
   document.getElementById('dr-roster-body').innerHTML=html;
+}
+function guessTeamAbbr(name){
+  for(var i=0;i<DRAFT_DB.length;i++){if(DRAFT_DB[i][1]===name)return DRAFT_DB[i][2]}
+  if(PT[name])return PT[name].toUpperCase();
+  return '';
+}
+function guessBye(name){
+  return TEAM_BYE[guessTeamAbbr(name)]||null;
 }
 function guessPosition(name){
   // Check against DRAFT_DB first
