@@ -611,6 +611,7 @@ var DRAFT_BOARD=[
 var DR={};DRAFT_BOARD.forEach(function(rnd,i){rnd.forEach(function(p){DR[p]=i+1})});
 var K25=new Set(["Kyle Pitts Sr.","Ladd McConkey","Jaxon Smith-Njigba","Brock Bowers","Chuba Hubbard","Chase Brown","Brian Thomas Jr.","T.J. Hockenson","Bucky Irving","Josh Downs","Baker Mayfield","Jordan Mason","Tyrone Tracy Jr.","Jerry Jeudy","Jonathan Taylor","Nico Collins","De'Von Achane","Trey McBride","Puka Nacua","C.J. Stroud"]);
 var K2=new Set(["Jonathan Taylor","Nico Collins","De'Von Achane","C.J. Stroud","Puka Nacua","Trey McBride"]);
+var KR_OVERRIDE={"Drake Maye":13}; // manual keeper-round override (doesn't touch the real 2025 draft record)
 var TM=[
 {n:"That's What Cheesehead",o:"Brent Brevak",p:["Baker Mayfield","Drake London","Christian Watson","Derrick Henry","Jonathan Taylor","George Kittle","Tyjae Spears","Kimani Vidal","Keaton Mitchell","Bhayshul Tuten","Jacory Croskey-Merritt","Blake Grupe","Steelers DEF","Bengals DEF","Rashee Rice"]},
 {n:"Poutine Powerhouse",o:"Jason Balmer",p:["Josh Allen","Michael Wilson","Brian Thomas Jr.","Breece Hall","Tony Pollard","Colston Loveland","Kyle Monangai","Isiah Pacheco","Emanuel Wilson","Ricky Pearsall","Alec Pierce","Luther Burden III","Eddy Pineiro","Saints DEF","Brock Bowers"]},
@@ -807,7 +808,7 @@ var BL={
 // ═══ HELPERS ═══
 function lookup(n){if(DR[n]!==undefined)return DR[n];var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(DR[c]!==undefined)return DR[c];for(var s of[" Jr."," Sr."," III"," II"])if(DR[n+s]!==undefined)return DR[n+s];return null}
 function nm(n,set){if(set.has(n))return true;var c=n.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim();if(set.has(c))return true;for(var k of set)if(k.replace(/ Sr\.?$| Jr\.?$| III$| II$/,"").trim()===c)return true;return false}
-function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(keeperRd<=3){return{status:"ineligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
+function getStatus(n){var draftRd=lookup(n);var isFA=(draftRd===null);var displayRd=isFA?"FA":draftRd;var keeperRd=isFA?14:Math.max(1,draftRd-1);var sortVal=isFA?15:draftRd;if(KR_OVERRIDE[n]!==undefined)keeperRd=KR_OVERRIDE[n];if(keeperRd<=3){return{status:"ineligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
 if(nm(n,K2))return{status:"ineligible",reason:"3 Years Maxed Out",rd:displayRd,kv:keeperRd,sv:sortVal};
 if(nm(n,K25))return{status:"last-year",reason:"2nd year - final keep",rd:displayRd,kv:keeperRd,sv:sortVal};
 return{status:"eligible",reason:"",rd:displayRd,kv:keeperRd,sv:sortVal}}
@@ -879,7 +880,7 @@ document.querySelectorAll(".pn[data-blurb]").forEach(function(el){
 // Locked permanently as of 2026-09-05: no new keepers, no changes to saved
 // ones. The board still displays who's already kept (via savedKeepers /
 // applyHighlights below), it just can't be edited anymore.
-var KEEPERS_LOCKED=true;
+var KEEPERS_LOCKED=false; // TEMPORARILY unlocked to add one keeper — re-lock right after
 document.querySelectorAll(".rtbl tr.selectable").forEach(function(tr){
   tr.addEventListener("click",function(){
     if(KEEPERS_LOCKED)return;
