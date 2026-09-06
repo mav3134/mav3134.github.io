@@ -69,6 +69,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .ptbl tr.proj-drafted td{opacity:.4}
 .ptbl tr.proj-drafted .pl{text-decoration:line-through}
 .proj-drafted-by{display:inline-block;margin-left:8px;font-family:'Oswald',sans-serif;font-size:.65rem;font-weight:600;text-decoration:none;color:#f5c842;letter-spacing:.5px}
+.proj-pickline td{padding:5px 12px;background:rgba(200,16,46,.12);border-top:2px solid #c8102e;border-bottom:2px solid #c8102e;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#ff6b6b;text-align:center}
 .proj-tools{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px;flex-wrap:wrap}
 .proj-tools input[type=text]{font-family:'Roboto Condensed',sans-serif;font-size:.85rem;padding:6px 12px;border-radius:4px;border:1px solid #2a2f3e;background:#12161f;color:#ccc;width:210px;outline:none}
 .proj-tools input[type=text]:focus{border-color:#c8102e}
@@ -678,6 +679,57 @@ function buildBoardOrder(order){
   });
   return out;
 }
+// Single source of truth for "who is at which pick": real picks first (as
+// recorded in data.picks), keepers falling back to a round+owner-derived
+// slot ONLY when not already recorded there. A keeper whose real pick is
+// already recorded keeps that slot — re-deriving it fresh from the CURRENT
+// draft order can land on a different pick than where the real record put
+// them (the order can change/lock after some keepers were recorded), which
+// is what was causing players to show up twice on the board.
+function computeBoardPlacements(){
+  var order=(liveOrder||[]).slice(0,12);
+  if(order.length<12)return {byPick:{},pickOf:{},slots:[],kept:0};
+  var slots=buildBoardOrder(order);
+  var byPick={},pickOf={},kept=0; // pickOf: normName -> pick number
+  (livePicks||[]).forEach(function(p){
+    if(p&&p.player&&p.pick){
+      var nn=normName(p.player);
+      byPick[p.pick]={player:p.player,keeper:!!p.keeper};pickOf[nn]=p.pick;
+    }
+  });
+  for(var tn in (liveKeepers||{})){
+    var owner=null;
+    for(var i=0;i<TEAM_OWNERS.length;i++){if(TEAM_OWNERS[i][0]===tn){owner=TEAM_OWNERS[i][1];break}}
+    if(!owner)continue;
+    (liveKeepers[tn]||[]).forEach(function(k){
+      if(!k||!k.name)return;
+      kept++;
+      var nn=normName(k.name);
+      if(pickOf[nn]!==undefined)return;
+      var kr=parseInt(k.kr);
+      if(isNaN(kr)||kr<1||kr>14)return;
+      for(var s=0;s<slots.length;s++){
+        if(slots[s].round===kr&&slots[s].name===owner){
+          if(!byPick[slots[s].pick]){byPick[slots[s].pick]={player:k.name,keeper:true};pickOf[nn]=slots[s].pick}
+          break;
+        }
+      }
+    });
+  }
+  return {byPick:byPick,pickOf:pickOf,slots:slots,kept:kept};
+}
+function ordinal(n){var s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+// My team's still-open pick numbers, in order, across all 14 rounds
+// (accounts for the snake order and pick trades already applied to `slots`).
+function myUpcomingPicks(){
+  var placements=computeBoardPlacements();
+  if(!placements.slots.length)return [];
+  var mine=[];
+  placements.slots.forEach(function(s){
+    if(s.name===MY_OWNER&&!placements.byPick[s.pick])mine.push(s.pick);
+  });
+  return mine;
+}
 function renderDraftBoard(){
   loadBoardPositions();
   var st=document.getElementById('board-status');
@@ -690,30 +742,8 @@ function renderDraftBoard(){
     document.getElementById('board-info').textContent='';
     return;
   }
-  var order=liveOrder.slice(0,12),slots=buildBoardOrder(order);
-  var byPick={}; // pick # -> {player, keeper}
-  (livePicks||[]).forEach(function(p){
-    if(p&&p.player&&p.pick)byPick[p.pick]={player:p.player,keeper:!!p.keeper};
-  });
-  // Keepers locked in on the Keepers tab, placed at their keeper round
-  var kept=0;
-  for(var tn in liveKeepers){
-    var owner=null;
-    for(var i=0;i<TEAM_OWNERS.length;i++){if(TEAM_OWNERS[i][0]===tn){owner=TEAM_OWNERS[i][1];break}}
-    if(!owner)continue;
-    (liveKeepers[tn]||[]).forEach(function(k){
-      if(!k||!k.name)return;
-      kept++;
-      var kr=parseInt(k.kr);
-      if(isNaN(kr)||kr<1||kr>14)return;
-      for(var s=0;s<slots.length;s++){
-        if(slots[s].round===kr&&slots[s].name===owner){
-          if(!byPick[slots[s].pick])byPick[slots[s].pick]={player:k.name,keeper:true};
-          break;
-        }
-      }
-    });
-  }
+  var order=liveOrder.slice(0,12);
+  var placements=computeBoardPlacements(),byPick=placements.byPick,slots=placements.slots,kept=placements.kept;
   var html='<table class="btbl"><thead><tr><th class="bt-rd"></th>';
   order.forEach(function(ownerName){
     var team='';
@@ -877,10 +907,20 @@ function projDraftedMap(){
   }
   return m;
 }
+// For sorting/display by rank: a keeper's effective rank becomes their
+// actual (or projected) pick number instead of their draft-room rank — a
+// keeper kept for pick 50 sorts like a pick-50 player even if he was
+// ranked 20th — while their original rank is kept visible alongside it.
+function projRankSortValue(p,nn,drafted,placements){
+  var d=drafted[nn];
+  if(d&&d.keeper&&placements.pickOf[nn]!==undefined)return placements.pickOf[nn];
+  return p.rank||9999;
+}
 function renderProj(){
   buildProjHead();buildPosFilter();
   var q=(document.getElementById('proj-search').value||'').toLowerCase();
   var drafted=projDraftedMap();
+  var placements=computeBoardPlacements();
   var list=PLAYERS.filter(function(p){
     if(posFilter!=='ALL'&&p.pos!==posFilter)return false;
     if(q&&p.name.toLowerCase().indexOf(q)<0&&p.team.toLowerCase().indexOf(q)<0)return false;
@@ -888,15 +928,34 @@ function renderProj(){
   });
   list.sort(function(a,b){
     var av=a[sortKey],bv=b[sortKey];
-    if(sortKey==='rank'){av=av||9999;bv=bv||9999}
+    if(sortKey==='rank'){
+      av=projRankSortValue(a,normName(a.name),drafted,placements);
+      bv=projRankSortValue(b,normName(b.name),drafted,placements);
+    }
     if(typeof av==='string')return sortDir*av.localeCompare(bv);
     return sortDir*(av-bv);
   });
+  // Red divider marking where each of my still-open picks falls once the
+  // rankings are laid out in order (keepers included at their pick number).
+  // Only meaningful against the full, ascending, rank-sorted list — a
+  // position/search filter would break the pick-number alignment.
+  var showPickLines=sortKey==='rank'&&sortDir===1&&posFilter==='ALL'&&!q;
+  var myPicks=showPickLines?myUpcomingPicks():[];
+  var pickPtr=0;
+  function pickLineRow(n,pickNum){
+    return '<tr class="proj-pickline"><td colspan="'+COLS.length+'">&#9660; Your '+ordinal(n)+' pick &mdash; Pick '+pickNum+'</td></tr>';
+  }
   var html='';
   list.forEach(function(p){
     var nn=normName(p.name),ed=edits[nn]||{};
     var d=drafted[nn];
-    html+='<tr'+(d?' class="proj-drafted"':'')+'><td style="color:#666">'+(p.rank||'')+'</td>'+
+    var pickNum=(d&&d.keeper)?placements.pickOf[nn]:undefined;
+    var rankCell=(pickNum!==undefined)?((p.rank||'?')+'-('+pickNum+')'):(p.rank||'');
+    var sv=projRankSortValue(p,nn,drafted,placements);
+    while(pickPtr<myPicks.length&&sv>=myPicks[pickPtr]){
+      html+=pickLineRow(pickPtr+1,myPicks[pickPtr]);pickPtr++;
+    }
+    html+='<tr'+(d?' class="proj-drafted"':'')+'><td style="color:#666">'+rankCell+'</td>'+
       '<td class="pl">'+p.name+(d?'<span class="proj-drafted-by">'+(d.keeper?'K: ':'')+d.owner+'</span>':'')+'</td>'+
       '<td style="color:#888">'+p.team+'</td><td>'+posTag(p.pos)+'</td>'+
       '<td class="fp" id="fp-'+p.id+'">'+p.pts.toFixed(1)+'</td>';
@@ -908,6 +967,7 @@ function renderProj(){
     });
     html+='</tr>';
   });
+  while(pickPtr<myPicks.length){html+=pickLineRow(pickPtr+1,myPicks[pickPtr]);pickPtr++}
   document.getElementById('proj-body').innerHTML=html;
 }
 var saveTimer=null;
