@@ -2465,7 +2465,7 @@ function renderTeamRoster(teamName){
     var rdLabel='<span style="'+(bye?'':'margin-left:auto;')+'font-size:.6rem;color:#ddd;font-family:Oswald,sans-serif;padding-left:6px">Rd '+tp.round+(tp.keeper?' K':'')+'</span>';
     html+='<div class="dr-slot filled'+(tp.keeper?' keeper':'')+'"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player '+pcls+'">'+tp.player+'</span>'+byeLabel+rdLabel+'</div>';
   });
-  for(var b=0;b<Math.max(0,4-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
+  for(var b=0;b<Math.max(0,5-bench.length);b++){html+='<div class="dr-slot"><span class="dr-slot-label" style="color:#ddd">BN</span><span class="dr-slot-player" style="color:#333">\u2014</span></div>'}
   document.getElementById('dr-roster-body').innerHTML=html;
 }
 function guessTeamAbbr(name){
