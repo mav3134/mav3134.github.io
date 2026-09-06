@@ -205,7 +205,7 @@ var PLAYERS_RAW=[["Jahmyr Gibbs","DET","RB",1,0,0,0,274.4,1381.2,13.8,71.3,580.6
 /* ═══════════ CORE DATA ═══════════ */
 var STAT_FIELDS=['paY','paTD','int','ruA','ruY','ruTD','rec','reY','reTD','fl'];
 var PLAYERS=PLAYERS_RAW.map(function(r,i){
-  return {id:i,name:r[0],team:r[1],pos:r[2],rank:r[3]||null,
+  return {id:i,name:r[0],team:r[1],pos:r[2],rank:r[3]||null,origRank:r[3]||null,
     paY:r[4],paTD:r[5],int:r[6],ruA:r[7],ruY:r[8],ruTD:r[9],rec:r[10],reY:r[11],reTD:r[12],fl:r[13]};
 });
 function normName(n){return String(n).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\.?$/,'').replace(/[^a-z]/g,'')}
@@ -816,9 +816,9 @@ function rankSheetName(blob){
   s=s.replace(/([A-Za-z.'])(Q|O|D|IR|SUSP|PUP|NA|GTD)$/,'$1');
   return s.trim();
 }
-function applyDraftRoomRanks(baseline,sheetTable){
-  var best=Object.assign({},baseline);          // normName -> rank
+function applyDraftRoomRanks(baselineRows,sheetTable){
   var rows=(sheetTable&&sheetTable.rows)||[];
+  var fromSheet={};
   if(rows.length){
     var nameCol=2,rankCol=7;
     for(var i=0;i<Math.min(rows.length,12);i++){
@@ -829,7 +829,6 @@ function applyDraftRoomRanks(baseline,sheetTable){
         if(v==='pre-season')rankCol=j;
       }
     }
-    var fromSheet={};
     for(var r=0;r<rows.length;r++){
       var cells=rows[r].c||[];
       var nm=rankSheetName(cellVal(cells[nameCol]));
@@ -839,15 +838,39 @@ function applyDraftRoomRanks(baseline,sheetTable){
       var key=normName(nm);
       if(fromSheet[key]===undefined||rk<fromSheet[key])fromSheet[key]=rk;
     }
-    if(Object.keys(fromSheet).length>=20)Object.assign(best,fromSheet);
+    if(Object.keys(fromSheet).length<20)fromSheet={};
   }
+  // Same renumbering the Draft Room itself does: sheet-matched players first
+  // (by the sheet's own rank), then everyone else in their existing baseline
+  // order, renumbered into one clean 1..N sequence — so no two players ever
+  // share a rank and there's no gap anywhere in the sequence. This is purely
+  // the base ranking; it doesn't touch the keeper pick-number display/sort
+  // built on top of it further down.
+  var matchedNames=Object.keys(fromSheet).sort(function(a,b){return fromSheet[a]-fromSheet[b]});
+  var matchedSet={};matchedNames.forEach(function(n){matchedSet[n]=true});
+  var restNames=baselineRows.filter(function(r){return r&&r[1]}).map(function(r){return normName(r[1])})
+    .filter(function(n){return !matchedSet[n]});
+  var coreOrdered=matchedNames.concat(restNames);
+  var coreSet={};coreOrdered.forEach(function(n){coreSet[n]=true});
+  // Projections tracks ~200 more players than the Draft Room's 327 (deep
+  // bench, nickname mismatches like "Kenny" vs "Kenneth" Gainwell). Those
+  // never matched the Draft Room, so their OLD static rank would otherwise
+  // survive untouched and could collide with a freshly-renumbered player.
+  // Append them after the Draft Room's own order instead, by their original
+  // rank, continuing the same clean sequence.
+  var leftover=PLAYERS.filter(function(p){return p.origRank&&!coreSet[normName(p.name)]})
+    .sort(function(a,b){return a.origRank-b.origRank})
+    .map(function(p){return normName(p.name)});
+  var ordered=coreOrdered.concat(leftover);
+  var rankOf={};ordered.forEach(function(n,i){rankOf[n]=i+1});
   var hit=0;
   PLAYERS.forEach(function(p){
-    var rk=best[normName(p.name)];
-    if(rk){p.rank=rk;hit++}
+    var rk=rankOf[normName(p.name)];
+    p.rank=rk||null; // clear rather than let a stale/colliding number survive
+    if(rk)hit++;
   });
   RANKED=PLAYERS.filter(function(p){return p.rank}).sort(function(a,b){return a.rank-b.rank});
-  console.log('Draft room rank sync: '+hit+' players matched');
+  console.log('Draft room rank sync: '+hit+' players matched, renumbered 1-'+ordered.length);
   renderProj();run10();run12();
 }
 function loadDraftRoomRanks(){
@@ -855,10 +878,8 @@ function loadDraftRoomRanks(){
     var m=/var DRAFT_DB=(\[[\s\S]*?\n\]);/.exec(text);
     if(!m)throw new Error('DRAFT_DB not found');
     var rows=JSON.parse(m[1].replace(/,\s*\]$/,']'));
-    var baseline={};
-    rows.forEach(function(r){if(r&&r[1]&&r[0])baseline[normName(r[1])]=r[0]});
     fetchSheet('Rankings',function(err,table){
-      applyDraftRoomRanks(baseline,err?null:table);
+      applyDraftRoomRanks(rows,err?null:table);
     });
   }).catch(function(e){console.warn('Draft room rank sync unavailable:',e)});
 }
