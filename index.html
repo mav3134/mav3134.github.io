@@ -1869,6 +1869,7 @@ var drSaveBusy=false;
 // on top of that snapshot, and (c) queue — rather than drop — a change
 // that arrives while a save is still in flight.
 var drSaveQueue=[];
+var drPendingRemovals=new Set(); // pick #s locally undone but not yet confirmed removed server-side
 function drApplyChangeToPicks(serverPicks,change){
   if(change.type==='pick'){
     var idx=-1;
@@ -1902,7 +1903,7 @@ function drApplyChangeToPicks(serverPicks,change){
 function drAdoptServerPicks(serverPicks){
   serverPicks.forEach(function(sp){
     var idx=sp.pick-1;
-    if(idx>=0&&idx<drOrder.length&&!drPicks[idx]){
+    if(idx>=0&&idx<drOrder.length&&!drPicks[idx]&&!drPendingRemovals.has(sp.pick)){
       drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
       drDrafted.add(sp.player);
     }
@@ -1936,11 +1937,15 @@ function drAttemptSave(change,attempt){
       .then(function(ok){
         if(!ok&&attempt<DR_SAVE_MAX_RETRIES){drAttemptSave(change,attempt+1);return}
         drAdoptServerPicks(serverPicks);
-        drFinishSave();
+        drFinishSave(change);
       });
-  }).catch(function(){drFinishSave()});
+  }).catch(function(){drFinishSave(change)});
 }
-function drFinishSave(){
+function drFinishSave(change){
+  // Once an undo's own save is done (however it went), stop protecting its
+  // pick number from the poll's additive merge re-adding it — see
+  // drPendingRemovals in loadDraftFromServer.
+  if(change&&change.type==='undo'&&change.localRemovedPick!=null)drPendingRemovals.delete(change.localRemovedPick);
   drSaveBusy=false;
   if(drSaveQueue.length)saveDraftToServer(drSaveQueue.shift());
 }
@@ -2010,11 +2015,20 @@ function loadDraftFromServer(){
       startPolling();
     }
     syncDraftClockFromServer(data.pickClockEndAt);
+    // Additive merge, same as drAdoptServerPicks after a save — never clear
+    // or overwrite a pick already held locally. A full rebuild here used to
+    // wipe out a just-made pick whenever this GET raced ahead of (or, worse,
+    // returned a cached/stale response for) the POST that saved it, which is
+    // exactly what "makes a pick, then it reverts" looks like: the periodic
+    // poll's own fetch briefly not reflecting a write that had already
+    // landed. Removals (e.g. someone else's undo) still show up — just via
+    // this same additive path next poll, once the store's response catches
+    // up — rather than a full clear-and-rebuild that can regress a write in
+    // flight.
     if(data.picks){
-      drPicks=[];drDrafted=new Set();
       data.picks.forEach(function(sp){
         var idx=sp.pick-1;
-        if(idx>=0&&idx<drOrder.length){
+        if(idx>=0&&idx<drOrder.length&&!drPicks[idx]&&!drPendingRemovals.has(sp.pick)){
           drPicks[idx]={pick:sp.pick,owner:sp.owner,player:sp.player,keeper:sp.keeper||false};
           drDrafted.add(sp.player);
         }
@@ -2252,10 +2266,12 @@ function draftPick(pickNum,ownerName,playerName){
   saveDraftToServer({type:'pick',pick:pickNum,owner:ownerName,player:playerName});
 }
 function draftUndo(){
-  for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
+  var removedPick=null;
+  for(var i=drPicks.length-1;i>=0;i--){if(drPicks[i]&&!drPicks[i].keeper){removedPick=drPicks[i].pick;drDrafted.delete(drPicks[i].player);drPicks[i]=undefined;break}}
   while(drPicks.length&&!drPicks[drPicks.length-1])drPicks.pop();
   renderDraftOrderPanel();renderLocalPlayers(drCurrentSub);
-  saveDraftToServer({type:'undo'});
+  if(removedPick!=null)drPendingRemovals.add(removedPick);
+  saveDraftToServer({type:'undo',localRemovedPick:removedPick});
 }
 
 /* ═══ CLICK-TO-SELECT + PICK BUTTON ═══ */
