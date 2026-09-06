@@ -93,6 +93,8 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
 .bt-num{font-family:'Oswald',sans-serif;font-size:.55rem;color:#3a4050;line-height:1}
 .bt-name{font-family:'Roboto Condensed',sans-serif;font-size:.76rem;font-weight:700;line-height:1.15;margin-top:2px;word-break:break-word}
 .bt-k{font-family:'Oswald',sans-serif;font-size:.52rem;color:#e05555;letter-spacing:1px}
+.bt-traded{font-family:'Oswald',sans-serif;font-size:.54rem;color:#f39c12;letter-spacing:1px;text-transform:uppercase;line-height:1;margin-top:2px}
+.bt-cell.empty .bt-traded{color:#8a6d3b}
 /* position colors — identical hues to the Draft Room */
 .bt-QB{background:rgba(241,196,15,.16);border-color:rgba(241,196,15,.45)}.bt-QB .bt-name{color:#f1c40f}
 .bt-RB{background:rgba(52,152,219,.16);border-color:rgba(52,152,219,.45)}.bt-RB .bt-name{color:#3498db}
@@ -625,8 +627,29 @@ var TEAM_OWNERS=[
 var BT_KICKERS=['Blake Grupe','Eddy Pineiro','Chase McLaughlin','Evan McPherson','Tyler Loop',
   'Jason Myers','Jake Bates',"Ka'imi Fairbairn",'Cameron Dicker','Chris Boswell','Brandon Aubrey','Jake Elliott'];
 var liveOrder=[];
+// PLAYERS_RAW is the projections set — it has no K/DEF and misses some depth
+// players (Kenneth Gainwell, Tyreek Hill, ...), which left their squares
+// uncolored. Pull the Draft Room's own player list for a complete name->pos
+// map, falling back to what we can infer locally.
+var BT_POS={},btPosLoaded=false,btPosLoading=false;
+function loadBoardPositions(){
+  if(btPosLoaded||btPosLoading)return;
+  btPosLoading=true;
+  fetch('index.html',{cache:'no-store'}).then(function(r){return r.text()}).then(function(text){
+    var m=/var DRAFT_DB=(\[[\s\S]*?\n\]);/.exec(text);
+    if(!m)throw new Error('DRAFT_DB not found');
+    JSON.parse(m[1].replace(/,\s*\]$/,']')).forEach(function(r){
+      if(r&&r[1]&&r[3])BT_POS[normName(r[1])]=r[3];
+    });
+    btPosLoaded=true;
+    renderDraftBoard();
+  }).catch(function(e){console.warn('Draft Room player list unavailable:',e)})
+    .then(function(){btPosLoading=false});
+}
 function boardPos(name){
-  var p=BY_NORM[normName(name)];
+  var nn=normName(name);
+  if(BT_POS[nn])return BT_POS[nn];
+  var p=BY_NORM[nn];
   if(p)return p.pos;
   if(/ DEF$/.test(name))return 'DEF';
   if(BT_KICKERS.indexOf(name)>=0)return 'K';
@@ -645,13 +668,14 @@ function buildBoardOrder(order){
     var o=rd%2===0?order.slice():order.slice().reverse();
     o.forEach(function(name,i){out.push({pick:rd*12+i+1,round:rd+1,pickInRound:i+1,name:name})});
   }
-  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'}];
+  var PICK_TRADES=[{round:3,from:'Chuck Bush',to:'Brandon Cepelnik'},{round:10,from:'Brandon Cepelnik',to:'Chuck Bush'}];
   PICK_TRADES.forEach(function(t){
     for(var p=0;p<out.length;p++){if(out[p].round===t.round&&out[p].name===t.from){out[p].name=t.to;break}}
   });
   return out;
 }
 function renderDraftBoard(){
+  loadBoardPositions();
   var st=document.getElementById('board-status');
   if(st){st.textContent=liveOk?'Draft room: connected':'Draft room: offline (retrying)';
          st.className=liveOk?'status-ok':'status-err'}
@@ -701,13 +725,19 @@ function renderDraftBoard(){
       var pickInRound=(rd%2===1)?c+1:12-c;
       var pickNum=(rd-1)*12+pickInRound;
       var e=byPick[pickNum];
+      // A traded pick sits in the original team's column — label whose pick it
+      // actually is (e.g. round 3 "Cepelnik", round 10 "Bush").
+      var slot=slots[pickNum-1],tradedTo='';
+      if(slot&&slot.name!==order[c])tradedTo=slot.name.split(' ').slice(-1)[0];
       if(e){
         made++;
         var pos=boardPos(e.player);
         html+='<td class="bt-cell'+(pos?' bt-'+pos:'')+'"><div class="bt-num">'+pickNum+
-          (e.keeper?' <span class="bt-k">K</span>':'')+'</div><div class="bt-name">'+btAbbrev(e.player)+'</div></td>';
+          (e.keeper?' <span class="bt-k">K</span>':'')+'</div><div class="bt-name">'+btAbbrev(e.player)+'</div>'+
+          (tradedTo?'<div class="bt-traded">'+tradedTo+'</div>':'')+'</td>';
       } else {
-        html+='<td class="bt-cell empty"><div class="bt-num">'+pickNum+'</div></td>';
+        html+='<td class="bt-cell empty"><div class="bt-num">'+pickNum+'</div>'+
+          (tradedTo?'<div class="bt-traded">'+tradedTo+'</div>':'')+'</td>';
       }
     }
     html+='</tr>';
