@@ -1986,6 +1986,7 @@ function loadDraftFromServer(){
       updateLiveBtn();
       startPolling();
     }
+    syncDraftClockFromServer(data.pickClockEndAt);
     if(data.picks){
       drPicks=[];drDrafted=new Set();
       data.picks.forEach(function(sp){
@@ -2314,7 +2315,12 @@ var DR_CLOCK_SECONDS=60;
 // last. The position survives reloads so a refresh doesn't restart the list.
 var DR_SOUNDS=['sounds/1-im-an-idiot.wav','sounds/2-ya-jackass.wav','sounds/3-hey-you-idiot.wav',
   'sounds/4-you-are-so-dumb.wav','sounds/5-mario-dead.wav','sounds/6-price-is-right-horn.mp3'];
-var drClockLeft=DR_CLOCK_SECONDS,drClockInt=null,drSoundEls=[],drNowPlaying=null;
+// The countdown is shared: drClockEndAt is a timestamp (ms) written to the
+// same npoint store as picks/keepers, so Start/Reset from any one screen
+// updates everyone else's countdown within a poll cycle (loadDraftFromServer
+// picks it up). A single always-on tick just re-renders from that shared
+// deadline — nothing about timing is kept in a per-client interval anymore.
+var drClockLeft=DR_CLOCK_SECONDS,drClockEndAt=null,drClockBuzzedFor=null,drSoundEls=[],drNowPlaying=null;
 function drSoundIdx(){var n=parseInt(localStorage.getItem('drSoundIdx')||'0',10);return isNaN(n)?0:n%DR_SOUNDS.length}
 function drPreloadSounds(){
   if(drSoundEls.length)return;
@@ -2330,27 +2336,49 @@ function renderDraftClock(){
   if(!t||!b)return;
   t.textContent=drFmtClock(drClockLeft);
   t.className='dr-timer'+(drClockLeft===0?' expired':drClockLeft<=15?' danger':drClockLeft<=30?' warn':'');
-  var started=drClockInt!==null||drClockLeft<DR_CLOCK_SECONDS;
+  var started=drClockEndAt!==null;
   b.textContent=started?'Reset the Clock':'Start the Clock';
   b.classList.toggle('running',started);
 }
-function toggleDraftClock(){
-  if(drClockInt!==null||drClockLeft<DR_CLOCK_SECONDS){resetDraftClock();return}
-  drPreloadSounds(); // this click is the gesture that lets us make noise later
-  var endAt=Date.now()+DR_CLOCK_SECONDS*1000;
-  drClockInt=setInterval(function(){
-    drClockLeft=Math.max(0,Math.round((endAt-Date.now())/1000));
-    if(drClockLeft===0){clearInterval(drClockInt);drClockInt=null;drPlayBuzzer()}
-    renderDraftClock();
-  },250);
-  drClockLeft=DR_CLOCK_SECONDS;
+function drTickClock(){
+  if(drClockEndAt){
+    drClockLeft=Math.max(0,Math.round((drClockEndAt-Date.now())/1000));
+    if(drClockLeft===0&&drClockBuzzedFor!==drClockEndAt){
+      drClockBuzzedFor=drClockEndAt;
+      drPlayBuzzer();
+    }
+  } else {
+    drClockLeft=DR_CLOCK_SECONDS;
+  }
   renderDraftClock();
 }
+setInterval(drTickClock,250);
+function setDraftClock(endAt){
+  drClockEndAt=endAt;
+  if(!endAt)drStopBuzzer();
+  drTickClock();
+  fetch(DRAFT_API).then(function(r){return r.json()}).then(function(data){
+    data=data||{};
+    data.pickClockEndAt=endAt;
+    return fetch(DRAFT_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  }).catch(function(){});
+}
+function toggleDraftClock(){
+  if(drClockEndAt){resetDraftClock();return}
+  drPreloadSounds(); // this click is the gesture that lets us make noise later
+  setDraftClock(Date.now()+DR_CLOCK_SECONDS*1000);
+}
 function resetDraftClock(){
-  if(drClockInt!==null){clearInterval(drClockInt);drClockInt=null}
-  drStopBuzzer();
-  drClockLeft=DR_CLOCK_SECONDS;
-  renderDraftClock();
+  setDraftClock(null);
+}
+// Adopt the shared clock state from a poll — Start/Reset from any screen
+// (including one where nobody ever clicked, just watching) shows up here.
+function syncDraftClockFromServer(serverEndAt){
+  serverEndAt=serverEndAt||null;
+  if(serverEndAt===drClockEndAt)return;
+  drClockEndAt=serverEndAt;
+  if(serverEndAt)drPreloadSounds(); // best-effort; a client that never interacted with the page may still have its browser block audio until it does
+  drTickClock();
 }
 function drPlayBuzzer(){
   drStopBuzzer();
