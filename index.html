@@ -457,7 +457,7 @@ body{font-family:'Roboto Condensed',sans-serif;background:#080c14;color:#e0e0e0;
         <div class="dr-clock-pick" id="dr-clock-pick">Pick 1 · Round 1</div>
         <div class="dr-timer-row">
           <button class="dr-clock-btn" id="dr-clock-btn" onclick="toggleDraftClock()">Start the Clock</button>
-          <span class="dr-timer" id="dr-timer">2:00</span>
+          <span class="dr-timer" id="dr-timer">1:00</span>
         </div>
       </div>
       <div class="dr-pick-wrap">
@@ -2304,8 +2304,8 @@ function positionPickBtn(){
   btn.style.left=Math.round(target-r.left-b.width/2)+'px';
 }
 window.addEventListener('resize',function(){positionPickBtn()});
-/* ═══ 2-MINUTE PICK CLOCK ═══ */
-var DR_CLOCK_SECONDS=120;
+/* ═══ 1-MINUTE PICK CLOCK ═══ */
+var DR_CLOCK_SECONDS=60;
 // Clips play in order, one per expiry, looping back to the first after the
 // last. The position survives reloads so a refresh doesn't restart the list.
 var DR_SOUNDS=['sounds/1-im-an-idiot.wav','sounds/2-ya-jackass.wav','sounds/3-hey-you-idiot.wav',
