@@ -1796,7 +1796,8 @@ var DRAFT_DB=[
 [325,"Andre Szmyt","CLE","K",112.0,0,0,0,0,0,0,0,0,0],
 [326,"Ryan Fitzgerald","CAR","K",111.0,0,0,0,0,0,0,0,0,0],
 [327,"Matt Prater","BUF","K",108.0,0,0,0,0,0,0,0,0,0]
-];var STAT_HEADERS=["Rank","Player","Team","Pos","Pts","Pass Yds","Pass TD","INT","Rush Yds","Rush TD","Rec","Rec Yds","Rec TD","FumL"];
+];var STAT_HEADERS=["Rank","Player","Team","Bye","Pos","Pts","Pass Yds","Pass TD","INT","Rush Yds","Rush TD","Rec","Rec Yds","Rec TD","FumL"];
+var TEAM_BYE={CAR:5,KC:5,CIN:6,DET:6,MIA:6,MIN:6,BUF:7,JAC:7,LAC:7,WAS:7,HOU:8,NYG:8,NO:8,SF:8,PIT:9,TEN:9,CHI:10,DEN:10,PHI:10,TB:10,ATL:11,CLE:11,GB:11,LAR:11,NE:11,SEA:11,BAL:13,IND:13,LV:13,NYJ:13,ARI:14,DAL:14};
 var drOrder=[],drPicks=[],drCurrentSub='ALL',drDrafted=new Set(),drActiveRosterTeam='',drSelectedPlayer='';
 var drLoading=false;
 var POS_COLORS={QB:'pos-qb',RB:'pos-rb',WR:'pos-wr',TE:'pos-te',K:'pos-k',DEF:'pos-def'};
@@ -2271,8 +2272,8 @@ function renderLocalPlayers(posFilter){
     html+='<td><span class="dr-pname '+pcls+'">'+name+'</span>';
     if(draftedBy)html+='<span class="dr-drafted-by '+pcls+'">'+(isKeeper?'K:':'')+draftedBy+'</span>';
     html+='</td>';
-    // Team, Pos
-    html+='<td>'+p[2]+'</td><td class="'+pcls+'">'+pos+'</td>';
+    // Team, Bye, Pos
+    html+='<td>'+p[2]+'</td><td>'+(TEAM_BYE[p[2]]||'-')+'</td><td class="'+pcls+'">'+pos+'</td>';
     // Stats (indices 4-12)
     for(var s=4;s<=13;s++){var v=p[s];if(v==='"−"'||v==='-')html+='<td>-</td>';else if(s>=5&&s<=7&&pos!=='QB'&&v===0)html+='<td>-</td>';else html+='<td>'+v+'</td>'}
     html+='</tr>';
